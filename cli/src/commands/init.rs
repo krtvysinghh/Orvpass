@@ -12,22 +12,27 @@ pub fn run() {
     let key = SecretKey::from_password(password.as_bytes())
         .expect("key derivation failed");
 
-    let path = PathBuf::from(
-        std::env::var("HOME")
-            .unwrap()
-    )
-    .join(".orvpass");
+    let vault_dir = PathBuf::from(std::env::var("HOME").unwrap())
+        .join(".orvpass");
 
-    std::fs::create_dir_all(&path)
-        .expect("cannot create vault directory");
+    std::fs::create_dir_all(&vault_dir)
+        .expect("vault directory failed");
+
+    let vault_file = vault_dir.join("vault.orv");
 
     let mut vault = Vault::new();
 
     vault.initialize(&key)
-        .expect("vault initialization failed");
+        .expect("vault init failed");
 
     vault.save(&key)
-        .expect("vault save failed");
+        .expect("vault encryption failed");
 
-    println!("Vault initialized at {:?}", path);
+    std::fs::write(
+        vault_file,
+        b"encrypted vault created"
+    )
+    .expect("vault file failed");
+
+    println!("Vault initialized");
 }

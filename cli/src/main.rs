@@ -24,7 +24,7 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Init => commands::init::run(),
+        Commands::Init => real_init(),
         Commands::Unlock => commands::unlock::run(),
         Commands::Add => commands::add::run(),
         Commands::Get => commands::get::run(),
@@ -63,3 +63,50 @@ mod commands {
         }
     }
 }
+
+
+
+use dialoguer::Password;
+use std::path::PathBuf;
+use orvpass_core::crypto::SecretKey;
+use orvpass_core::vault::Vault;
+
+
+
+
+
+fn real_init() {
+    let _password = Password::new()
+        .with_prompt("Create master password")
+        .interact()
+        .unwrap();
+
+    let key = SecretKey::generate();
+
+    let vault_dir = PathBuf::from(std::env::var("HOME").unwrap())
+        .join(".orvpass");
+
+    std::fs::create_dir_all(&vault_dir)
+        .expect("cannot create vault directory");
+
+    let vault_file = vault_dir.join("vault.orv");
+
+    if vault_file.exists() {
+        if vault_file.is_dir() {
+            std::fs::remove_dir_all(&vault_file)
+                .expect("cannot remove old vault directory");
+        } else {
+            std::fs::remove_file(&vault_file)
+                .expect("cannot remove old vault file");
+        }
+    }
+
+    let mut vault = Vault::new_locked_at(&vault_file);
+
+    vault.initialize(&key)
+        .expect("vault initialization failed");
+
+    println!("Vault initialized at {:?}", vault_file);
+}
+
+
