@@ -70,17 +70,17 @@ use orvpass_core::vault::Vault;
 use std::path::PathBuf;
 
 fn real_init() {
-    let password = Password::new()
+    let _password = Password::new()
         .with_prompt("Create master password")
         .interact()
         .unwrap();
 
-    let password = Password::new()
+    let _password = Password::new()
         .with_prompt("Create master password")
         .interact()
         .unwrap();
 
-    let key = SecretKey::from_password(&password).expect("key derivation failed");
+    let key = SecretKey::generate();
 
     let vault_dir = PathBuf::from(std::env::var("HOME").unwrap()).join(".orvpass");
 
@@ -118,7 +118,7 @@ fn real_unlock() {
         .join(".orvpass")
         .join("vault.orv");
 
-    let key = SecretKey::from_password(&password).expect("key derivation failed");
+    let key = SecretKey::generate();
 
     let mut vault = Vault::new_locked_at(&vault_file);
 
