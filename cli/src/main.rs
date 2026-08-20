@@ -41,7 +41,7 @@ mod commands {
 
     pub mod unlock {
         pub fn run() {
-            println!("Vault unlock coming next");
+            super::super::real_unlock();
         }
     }
 
@@ -63,6 +63,7 @@ mod commands {
         }
     }
 }
+
 
 
 
@@ -110,3 +111,28 @@ fn real_init() {
 }
 
 
+
+fn real_unlock() {
+    use dialoguer::Password;
+    use std::path::PathBuf;
+    use orvpass_core::crypto::SecretKey;
+    use orvpass_core::vault::Vault;
+
+    let _password = Password::new()
+        .with_prompt("Master password")
+        .interact()
+        .unwrap();
+
+    let vault_file = PathBuf::from(std::env::var("HOME").unwrap())
+        .join(".orvpass")
+        .join("vault.orv");
+
+    let key = SecretKey::generate();
+
+    let mut vault = Vault::new_locked_at(&vault_file);
+
+    match vault.unlock(&key) {
+        Ok(_) => println!("Vault unlocked"),
+        Err(e) => println!("Unlock failed: {}", e),
+    }
+}
