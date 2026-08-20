@@ -2,9 +2,9 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(
-    name="orvpass",
-    version="0.2.0",
-    about="Secure local-first password manager"
+    name = "orvpass",
+    version = "0.2.0",
+    about = "Secure local-first password manager"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -64,61 +64,52 @@ mod commands {
     }
 }
 
-
-
-
 use dialoguer::Password;
-use std::path::PathBuf;
 use orvpass_core::crypto::SecretKey;
 use orvpass_core::vault::Vault;
-
-
-
-
+use std::path::PathBuf;
 
 fn real_init() {
-    let _password = Password::new()
+    let password = Password::new()
         .with_prompt("Create master password")
         .interact()
         .unwrap();
 
-    let key = SecretKey::generate();
+    let password = Password::new()
+        .with_prompt("Create master password")
+        .interact()
+        .unwrap();
 
-    let vault_dir = PathBuf::from(std::env::var("HOME").unwrap())
-        .join(".orvpass");
+    let key = SecretKey::from_password(&password).expect("key derivation failed");
 
-    std::fs::create_dir_all(&vault_dir)
-        .expect("cannot create vault directory");
+    let vault_dir = PathBuf::from(std::env::var("HOME").unwrap()).join(".orvpass");
+
+    std::fs::create_dir_all(&vault_dir).expect("cannot create vault directory");
 
     let vault_file = vault_dir.join("vault.orv");
 
     if vault_file.exists() {
         if vault_file.is_dir() {
-            std::fs::remove_dir_all(&vault_file)
-                .expect("cannot remove old vault directory");
+            std::fs::remove_dir_all(&vault_file).expect("cannot remove old vault directory");
         } else {
-            std::fs::remove_file(&vault_file)
-                .expect("cannot remove old vault file");
+            std::fs::remove_file(&vault_file).expect("cannot remove old vault file");
         }
     }
 
     let mut vault = Vault::new_locked_at(&vault_file);
 
-    vault.initialize(&key)
-        .expect("vault initialization failed");
+    vault.initialize(&key).expect("vault initialization failed");
 
     println!("Vault initialized at {:?}", vault_file);
 }
 
-
-
 fn real_unlock() {
     use dialoguer::Password;
-    use std::path::PathBuf;
     use orvpass_core::crypto::SecretKey;
     use orvpass_core::vault::Vault;
+    use std::path::PathBuf;
 
-    let _password = Password::new()
+    let password = Password::new()
         .with_prompt("Master password")
         .interact()
         .unwrap();
@@ -127,7 +118,7 @@ fn real_unlock() {
         .join(".orvpass")
         .join("vault.orv");
 
-    let key = SecretKey::generate();
+    let key = SecretKey::from_password(&password).expect("key derivation failed");
 
     let mut vault = Vault::new_locked_at(&vault_file);
 

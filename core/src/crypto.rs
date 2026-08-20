@@ -35,6 +35,20 @@ pub enum CryptoError {
 pub struct SecretKey([u8; MASTER_KEY_BYTES]);
 
 impl SecretKey {
+    pub fn from_password(password: &str) -> Result<Self, CryptoError> {
+        use sha2::{Digest, Sha256};
+
+        let mut hasher = Sha256::new();
+        hasher.update(password.as_bytes());
+
+        let hash = hasher.finalize();
+
+        let mut bytes = [0u8; MASTER_KEY_BYTES];
+        bytes.copy_from_slice(&hash[..MASTER_KEY_BYTES]);
+
+        Ok(Self::from_bytes(bytes))
+    }
+
     pub fn from_bytes(bytes: [u8; MASTER_KEY_BYTES]) -> Self {
         Self(bytes)
     }
