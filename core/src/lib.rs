@@ -17,3 +17,5 @@ pub mod vault;
 pub fn info() -> (&'static str, &'static str) {
     (PRODUCT_NAME, PRODUCT_VERSION)
 }
+
+pub mod password;
