@@ -1,5 +1,6 @@
-use anyhow::Result;
 use dialoguer::Password;
+use orvpass_core::vault::Vault;
+use orvpass_core::crypto::SecretKey;
 
 pub fn run() {
     let password = Password::new()
@@ -7,5 +8,11 @@ pub fn run() {
         .interact()
         .unwrap();
 
-    println!("Master password created ({} chars)", password.len());
+    let key = SecretKey::from_password(password.as_bytes()).unwrap();
+
+    let mut vault = Vault::new();
+
+    vault.initialize(&key).unwrap();
+
+    println!("Vault initialized");
 }
