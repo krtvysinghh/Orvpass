@@ -1,15 +1,29 @@
+
+
 [workspace]
+members = [
+    "core",
+    "cli"
+]
 resolver = "2"
-members = ["core"]
 
 [workspace.package]
-version = "0.1.0"
 edition = "2024"
-license = "AGPL-3.0-or-later"
+version = "0.1.0"
+license = "MIT"
 
 [workspace.dependencies]
-serde = { version = "1", features = ["derive"] }
-uuid = { version = "1", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-zeroize = { version = "1.8", features = ["derive"] }
-thiserror = "2"
+chrono = { version = "0.4.45", features = ["serde"] }
+serde = { version = "1.0.229", features = ["derive"] }
+thiserror = "2.0.20"
+uuid = { version = "1.24.1", features = ["v4", "serde"] }
+rand = "0.9.5"
+zeroize = { version = "1.9.0", features = ["derive"] }
+sha2 = "0.10.9"
+sha1 = "0.10.7"
+hmac = "0.12.1"
+hkdf = "0.12.4"
+argon2 = "0.5.3"
+chacha20poly1305 = "0.10.1"
+base32 = "0.5.1"
+postcard = "1.1.3"
