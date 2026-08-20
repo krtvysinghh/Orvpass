@@ -24,10 +24,42 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Init => println!("Initialize vault"),
-        Commands::Unlock => println!("Unlock vault"),
-        Commands::Add => println!("Add credential"),
-        Commands::Get => println!("Retrieve credential"),
-        Commands::Generate => println!("Generate password"),
+        Commands::Init => commands::init::run(),
+        Commands::Unlock => commands::unlock::run(),
+        Commands::Add => commands::add::run(),
+        Commands::Get => commands::get::run(),
+        Commands::Generate => commands::generate::run(),
+    }
+}
+
+mod commands {
+    pub mod init {
+        pub fn run() {
+            println!("Vault initialization coming next");
+        }
+    }
+
+    pub mod unlock {
+        pub fn run() {
+            println!("Vault unlock coming next");
+        }
+    }
+
+    pub mod add {
+        pub fn run() {
+            println!("Credential storage coming next");
+        }
+    }
+
+    pub mod get {
+        pub fn run() {
+            println!("Credential retrieval coming next");
+        }
+    }
+
+    pub mod generate {
+        pub fn run() {
+            println!("Secure password generation ready");
+        }
     }
 }
