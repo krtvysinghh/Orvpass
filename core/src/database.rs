@@ -48,4 +48,8 @@ impl VaultDatabase {
     pub fn items(&self) -> &[VaultItem] {
         &self.items
     }
+
+    pub fn folders(&self) -> &[Folder] {
+        &self.folders
+    }
 }

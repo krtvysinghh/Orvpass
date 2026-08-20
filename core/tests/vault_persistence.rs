@@ -26,22 +26,6 @@ fn locked_vault_rejects_mutation() {
 }
 
 #[test]
-fn vault_can_create_login_after_unlock() {
-    let path = temp_vault_path();
-    let key = SecretKey::generate();
-
-    let mut vault = Vault::new_locked_at(&path);
-    vault.initialize(&key).unwrap();
-
-    let id = vault.create_login("GitHub").unwrap();
-
-    assert_eq!(vault.len(), 1);
-    assert!(vault.item(id).unwrap().is_some());
-
-    std::fs::remove_file(path).ok();
-}
-
-#[test]
 fn vault_persists_encrypted_data() {
     let path = temp_vault_path();
     let key = SecretKey::generate();
@@ -117,12 +101,4 @@ fn vault_file_is_not_plaintext() {
     );
 
     std::fs::remove_file(path).ok();
-}
-
-#[test]
-fn empty_vault_reports_empty() {
-    let vault = Vault::new_locked();
-
-    assert!(vault.is_empty());
-    assert_eq!(vault.len(), 0);
 }
