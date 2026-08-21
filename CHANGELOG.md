@@ -1,9 +1,9 @@
 # Changelog
 
-## 1.0.0
+## 1.0.0 RC2
 
-- Encrypted vault
-- Secure lifecycle
-- CLI password manager
-- Audit foundation
-- Local storage
+- Hardened security layer
+- CRUD command foundation
+- Release profile optimization
+- Audit framework
+- Security validation tests

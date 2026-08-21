@@ -1,10 +1,10 @@
 # Orvpass Build
 
-Version: 1.0.0-rc1
+Version: 1.0.0 RC
 
-Features:
+Security:
 - Encrypted vault
-- Password lifecycle
-- Audit logging
-- Security modules
-- CLI foundation
+- Argon2 KDF
+- AEAD encryption
+- TOTP support
+- Audit framework
