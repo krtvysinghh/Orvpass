@@ -12,3 +12,5 @@ pub mod release;
 pub mod health;
 
 pub mod readiness;
+
+pub mod final_check;
