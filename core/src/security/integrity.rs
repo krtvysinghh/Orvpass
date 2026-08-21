@@ -1,10 +1,9 @@
-use std::fs;
-use std::path::Path;
+use sha2::{Digest, Sha256};
 
-pub fn check(path: &Path) -> bool {
-    match fs::metadata(path) {
-        Ok(m) => m.len() > 0,
+pub fn fingerprint(data: &[u8]) -> String {
+    let mut h = Sha256::new();
 
-        Err(_) => false,
-    }
+    h.update(data);
+
+    hex::encode(h.finalize())
 }
