@@ -6,3 +6,5 @@ pub mod hardening;
 
 pub mod integrity;
 pub mod permissions;
+
+pub mod release;
