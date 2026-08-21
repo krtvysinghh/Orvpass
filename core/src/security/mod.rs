@@ -8,3 +8,5 @@ pub mod integrity;
 pub mod permissions;
 
 pub mod release;
+
+pub mod health;
