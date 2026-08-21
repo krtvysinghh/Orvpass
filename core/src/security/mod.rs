@@ -10,3 +10,5 @@ pub mod permissions;
 pub mod release;
 
 pub mod health;
+
+pub mod readiness;
