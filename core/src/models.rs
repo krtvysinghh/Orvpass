@@ -1,169 +1,108 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub enum ItemType {
-    Login,
-    Passkey,
-    Totp,
-    SecureNote,
-    CreditCard,
-    Identity,
-    BankAccount,
-    ApiKey,
-    SshKey,
-    RecoveryCodes,
-    Wifi,
-    SoftwareLicense,
-    Custom,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoginData {
     pub username: Option<String>,
     pub password: Option<String>,
     pub urls: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct TotpData {
-    pub secret: String,
-    pub issuer: Option<String>,
-    pub account: Option<String>,
-    pub algorithm: String,
-    pub digits: u8,
-    pub period_seconds: u32,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SecureNoteData {
     pub content: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CardData {
-    pub cardholder_name: Option<String>,
-    pub number: Option<String>,
-    pub expiry_month: Option<u8>,
-    pub expiry_year: Option<u16>,
-    pub security_code: Option<String>,
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ItemType {
+    Login,
+    SecureNote,
+    Custom,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct IdentityData {
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub address: Option<String>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ItemData {
+    Login(LoginData),
+    SecureNote(SecureNoteData),
+    Custom,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomField {
     pub name: String,
     pub value: String,
     pub secret: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub enum ItemData {
-    Login(LoginData),
-    Passkey,
-    Totp(TotpData),
-    SecureNote(SecureNoteData),
-    CreditCard(CardData),
-    Identity(IdentityData),
-    BankAccount,
-    ApiKey,
-    SshKey,
-    RecoveryCodes(Vec<String>),
-    Wifi,
-    SoftwareLicense,
-    Custom,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VaultItem {
-    pub id: Uuid,
+    pub id: uuid::Uuid,
     pub item_type: ItemType,
     pub title: String,
-    pub username: Option<String>,
-    pub favorite: bool,
-    pub archived: bool,
-    pub tags: Vec<String>,
-    pub folder_id: Option<Uuid>,
-    pub custom_fields: Vec<CustomField>,
     pub data: ItemData,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    pub tags: Vec<String>,
+    pub custom_fields: Vec<CustomField>,
 }
 
 impl VaultItem {
-    pub fn new(item_type: ItemType, title: impl Into<String>, data: ItemData) -> Self {
-        let now = Utc::now();
-
+    pub fn new(item_type: ItemType, title: &str, data: ItemData) -> Self {
         Self {
-            id: Uuid::new_v4(),
+            id: uuid::Uuid::new_v4(),
             item_type,
-            title: title.into(),
-            username: None,
-            favorite: false,
-            archived: false,
-            tags: Vec::new(),
-            folder_id: None,
-            custom_fields: Vec::new(),
+            title: title.to_string(),
             data,
-            created_at: now,
-            updated_at: now,
+            tags: vec![],
+            custom_fields: vec![],
         }
     }
 
-    pub fn touch(&mut self) {
-        self.updated_at = Utc::now();
-    }
-
-    pub fn add_tag(&mut self, tag: impl Into<String>) {
-        let tag = tag.into();
-
-        if !self.tags.iter().any(|existing| existing == &tag) {
-            self.tags.push(tag);
-            self.touch();
+    pub fn add_tag(&mut self, tag: &str) {
+        if !self.tags.iter().any(|existing| existing == tag) {
+            self.tags.push(tag.to_string());
         }
     }
 
-    pub fn add_custom_field(
-        &mut self,
-        name: impl Into<String>,
-        value: impl Into<String>,
-        secret: bool,
-    ) {
+    pub fn add_custom_field(&mut self, name: &str, value: &str, secret: bool) {
         self.custom_fields.push(CustomField {
-            name: name.into(),
-            value: value.into(),
+            name: name.to_string(),
+            value: value.to_string(),
             secret,
         });
-        self.touch();
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Folder {
-    pub id: Uuid,
-    pub name: String,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+impl VaultItem {
+    pub fn validate(&self) -> bool {
+        if self.title.trim().is_empty() {
+            return false;
+        }
+
+        match &self.data {
+            ItemData::Login(data) => {
+                data.username.is_some() || data.password.is_some() || !data.urls.is_empty()
+            }
+            ItemData::SecureNote(data) => !data.content.trim().is_empty(),
+            ItemData::Custom => true,
+        }
+    }
 }
 
 impl Folder {
-    pub fn new(name: impl Into<String>) -> Self {
-        let now = Utc::now();
+    pub fn rename(&mut self, name: &str) {
+        self.name = name.to_string();
+    }
+}
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Folder {
+    pub id: uuid::Uuid,
+    pub name: String,
+}
+
+impl Folder {
+    pub fn new(name: &str) -> Self {
         Self {
-            id: Uuid::new_v4(),
-            name: name.into(),
-            created_at: now,
-            updated_at: now,
+            id: uuid::Uuid::new_v4(),
+            name: name.to_string(),
         }
     }
 }

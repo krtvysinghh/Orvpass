@@ -1,0 +1,4 @@
+name = "orvpass"
+version = "1.0.0"
+channel = "stable"
+security = "encrypted-local-vault"

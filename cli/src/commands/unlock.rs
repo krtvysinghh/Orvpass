@@ -1,24 +1,24 @@
 use dialoguer::Password;
-use std::path::PathBuf;
 use orvpass_core::crypto::SecretKey;
 use orvpass_core::vault::Vault;
+use std::path::PathBuf;
 
 pub fn run() {
-    let _password = Password::new()
+    let master = Password::new()
         .with_prompt("Master password")
         .interact()
         .unwrap();
 
-    let vault_file = PathBuf::from(std::env::var("HOME").unwrap())
+    let key = SecretKey::from_password(&master).unwrap();
+
+    let path = PathBuf::from(std::env::var("HOME").unwrap())
         .join(".orvpass")
         .join("vault.orv");
 
-    let key = SecretKey::generate();
+    let mut vault = Vault::new(path);
 
-    let mut vault = Vault::new_locked_at(&vault_file);
-
-    vault.unlock(&key)
-        .expect("vault unlock failed");
-
-    println!("Vault unlocked");
+    match vault.unlock(&key) {
+        Ok(_) => println!("✓ Vault unlocked"),
+        Err(e) => println!("✗ Unlock failed: {}", e),
+    }
 }

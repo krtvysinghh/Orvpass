@@ -1,4 +1,4 @@
-use orvpass_core::totp::{TotpAlgorithm, TotpConfig, TotpError, TotpSecret, generate};
+use orvpass_core::totp::{generate, TotpAlgorithm, TotpConfig, TotpError, TotpSecret};
 
 #[test]
 fn sha256_generation_is_stable() {

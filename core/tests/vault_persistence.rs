@@ -95,10 +95,9 @@ fn vault_file_is_not_plaintext() {
 
     let raw = std::fs::read(&path).unwrap();
 
-    assert!(
-        !raw.windows(b"VERY-SECRET-ORVPASS-DATA".len())
-            .any(|window| window == b"VERY-SECRET-ORVPASS-DATA")
-    );
+    assert!(!raw
+        .windows(b"VERY-SECRET-ORVPASS-DATA".len())
+        .any(|window| window == b"VERY-SECRET-ORVPASS-DATA"));
 
     std::fs::remove_file(path).ok();
 }

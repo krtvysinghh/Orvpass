@@ -1,21 +1,38 @@
-#![forbid(unsafe_code)]
-
-pub const PRODUCT_NAME: &str = "Orvpass";
-pub const PRODUCT_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 pub mod crypto;
-pub mod database;
-pub mod generator;
-pub mod import_export;
 pub mod models;
-pub mod passkeys;
-pub mod search;
-pub mod sync;
-pub mod totp;
 pub mod vault;
 
-pub fn info() -> (&'static str, &'static str) {
-    (PRODUCT_NAME, PRODUCT_VERSION)
-}
+pub use crypto::*;
+pub use models::*;
+pub use vault::*;
 
-pub mod password;
+pub fn info() -> (&'static str, &'static str) {
+    ("Orvpass", env!("CARGO_PKG_VERSION"))
+}
+pub mod totp;
+
+pub mod kdf;
+
+pub mod security;
+
+pub mod config;
+
+pub mod backup;
+
+pub mod clipboard;
+
+pub mod export;
+
+pub mod import;
+
+pub mod errors;
+
+pub mod runtime;
+
+pub mod version;
+
+pub mod logging;
+
+pub mod memory;
+
+pub mod result;

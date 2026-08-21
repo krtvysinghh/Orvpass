@@ -1,14 +1,19 @@
 # Orvpass
 
-Local-first universal credential manager.
+A local encrypted password manager written in Rust.
 
-Architecture:
-- Rust shared core
-- Native Apple clients
-- Native Android client
-- Native Windows client
-- Native Linux client
-- Browser extensions
-- Encrypted synchronization
+Features:
 
-The V1 architecture and roadmap are locked.
+- Encrypted vault
+- Master password protection
+- Credential storage
+- CLI workflow
+- Audit foundation
+
+Build:
+
+cargo build --release
+
+Test:
+
+cargo test --workspace
