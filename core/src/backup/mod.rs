@@ -6,3 +6,5 @@ pub fn backup(source: &Path, target: &Path) -> std::io::Result<()> {
 
     Ok(())
 }
+
+pub mod safety;

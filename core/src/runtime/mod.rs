@@ -5,3 +5,5 @@ pub fn install() {
         eprintln!("Orvpass error: {}", info);
     }));
 }
+
+pub mod health;
