@@ -17,7 +17,7 @@ pub fn execute() {
 
     let key = encryption::derive_key(password, salt);
 
-    session::unlock(key);
+    session::unlock(orvpass_core::crypto::SecretKey(key));
 
     println!("Vault unlocked");
 }
