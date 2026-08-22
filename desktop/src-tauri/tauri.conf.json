@@ -15,4 +15,11 @@
       }
     ]
   }
+,
+"bundle": {
+  "active": true,
+  "icon": [
+    "icons/icon.png"
+  ]
+}
 }
