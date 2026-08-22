@@ -1,3 +1,7 @@
 pub mod crypto;
-pub mod store;
 pub mod item;
+pub mod store;
+
+pub use crypto::derive_key;
+pub use item::VaultItem;
+pub use store::{load, save};
