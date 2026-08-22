@@ -1,15 +1,18 @@
 pub struct HealthReport {
+    pub healthy: bool,
     pub encrypted: bool,
     pub locked: bool,
-    pub version: &'static str,
+    pub message: String,
 }
 
 impl HealthReport {
+
     pub fn ok() -> Self {
         Self {
+            healthy: true,
             encrypted: true,
             locked: true,
-            version: "1.0.0",
+            message: "ORVPASS RUNTIME HEALTHY".into(),
         }
     }
 }

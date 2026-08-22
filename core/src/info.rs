@@ -1,3 +1,3 @@
-pub fn info() -> (&'static str, &'static str) {
-    ("Orvpass", env!("CARGO_PKG_VERSION"))
+pub fn get_info() -> (&'static str, &'static str) {
+    ("Orvpass", "2.0.0")
 }

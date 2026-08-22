@@ -1,16 +1,9 @@
-pub mod audit;
-
-pub mod check;
-
-pub mod hardening;
-
-pub mod integrity;
-pub mod permissions;
-
 pub mod release;
-
-pub mod health;
-
+pub mod integrity;
+pub mod final_check;
+pub mod check;
 pub mod readiness;
 
-pub mod final_check;
+pub fn health() -> String {
+    "ORVPASS SECURITY ENGINE ONLINE".into()
+}

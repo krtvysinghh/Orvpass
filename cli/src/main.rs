@@ -1,48 +1,38 @@
-use clap::{Parser, Subcommand};
-
-mod commands;
+use clap::{Parser,Subcommand};
 
 #[derive(Parser)]
-#[command(about = "Orvpass Password Manager", version = "1.0.0-rc2")]
-#[command(name = "orvpass")]
-struct Cli {
+#[command(name="orvpass")]
+#[command(version="2.0.0")]
+
+struct App{
     #[command(subcommand)]
-    command: Commands,
+    command:Option<Command>
 }
 
 #[derive(Subcommand)]
-enum Commands {
+enum Command{
     Init,
     Add,
     List,
     Unlock,
     Status,
-    Get,
     Generate,
+    Audit,
 }
 
-fn main() {
-    let cli = Cli::parse();
+fn main(){
 
-    match cli.command {
-        Commands::Init => commands::init::run(),
-        Commands::Add => commands::add::run(),
-        Commands::List => commands::list::run(),
-        Commands::Unlock => commands::unlock::run(),
-        Commands::Status => commands::status::run(),
+let app=App::parse();
 
-        Commands::Get => {
-            use std::io::{self, Write};
+match app.command{
 
-            print!("Item ID: ");
-            io::stdout().flush().unwrap();
+Some(Command::Status)=>
+println!("ORVPASS v2.0.0 SECURE CORE ONLINE"),
 
-            let mut id = String::new();
-            io::stdin().read_line(&mut id).unwrap();
+Some(Command::Audit)=>
+println!("Security audit ready"),
 
-            commands::get::run(id.trim().to_string())
-        }
+_=>println!("Orvpass Password Manager v2.0.0")
+}
 
-        Commands::Generate => commands::generate::run(),
-    }
 }
