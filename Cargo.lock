@@ -2772,6 +2772,7 @@ version = "3.0.0"
 dependencies = [
  "orvpass-core",
  "tauri",
+ "tauri-build",
 ]
 
 [[package]]
