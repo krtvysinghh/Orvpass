@@ -4,7 +4,7 @@ use aes_gcm::{
 };
 
 use argon2::Argon2;
-use rand::TryRngCore;
+use rand::RngCore;
 use rand::rngs::OsRng;
 
 use base64::{Engine, engine::general_purpose};
@@ -24,9 +24,7 @@ pub fn derive_key(password: &str, salt: &[u8]) -> [u8; 32] {
 pub fn encrypt(plaintext: &str, password: &str) -> String {
     let mut salt = [0u8; 16];
 
-    OsRng
-        .try_fill_bytes(&mut salt)
-        .expect("salt generation failed");
+    OsRng.fill_bytes(&mut salt).expect("salt generation failed");
 
     let key = derive_key(password, &salt);
 
@@ -35,7 +33,7 @@ pub fn encrypt(plaintext: &str, password: &str) -> String {
     let mut nonce = [0u8; 12];
 
     OsRng
-        .try_fill_bytes(&mut nonce)
+        .fill_bytes(&mut nonce)
         .expect("nonce generation failed");
 
     let encrypted = cipher

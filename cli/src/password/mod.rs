@@ -18,7 +18,7 @@ pub fn generate(length: usize, numbers: bool, symbols: bool) -> String {
 
     let chars: Vec<char> = charset.chars().collect();
 
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
 
     (0..length)
         .map(|_| chars[rng.random_range(0..chars.len())])
