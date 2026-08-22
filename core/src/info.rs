@@ -1,3 +1,2 @@
-pub fn get_info() -> (&'static str, &'static str) {
-    ("Orvpass", "2.0.0")
-}
+pub const NAME:&str="Orvpass";
+pub const VERSION:&str="3.0.0";

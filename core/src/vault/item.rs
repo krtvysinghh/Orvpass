@@ -1,28 +1,27 @@
-use serde::{Deserialize, Serialize};
+use serde::{Serialize,Deserialize};
+use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+use crate::models::{ItemData,ItemType};
+
+#[derive(Debug,Clone,Serialize,Deserialize)]
 pub struct VaultItem {
-    pub id: String,
-    pub name: String,
-    pub username: String,
-    pub password: String,
-    pub url: String,
+    pub id:String,
+    pub item_type:String,
+    pub name:String,
+    pub data:String,
 }
 
 impl VaultItem {
     pub fn new(
-        id: String,
-        name: String,
-        username: String,
-        password: String,
-        url: String,
-    ) -> Self {
-        Self {
-            id,
-            name,
-            username,
-            password,
-            url,
+        item_type:ItemType,
+        name:&str,
+        data:ItemData,
+    )->Self {
+        Self{
+            id:Uuid::new_v4().to_string(),
+            item_type:format!("{:?}",item_type),
+            name:name.to_string(),
+            data:format!("{:?}",data),
         }
     }
 }
