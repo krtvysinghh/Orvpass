@@ -1,0 +1,440 @@
+=== GIT ===
+ M cli/src/commands/add.rs
+ M cli/src/commands/get.rs
+ M cli/src/commands/init.rs
+ M cli/src/commands/list.rs
+ M cli/src/commands/remove.rs
+ M cli/src/commands/search.rs
+ M cli/src/commands/status.rs
+ M cli/src/commands/unlock.rs
+ M cli/src/main.rs
+ M cli/src/vault/mod.rs
+ M cli/src/vault/session.rs
+?? orvpass-live-audit.txt
+cli-v3-integration
+b3afa9b fix: restore v3 core api compatibility
+0aa39e5 fix: restore v3 core api compatibility
+8bbce26 feat: expose vault core api
+
+=== TREE ===
+.
+├── android
+├── apps
+│   ├── android
+│   ├── components
+│   │   └── components.md
+│   ├── ios
+│   ├── ipados
+│   ├── linux
+│   ├── macos
+│   ├── README.md
+│   ├── shared
+│   │   └── ui_protocol.json
+│   ├── themes
+│   │   └── theme.json
+│   └── windows
+├── ARTIFACT_MANIFEST.md
+├── benches
+│   └── crypto.rs
+├── bindings
+│   ├── c
+│   ├── go
+│   ├── kotlin
+│   ├── node
+│   ├── python
+│   └── swift
+├── browser
+│   ├── manifest.json
+│   └── src
+├── BUILD_INFO.md
+├── Cargo.lock
+├── Cargo.toml
+├── CHANGELOG.md
+├── cli
+│   ├── Cargo.toml
+│   ├── src
+│   │   ├── clipboard
+│   │   ├── commands
+│   │   ├── completion
+│   │   ├── config
+│   │   ├── main.rs
+│   │   ├── main.rs.backup
+│   │   ├── output
+│   │   ├── password
+│   │   ├── search
+│   │   └── vault
+│   └── tests
+│       ├── basic.rs
+│       ├── encryption_real.rs
+│       └── release_cli.rs
+├── CLI_RELEASE_REPORT.md
+├── CONTRIBUTING.md
+├── core
+│   ├── attachments
+│   │   └── mod.rs
+│   ├── Cargo.toml
+│   ├── crypto
+│   ├── database
+│   │   └── mod.rs
+│   ├── generator
+│   │   └── password.rs
+│   ├── import_export
+│   │   ├── formats
+│   │   ├── mod.rs
+│   │   └── tests
+│   ├── models
+│   │   ├── identity.rs
+│   │   ├── password_entry.rs
+│   │   └── secure_note.rs
+│   ├── passkeys
+│   ├── search
+│   │   └── mod.rs
+│   ├── src
+│   │   ├── attachments
+│   │   ├── backup
+│   │   ├── build
+│   │   ├── clipboard
+│   │   ├── config
+│   │   ├── crypto
+│   │   ├── crypto.rs
+│   │   ├── database.rs
+│   │   ├── errors
+│   │   ├── export
+│   │   ├── generator.rs
+│   │   ├── import
+│   │   ├── import_export
+│   │   ├── info.rs
+│   │   ├── kdf.rs
+│   │   ├── lib.rs
+│   │   ├── logging
+│   │   ├── memory
+│   │   ├── models
+│   │   ├── passkeys.rs
+│   │   ├── password.rs
+│   │   ├── result
+│   │   ├── runtime
+│   │   ├── search.rs
+│   │   ├── security
+│   │   ├── storage
+│   │   ├── sync
+│   │   ├── totp
+│   │   ├── vault
+│   │   └── version
+│   ├── sync
+│   │   ├── conflict.rs
+│   │   ├── device.rs
+│   │   ├── protocol.rs
+│   │   └── queue.rs
+│   ├── tests
+│   │   ├── artifact_v1.rs
+│   │   ├── crypto.rs
+│   │   ├── documentation_v1.rs
+│   │   ├── final_release.rs
+│   │   ├── final_state_v1.rs
+│   │   ├── foundation.rs
+│   │   ├── freeze_audit.rs
+│   │   ├── freeze_v1.rs
+│   │   ├── integration_v1.rs
+│   │   ├── lifecycle.rs
+│   │   ├── models.rs
+│   │   ├── package_v1.rs
+│   │   ├── production_v1.rs
+│   │   ├── quality_gate_v1.rs
+│   │   ├── rc2_validation.rs
+│   │   ├── readiness_v1.rs
+│   │   ├── release_audit.rs
+│   │   ├── release_closure.rs
+│   │   ├── release_gate_v1.rs
+│   │   ├── release_v1.rs
+│   │   ├── runtime_health.rs
+│   │   ├── security_integrity.rs
+│   │   ├── security_regression.rs
+│   │   ├── security_release_gate.rs
+│   │   ├── security_v1.rs
+│   │   ├── signoff_v1.rs
+│   │   ├── stability_v1.rs
+│   │   ├── totp.rs
+│   │   ├── vault_persistence.rs
+│   │   ├── vault.rs
+│   │   ├── version_freeze.rs
+│   │   └── version_v1.rs
+│   ├── totp
+│   └── vault
+├── deny.toml
+├── desktop
+│   ├── ARCHITECTURE.md
+│   ├── dist
+│   │   ├── assets
+│   │   └── index.html
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── components
+│   │   ├── lib
+│   │   ├── main.rs
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   └── styles
+│   ├── src-tauri
+│   │   ├── build.rs
+│   │   ├── Cargo.toml
+│   │   ├── gen
+│   │   ├── icons
+│   │   ├── src
+│   │   └── tauri.conf.json
+│   └── vite.config.ts
+├── docs
+│   ├── architecture
+│   │   └── LOCKED.md
+│   ├── archive_internal
+│   │   ├── FINAL_INTEGRATION_REPORT.md
+│   │   ├── FINAL_STATE.md
+│   │   ├── FREEZE_AUDIT.md
+│   │   ├── PACKAGE_INFO.md
+│   │   ├── PACKAGE_STATUS.md
+│   │   ├── PRODUCTION_MANIFEST.md
+│   │   ├── QUALITY_GATE.md
+│   │   ├── RC2_VALIDATION_REPORT.md
+│   │   ├── RELEASE_AUDIT.md
+│   │   ├── RELEASE_BUILD.md
+│   │   ├── RELEASE_CHECKLIST.md
+│   │   ├── RELEASE_CLOSURE.md
+│   │   ├── RELEASE_FREEZE.md
+│   │   ├── RELEASE_INVENTORY.md
+│   │   ├── RELEASE_MANIFEST.md
+│   │   ├── RELEASE_NOTES_V1.md
+│   │   ├── RELEASE_SIGNOFF.md
+│   │   ├── scripts
+│   │   ├── SECURITY_CHECKLIST.md
+│   │   ├── SECURITY_RELEASE_REPORT.md
+│   │   ├── STABILITY_CHECKLIST.md
+│   │   ├── TEST_STATUS.md
+│   │   ├── V1_SIGNOFF.md
+│   │   └── VERSION_FREEZE.md
+│   ├── browser
+│   │   └── ARCHITECTURE.md
+│   ├── cargo-deny-report.txt
+│   ├── cli
+│   │   ├── CLI.md
+│   │   └── COMMAND_REFERENCE.md
+│   ├── COMMANDS.md
+│   ├── COMPLETION.md
+│   ├── CONFIG.md
+│   ├── dependency-duplicates.txt
+│   ├── dependency-report.txt
+│   ├── dependency-tree.txt
+│   ├── development
+│   ├── FEATURE_MATRIX.md
+│   ├── gui
+│   │   └── UI_GUIDE.md
+│   ├── HEALTH.md
+│   ├── import_export
+│   │   └── IMPORT_EXPORT.md
+│   ├── IMPORT_EXPORT.md
+│   ├── OFFLINE_MODE.md
+│   ├── PACKAGING.md
+│   ├── protocol
+│   ├── security
+│   │   ├── CRYPTOGRAPHY.md
+│   │   └── STORAGE.md
+│   ├── SECURITY.md
+│   ├── sync
+│   │   ├── ARCHITECTURE.md
+│   │   └── SYNC.md
+│   ├── udeps-report.txt
+│   ├── USAGE.md
+│   └── V3.md
+├── extensions
+│   ├── chromium
+│   │   └── manifest.json
+│   ├── common
+│   │   ├── autofill.js
+│   │   ├── bridge.js
+│   │   ├── manifest-template.json
+│   │   └── protocol.json
+│   ├── firefox
+│   │   └── manifest.json
+│   └── safari
+│       └── README.md
+├── git_release.sh
+├── LICENSE
+├── mobile
+│   ├── android
+│   ├── ARCHITECTURE.md
+│   ├── ios
+│   └── src
+│       └── lib.rs
+├── Orvpass
+│   ├── ARTIFACT_MANIFEST.md
+│   ├── benches
+│   │   └── crypto.rs
+│   ├── BUILD_INFO.md
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── CHANGELOG.md
+│   ├── cli
+│   │   ├── Cargo.toml
+│   │   ├── src
+│   │   └── tests
+│   ├── CLI_RELEASE_REPORT.md
+│   ├── CONTRIBUTING.md
+│   ├── core
+│   │   ├── Cargo.toml
+│   │   ├── src
+│   │   └── tests
+│   ├── deny.toml
+│   ├── docs
+│   │   ├── architecture
+│   │   ├── archive_internal
+│   │   ├── COMMANDS.md
+│   │   ├── COMPLETION.md
+│   │   ├── CONFIG.md
+│   │   ├── HEALTH.md
+│   │   ├── security
+│   │   ├── SECURITY.md
+│   │   └── USAGE.md
+│   ├── git_release.sh
+│   ├── LICENSE
+│   ├── ORVPASS_VERSION
+│   ├── ORVPASS.toml
+│   ├── README.md
+│   ├── release
+│   │   ├── orvpass
+│   │   └── SHA256SUMS
+│   ├── release_clean_check.sh
+│   ├── RELEASE.toml
+│   ├── ROADMAP.md
+│   ├── rust-toolchain.toml
+│   ├── scripts
+│   │   └── archive_internal
+│   ├── SECURITY.md
+│   ├── SHA256SUMS
+│   ├── tests
+│   │   ├── binary_smoke.sh
+│   │   ├── cli_release_smoke.sh
+│   │   ├── final_smoke.sh
+│   │   ├── release_smoke.sh
+│   │   ├── smoke.sh
+│   │   └── v1_smoke.sh
+│   └── verify_artifact.sh
+├── ORVPASS_VERSION
+├── orvpass-live-audit.txt
+├── ORVPASS.toml
+├── README.md
+├── release
+│   ├── artifacts
+│   ├── BUILD_MATRIX.md
+│   ├── orvpass
+│   ├── packages
+│   ├── REPRODUCIBLE_BUILD.md
+│   └── SHA256SUMS
+├── release_clean_check.sh
+├── RELEASE.toml
+├── ROADMAP.md
+├── rust-toolchain.toml
+├── scripts
+│   ├── archive_internal
+│   │   ├── artifact_check.sh
+│   │   ├── audit_project.sh
+│   │   ├── batch2_upgrade.sh
+│   │   ├── batch3_upgrade.sh
+│   │   ├── build_release.sh
+│   │   ├── clean_workspace_check.sh
+│   │   ├── final_audit.sh
+│   │   ├── final_release_check.sh
+│   │   ├── final_v1_check.sh
+│   │   ├── fix_batch1.sh
+│   │   ├── package_release.sh
+│   │   ├── package_v1_release.sh
+│   │   ├── prepare_v1_tag.sh
+│   │   ├── quality_gate.sh
+│   │   ├── release_audit.sh
+│   │   ├── release_pipeline.sh
+│   │   ├── release.sh
+│   │   ├── run_final_pipeline.sh
+│   │   ├── security_release_check.sh
+│   │   ├── upgrade_orvpass.sh
+│   │   ├── v1_signoff_check.sh
+│   │   ├── verify_release.sh
+│   │   └── verify_v1_release.sh
+│   └── build
+│       ├── build-all.sh
+│       └── checksum.sh
+├── sdk
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── security
+├── SECURITY.md
+├── server
+├── SHA256SUMS
+├── shared
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── sync-server
+│   ├── Cargo.toml
+│   ├── README.md
+│   └── src
+│       └── main.rs
+├── tests
+│   ├── binary_smoke.sh
+│   ├── cli_release_smoke.sh
+│   ├── final_smoke.sh
+│   ├── integration
+│   ├── interoperability
+│   ├── release_smoke.sh
+│   ├── security
+│   ├── smoke.sh
+│   └── v1_smoke.sh
+├── tools
+├── verify_artifact.sh
+└── VERSION
+
+138 directories, 238 files
+
+=== CARGO ===
+{"packages":[{"name":"orvpass-core","version":"2.0.0","id":"path+file:///Users/krtvysingh/Orvpass/core#orvpass-core@2.0.0","license":"MIT","license_file":null,"description":null,"source":null,"dependencies":[{"name":"argon2","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.5","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"chacha20poly1305","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.10","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"chrono","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.4","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["serde"],"target":null,"registry":null},{"name":"dirs","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^6","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"hex","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.4","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"hkdf","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.12","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"postcard","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["alloc"],"target":null,"registry":null},{"name":"rand","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.8","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"serde","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["derive"],"target":null,"registry":null},{"name":"serde_json","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"sha2","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.10","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"thiserror","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^2","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"uuid","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["v4","serde"],"target":null,"registry":null},{"name":"zeroize","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["derive"],"target":null,"registry":null}],"targets":[{"kind":["lib"],"crate_types":["lib"],"name":"orvpass_core","src_path":"/Users/krtvysingh/Orvpass/core/src/lib.rs","edition":"2024","doc":true,"doctest":true,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"artifact_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/artifact_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"crypto","src_path":"/Users/krtvysingh/Orvpass/core/tests/crypto.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"documentation_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/documentation_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"final_release","src_path":"/Users/krtvysingh/Orvpass/core/tests/final_release.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"final_state_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/final_state_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"foundation","src_path":"/Users/krtvysingh/Orvpass/core/tests/foundation.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"freeze_audit","src_path":"/Users/krtvysingh/Orvpass/core/tests/freeze_audit.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"freeze_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/freeze_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"integration_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/integration_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"lifecycle","src_path":"/Users/krtvysingh/Orvpass/core/tests/lifecycle.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"models","src_path":"/Users/krtvysingh/Orvpass/core/tests/models.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"package_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/package_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"production_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/production_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"quality_gate_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/quality_gate_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"rc2_validation","src_path":"/Users/krtvysingh/Orvpass/core/tests/rc2_validation.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"readiness_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/readiness_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"release_audit","src_path":"/Users/krtvysingh/Orvpass/core/tests/release_audit.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"release_closure","src_path":"/Users/krtvysingh/Orvpass/core/tests/release_closure.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"release_gate_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/release_gate_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"release_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/release_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"runtime_health","src_path":"/Users/krtvysingh/Orvpass/core/tests/runtime_health.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"security_integrity","src_path":"/Users/krtvysingh/Orvpass/core/tests/security_integrity.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"security_regression","src_path":"/Users/krtvysingh/Orvpass/core/tests/security_regression.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"security_release_gate","src_path":"/Users/krtvysingh/Orvpass/core/tests/security_release_gate.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"security_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/security_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"signoff_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/signoff_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"stability_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/stability_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"totp","src_path":"/Users/krtvysingh/Orvpass/core/tests/totp.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"vault","src_path":"/Users/krtvysingh/Orvpass/core/tests/vault.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"vault_persistence","src_path":"/Users/krtvysingh/Orvpass/core/tests/vault_persistence.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"version_freeze","src_path":"/Users/krtvysingh/Orvpass/core/tests/version_freeze.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"version_v1","src_path":"/Users/krtvysingh/Orvpass/core/tests/version_v1.rs","edition":"2024","doc":false,"doctest":false,"test":true}],"features":{},"manifest_path":"/Users/krtvysingh/Orvpass/core/Cargo.toml","metadata":null,"publish":null,"authors":[],"categories":[],"keywords":[],"readme":null,"repository":null,"homepage":null,"documentation":null,"edition":"2024","links":null,"default_run":null,"rust_version":null},{"name":"orvpass-cli","version":"2.0.0","id":"path+file:///Users/krtvysingh/Orvpass/cli#orvpass-cli@2.0.0","license":null,"license_file":null,"description":null,"source":null,"dependencies":[{"name":"aes-gcm","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.11.1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"anyhow","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"arboard","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^3.6.1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"argon2","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.5","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"base64","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.23.1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"clap","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^4","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["derive"],"target":null,"registry":null},{"name":"dialoguer","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.11","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"dirs","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^6.0.0","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"orvpass-core","source":null,"req":"*","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null,"path":"/Users/krtvysingh/Orvpass/core"},{"name":"rand","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.8","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"rpassword","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^7","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"serde","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["derive"],"target":null,"registry":null},{"name":"serde_json","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null}],"targets":[{"kind":["bin"],"crate_types":["bin"],"name":"orvpass","src_path":"/Users/krtvysingh/Orvpass/cli/src/main.rs","edition":"2024","doc":true,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"basic","src_path":"/Users/krtvysingh/Orvpass/cli/tests/basic.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"encryption_real","src_path":"/Users/krtvysingh/Orvpass/cli/tests/encryption_real.rs","edition":"2024","doc":false,"doctest":false,"test":true},{"kind":["test"],"crate_types":["bin"],"name":"release_cli","src_path":"/Users/krtvysingh/Orvpass/cli/tests/release_cli.rs","edition":"2024","doc":false,"doctest":false,"test":true}],"features":{},"manifest_path":"/Users/krtvysingh/Orvpass/cli/Cargo.toml","metadata":null,"publish":null,"authors":[],"categories":[],"keywords":[],"readme":null,"repository":null,"homepage":null,"documentation":null,"edition":"2024","links":null,"default_run":null,"rust_version":null},{"name":"orvpass-desktop","version":"3.0.0","id":"path+file:///Users/krtvysingh/Orvpass/desktop/src-tauri#orvpass-desktop@3.0.0","license":null,"license_file":null,"description":null,"source":null,"dependencies":[{"name":"orvpass-core","source":null,"req":"*","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null,"path":"/Users/krtvysingh/Orvpass/core"},{"name":"tauri","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^2","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"tauri-build","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^2","kind":"build","rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null}],"targets":[{"kind":["bin"],"crate_types":["bin"],"name":"orvpass-desktop","src_path":"/Users/krtvysingh/Orvpass/desktop/src-tauri/src/main.rs","edition":"2021","doc":true,"doctest":false,"test":true},{"kind":["custom-build"],"crate_types":["bin"],"name":"build-script-build","src_path":"/Users/krtvysingh/Orvpass/desktop/src-tauri/build.rs","edition":"2021","doc":false,"doctest":false,"test":false}],"features":{},"manifest_path":"/Users/krtvysingh/Orvpass/desktop/src-tauri/Cargo.toml","metadata":null,"publish":null,"authors":[],"categories":[],"keywords":[],"readme":null,"repository":null,"homepage":null,"documentation":null,"edition":"2021","links":null,"default_run":null,"rust_version":null},{"name":"orvpass-sdk","version":"3.0.0","id":"path+file:///Users/krtvysingh/Orvpass/sdk#orvpass-sdk@3.0.0","license":null,"license_file":null,"description":null,"source":null,"dependencies":[{"name":"orvpass-core","source":null,"req":"*","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null,"path":"/Users/krtvysingh/Orvpass/core"}],"targets":[{"kind":["lib"],"crate_types":["lib"],"name":"orvpass_sdk","src_path":"/Users/krtvysingh/Orvpass/sdk/src/lib.rs","edition":"2021","doc":true,"doctest":true,"test":true}],"features":{},"manifest_path":"/Users/krtvysingh/Orvpass/sdk/Cargo.toml","metadata":null,"publish":null,"authors":[],"categories":[],"keywords":[],"readme":null,"repository":null,"homepage":null,"documentation":null,"edition":"2021","links":null,"default_run":null,"rust_version":null},{"name":"orvpass-sync","version":"3.0.0","id":"path+file:///Users/krtvysingh/Orvpass/sync-server#orvpass-sync@3.0.0","license":null,"license_file":null,"description":null,"source":null,"dependencies":[{"name":"axum","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^0.8","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"serde","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["derive"],"target":null,"registry":null},{"name":"serde_json","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":[],"target":null,"registry":null},{"name":"tokio","source":"registry+https://github.com/rust-lang/crates.io-index","req":"^1","kind":null,"rename":null,"optional":false,"uses_default_features":true,"features":["full"],"target":null,"registry":null}],"targets":[{"kind":["bin"],"crate_types":["bin"],"name":"orvpass-sync","src_path":"/Users/krtvysingh/Orvpass/sync-server/src/main.rs","edition":"2021","doc":true,"doctest":false,"test":true}],"features":{},"manifest_path":"/Users/krtvysingh/Orvpass/sync-server/Cargo.toml","metadata":null,"publish":null,"authors":[],"categories":[],"keywords":[],"readme":"README.md","repository":null,"homepage":null,"documentation":null,"edition":"2021","links":null,"default_run":null,"rust_version":null}],"workspace_members":["path+file:///Users/krtvysingh/Orvpass/core#orvpass-core@2.0.0","path+file:///Users/krtvysingh/Orvpass/cli#orvpass-cli@2.0.0","path+file:///Users/krtvysingh/Orvpass/desktop/src-tauri#orvpass-desktop@3.0.0","path+file:///Users/krtvysingh/Orvpass/sdk#orvpass-sdk@3.0.0","path+file:///Users/krtvysingh/Orvpass/sync-server#orvpass-sync@3.0.0"],"workspace_default_members":["path+file:///Users/krtvysingh/Orvpass/core#orvpass-core@2.0.0","path+file:///Users/krtvysingh/Orvpass/cli#orvpass-cli@2.0.0","path+file:///Users/krtvysingh/Orvpass/desktop/src-tauri#orvpass-desktop@3.0.0","path+file:///Users/krtvysingh/Orvpass/sdk#orvpass-sdk@3.0.0","path+file:///Users/krtvysingh/Orvpass/sync-server#orvpass-sync@3.0.0"],"resolve":null,"target_directory":"/Users/krtvysingh/Orvpass/target","build_directory":"/Users/krtvysingh/Orvpass/target","version":1,"workspace_root":"/Users/krtvysingh/Orvpass","metadata":null}
+
+=== COMMAND MODULES ===
+cli/src/commands/about.rs
+cli/src/commands/add.rs
+cli/src/commands/backup.rs
+cli/src/commands/copy.rs
+cli/src/commands/delete.rs
+cli/src/commands/doctor.rs
+cli/src/commands/edit.rs
+cli/src/commands/export.rs
+cli/src/commands/generate.rs
+cli/src/commands/get.rs
+cli/src/commands/health.rs
+cli/src/commands/import.rs
+cli/src/commands/info.rs
+cli/src/commands/init.rs
+cli/src/commands/item.rs
+cli/src/commands/list.rs
+cli/src/commands/mod.rs
+cli/src/commands/registry.rs
+cli/src/commands/remove.rs
+cli/src/commands/search.rs
+cli/src/commands/security.rs
+cli/src/commands/status.rs
+cli/src/commands/sync.rs
+cli/src/commands/unlock.rs
+cli/src/commands/vault/init.rs
+cli/src/commands/vault/lock.rs
+cli/src/commands/vault/mod.rs
+cli/src/commands/vault/status.rs
+cli/src/commands/vault/unlock.rs
+cli/src/commands/version.rs
+
+=== VAULT MODULES ===
+cli/src/vault/database.rs
+cli/src/vault/encryption.rs
+cli/src/vault/item.rs
+cli/src/vault/mod.rs
+cli/src/vault/session.rs
+cli/src/vault/store.rs

@@ -1,9 +1,10 @@
 use dialoguer::Password;
 use orvpass_core::crypto::SecretKey;
-use orvpass_core::vault::Vault;
-use std::path::PathBuf;
 
-pub fn run() {
+use crate::vault;
+use crate::vault::session;
+
+pub fn execute() {
     let password = Password::new()
         .with_prompt("Create master password")
         .interact()
@@ -11,13 +12,17 @@ pub fn run() {
 
     let key = SecretKey::from_password(&password).unwrap();
 
-    let dir = PathBuf::from(std::env::var("HOME").unwrap()).join(".orvpass");
+    let dir = std::env::var("HOME")
+        .unwrap();
 
-    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::create_dir_all(format!("{}/.orvpass", dir))
+        .unwrap();
 
-    let mut vault = Vault::new(dir.join("vault.orv"));
+    let mut v = vault::open();
 
-    vault.initialize(&key).unwrap();
+    v.initialize(&key).unwrap();
 
-    println!("Vault initialized");
+    session::set(key);
+
+    println!("✓ Vault initialized");
 }

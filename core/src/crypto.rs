@@ -32,7 +32,7 @@ pub enum CryptoError {
 }
 
 #[derive(Clone, Zeroize, ZeroizeOnDrop, Debug, PartialEq, Eq)]
-pub struct SecretKey([u8; MASTER_KEY_BYTES]);
+pub struct SecretKey(pub [u8; MASTER_KEY_BYTES]);
 
 impl SecretKey {
     pub fn from_password(password: &str) -> Result<Self, CryptoError> {

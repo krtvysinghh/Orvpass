@@ -36,7 +36,7 @@ if Confirm::new()
 .unwrap()
 {
 
-match vault.delete(&id){
+match vault.delete(id){
 
 Ok(_)=>{
 

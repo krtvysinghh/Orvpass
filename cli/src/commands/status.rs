@@ -1,7 +1,9 @@
-use crate::vault::database;
+use crate::vault;
 
 pub fn execute() {
-    let count = database::list().len();
-
-    println!("Vault entries: {}", count);
+    if vault::path().exists() {
+        println!("Vault ready");
+    } else {
+        println!("Vault missing");
+    }
 }

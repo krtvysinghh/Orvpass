@@ -11,7 +11,7 @@ mod output;
 #[derive(Parser)]
 #[command(
     name = "orvpass",
-    version = "2.0.0",
+    version = "3.0.0",
     about = "Secure offline password manager"
 )]
 
@@ -57,13 +57,24 @@ enum Commands {
     },
 
     Version,
+
+Init,
+Unlock,
 }
 
 fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Add { name } => {
+        Commands::Init => {
+        commands::init::execute();
+    }
+
+    Commands::Unlock => {
+        commands::unlock::execute();
+    }
+
+    Commands::Add { name } => {
             commands::add::execute(name);
         }
 
@@ -102,7 +113,7 @@ fn main() {
         }
 
         Commands::Version => {
-            println!("Orvpass 2.0.0");
+            println!("Orvpass 3.0.0");
         }
     }
 }

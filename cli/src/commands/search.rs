@@ -1,18 +1,22 @@
-use crate::vault::database;
+use crate::vault;
+use crate::vault::session;
 
 pub fn execute(query: &str) {
-    let items = database::list();
+    let Some(key) = session::key() else {
+        println!("Vault locked");
+        return;
+    };
 
-    let mut found = false;
+    let mut vault = vault::open();
 
-    for item in items {
-        if item.name.contains(query) {
-            println!("{}", item.name);
-            found = true;
-        }
+    if vault.unlock(&key).is_err() {
+        println!("Unlock failed");
+        return;
     }
 
-    if !found {
-        println!("No matches");
+    for item in vault.items() {
+        if item.name.to_lowercase().contains(&query.to_lowercase()) {
+            println!("{}", item.name);
+        }
     }
 }
