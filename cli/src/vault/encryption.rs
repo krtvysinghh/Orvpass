@@ -32,9 +32,7 @@ pub fn encrypt(plaintext: &str, password: &str) -> String {
 
     let mut nonce = [0u8; 12];
 
-    OsRng
-        .fill_bytes(&mut nonce)
-        .expect("nonce generation failed");
+    OsRng.fill_bytes(&mut nonce);
 
     let encrypted = cipher
         .encrypt(Nonce::from_slice(&nonce), plaintext.as_bytes())

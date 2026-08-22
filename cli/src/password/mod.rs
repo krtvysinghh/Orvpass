@@ -21,7 +21,7 @@ pub fn generate(length: usize, numbers: bool, symbols: bool) -> String {
     let mut rng = rand::thread_rng();
 
     (0..length)
-        .map(|_| chars[rng.random_range(0..chars.len())])
+        .map(|_| chars[rng.gen_range(0..chars.len())])
         .collect()
 }
 

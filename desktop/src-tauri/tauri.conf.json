@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Orvpass",
+  "version": "3.0.0",
+  "identifier": "com.orvpass.desktop",
+  "build": {
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Orvpass",
+        "width": 1200,
+        "height": 800
+      }
+    ]
+  }
+}
