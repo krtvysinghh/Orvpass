@@ -2,7 +2,7 @@
   "name": "orvpass-desktop",
   "version": "3.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "tauri": "tauri"
   },
@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",
-    "vite": "^7.0.0",
-    "typescript": "^5.0.0"
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.0.0",
+    "vite": "^7.0.0"
   }
 }
