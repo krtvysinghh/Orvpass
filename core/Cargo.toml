@@ -8,7 +8,7 @@ license="MIT"
 path="src/lib.rs"
 
 [dependencies]
-serde.workspace=true
+serde.workspace = true
 serde_json.workspace=true
 thiserror.workspace=true
 zeroize.workspace=true
@@ -20,8 +20,5 @@ hex.workspace=true
 rand.workspace=true
 uuid.workspace=true
 chrono.workspace=true
-
 postcard = { version="1", features=["alloc"] }
-
-
 dirs = "6"
