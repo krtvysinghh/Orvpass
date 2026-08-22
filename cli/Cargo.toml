@@ -1,6 +1,12 @@
 [package]
-edition = "2024"
 name = "cli"
+version.workspace = true
+edition = "2021"
+license.workspace = true
+
+[[bin]]
+name = "orvpass"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.104"
