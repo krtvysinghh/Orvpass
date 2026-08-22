@@ -1,38 +1,108 @@
-use clap::{Parser,Subcommand};
+mod clipboard;
+mod password;
+mod vault;
+use clap::{Parser, Subcommand};
+
+mod commands;
+mod completion;
+mod config;
+mod output;
 
 #[derive(Parser)]
-#[command(name="orvpass")]
-#[command(version="2.0.0")]
+#[command(
+    name = "orvpass",
+    version = "2.0.0",
+    about = "Secure offline password manager"
+)]
 
-struct App{
+struct Cli {
     #[command(subcommand)]
-    command:Option<Command>
+    command: Commands,
 }
 
 #[derive(Subcommand)]
-enum Command{
-    Init,
-    Add,
+
+enum Commands {
     List,
-    Unlock,
+
+    Get {
+        name: String,
+    },
+
+    Remove {
+        name: String,
+    },
+
     Status,
-    Generate,
-    Audit,
+
+    Add {
+        name: String,
+    },
+
+    Search {
+        query: String,
+    },
+
+    Generate {
+        #[arg(short, long, default_value_t = 20)]
+        length: usize,
+    },
+
+    Import {
+        file: String,
+    },
+
+    Export {
+        file: String,
+    },
+
+    Version,
 }
 
-fn main(){
+fn main() {
+    let cli = Cli::parse();
 
-let app=App::parse();
+    match cli.command {
+        Commands::Add { name } => {
+            commands::add::execute(name);
+        }
 
-match app.command{
+        Commands::List => {
+            commands::list::execute();
+        }
 
-Some(Command::Status)=>
-println!("ORVPASS v2.0.0 SECURE CORE ONLINE"),
+        Commands::Get { name } => {
+            commands::get::execute(&name);
+        }
 
-Some(Command::Audit)=>
-println!("Security audit ready"),
+        Commands::Remove { name } => {
+            commands::remove::execute(name);
+        }
 
-_=>println!("Orvpass Password Manager v2.0.0")
-}
+        Commands::Status => {
+            commands::status::execute();
+        }
 
+        Commands::Search { query } => {
+            commands::search::execute(&query);
+        }
+
+        Commands::Generate { length } => {
+            let pass = commands::generate::execute(length);
+
+            output::success(&pass);
+        }
+
+        Commands::Import { file } => {
+            commands::import::execute(&file);
+        }
+
+        Commands::Export { file } => {
+            commands::export::execute(&file);
+        }
+
+        Commands::Version => {
+            println!("Orvpass 2.0.0");
+        }
+    }
 }

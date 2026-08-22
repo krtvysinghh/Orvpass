@@ -16,8 +16,10 @@ argon2.workspace=true
 chacha20poly1305.workspace=true
 hkdf.workspace=true
 sha2.workspace=true
+hex.workspace=true
 rand.workspace=true
 uuid.workspace=true
 chrono.workspace=true
 
 postcard = { version="1", features=["alloc"] }
+

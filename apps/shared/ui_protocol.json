@@ -1,0 +1,19 @@
+{
+  "application": "Orvpass",
+  "version": "2.0.0",
+  "platforms": [
+    "macos",
+    "windows",
+    "linux",
+    "android",
+    "ios",
+    "ipados"
+  ],
+  "features": [
+    "vault",
+    "search",
+    "generator",
+    "totp",
+    "settings"
+  ]
+}

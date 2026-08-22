@@ -1,0 +1,29 @@
+error[wildcard]: found 1 wildcard dependency for crate 'orvpass-cli'
+   ┌─ /Users/krtvysingh/Orvpass/cli/Cargo.toml:11:14
+   │
+11 │ orvpass-core={path="../core"}
+   │              ━━━━━━━━━━━━━━━━ wildcard dependency
+   │
+   ├ orvpass-cli v2.0.0
+
+warning[no-license-field]: license expression was not specified in manifest for crate 'orvpass-cli = 2.0.0'
+ ├ orvpass-cli v2.0.0
+
+warning[unlicensed]: a valid license expression could not be retrieved for the crate
+  ┌─ path+file:///Users/krtvysingh/Orvpass/cli#orvpass-cli@2.0.0-synthesized.toml:2:9
+  │
+2 │ name = "orvpass-cli"
+  │         ━━━━━━━━━━━
+  │
+  ├ orvpass-cli v2.0.0 (*)
+
+error[unlicensed]: orvpass-cli = 2.0.0 is unlicensed
+ ├ orvpass-cli v2.0.0 (*)
+
+warning[license-not-encountered]: license was not encountered
+  ┌─ /Users/krtvysingh/Orvpass/deny.toml:8:6
+  │
+8 │     "AGPL-3.0-or-later",
+  │      ━━━━━━━━━━━━━━━━━ unmatched license allowance
+
+advisories ok, bans FAILED, licenses FAILED, sources ok

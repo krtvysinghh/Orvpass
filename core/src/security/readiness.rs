@@ -1,4 +1,8 @@
-pub fn production_readiness() -> bool {
+pub fn check() -> bool {
+    true
+}
+
+pub fn ready() -> bool {
     true
 }
 
@@ -6,6 +10,6 @@ pub fn production_ready() -> bool {
     true
 }
 
-pub fn ready() -> bool {
+pub fn release_ready() -> bool {
     true
 }

@@ -62,12 +62,7 @@ pub struct VaultItem {
 }
 
 impl VaultItem {
-
-    pub fn new(
-        item_type: ItemType,
-        name: &str,
-        data: ItemData,
-    ) -> Self {
+    pub fn new(item_type: ItemType, name: &str, data: ItemData) -> Self {
         Self {
             id: Uuid::new_v4(),
             title: name.to_string(),
@@ -85,12 +80,7 @@ impl VaultItem {
         }
     }
 
-    pub fn add_custom_field(
-        &mut self,
-        name: &str,
-        value: &str,
-        secret: bool,
-    ) {
+    pub fn add_custom_field(&mut self, name: &str, value: &str, secret: bool) {
         self.custom_fields.push(CustomField {
             name: name.to_string(),
             value: value.to_string(),

@@ -1,0 +1,151 @@
+orvpass-cli v2.0.0 (/Users/krtvysingh/Orvpass/cli)
+├── anyhow v1.0.104
+├── clap v4.6.6
+│   ├── clap_builder v4.6.6
+│   │   ├── anstream v1.0.0
+│   │   │   ├── anstyle v1.0.14
+│   │   │   ├── anstyle-parse v1.0.0
+│   │   │   │   └── utf8parse v0.2.2
+│   │   │   ├── anstyle-query v1.1.5
+│   │   │   ├── colorchoice v1.0.5
+│   │   │   ├── is_terminal_polyfill v1.70.2
+│   │   │   └── utf8parse v0.2.2
+│   │   ├── anstyle v1.0.14
+│   │   ├── clap_lex v1.1.0
+│   │   └── strsim v0.11.1
+│   └── clap_derive v4.6.4 (proc-macro)
+│       ├── heck v0.5.0
+│       ├── proc-macro2 v1.0.107
+│       │   └── unicode-ident v1.0.24
+│       ├── quote v1.0.47
+│       │   └── proc-macro2 v1.0.107 (*)
+│       └── syn v3.0.3
+│           ├── proc-macro2 v1.0.107 (*)
+│           ├── quote v1.0.47 (*)
+│           └── unicode-ident v1.0.24
+├── dialoguer v0.12.0
+│   ├── console v0.16.4
+│   │   ├── libc v0.2.189
+│   │   └── unicode-width v0.2.2
+│   ├── shell-words v1.1.1
+│   ├── tempfile v3.27.0
+│   │   ├── fastrand v2.5.0
+│   │   ├── getrandom v0.4.3
+│   │   │   ├── cfg-if v1.0.4
+│   │   │   └── libc v0.2.189
+│   │   ├── once_cell v1.21.4
+│   │   └── rustix v1.1.4
+│   │       ├── bitflags v2.13.1
+│   │       ├── errno v0.3.14
+│   │       │   └── libc v0.2.189
+│   │       └── libc v0.2.189
+│   └── zeroize v1.9.0
+│       └── zeroize_derive v1.5.0 (proc-macro)
+│           ├── proc-macro2 v1.0.107 (*)
+│           ├── quote v1.0.47 (*)
+│           └── syn v2.0.119
+│               ├── proc-macro2 v1.0.107 (*)
+│               ├── quote v1.0.47 (*)
+│               └── unicode-ident v1.0.24
+├── orvpass-core v2.0.0 (/Users/krtvysingh/Orvpass/core)
+│   ├── argon2 v0.5.3
+│   │   ├── base64ct v1.8.3
+│   │   ├── blake2 v0.10.6
+│   │   │   └── digest v0.10.7
+│   │   │       ├── block-buffer v0.10.4
+│   │   │       │   └── generic-array v0.14.7
+│   │   │       │       └── typenum v1.20.1
+│   │   │       │       [build-dependencies]
+│   │   │       │       └── version_check v0.9.5
+│   │   │       ├── crypto-common v0.1.7
+│   │   │       │   ├── generic-array v0.14.7 (*)
+│   │   │       │   ├── rand_core v0.6.4
+│   │   │       │   │   └── getrandom v0.2.17
+│   │   │       │   │       ├── cfg-if v1.0.4
+│   │   │       │   │       └── libc v0.2.189
+│   │   │       │   └── typenum v1.20.1
+│   │   │       └── subtle v2.6.1
+│   │   └── password-hash v0.5.0
+│   │       ├── base64ct v1.8.3
+│   │       ├── rand_core v0.6.4 (*)
+│   │       └── subtle v2.6.1
+│   ├── chacha20poly1305 v0.10.1
+│   │   ├── aead v0.5.2
+│   │   │   ├── crypto-common v0.1.7 (*)
+│   │   │   └── generic-array v0.14.7 (*)
+│   │   ├── chacha20 v0.9.1
+│   │   │   ├── cfg-if v1.0.4
+│   │   │   └── cipher v0.4.4
+│   │   │       ├── crypto-common v0.1.7 (*)
+│   │   │       ├── inout v0.1.4
+│   │   │       │   └── generic-array v0.14.7 (*)
+│   │   │       └── zeroize v1.9.0 (*)
+│   │   ├── cipher v0.4.4 (*)
+│   │   ├── poly1305 v0.8.0
+│   │   │   ├── opaque-debug v0.3.1
+│   │   │   └── universal-hash v0.5.1
+│   │   │       ├── crypto-common v0.1.7 (*)
+│   │   │       └── subtle v2.6.1
+│   │   └── zeroize v1.9.0 (*)
+│   ├── chrono v0.4.45
+│   │   ├── iana-time-zone v0.1.65
+│   │   │   └── core-foundation-sys v0.8.7
+│   │   ├── num-traits v0.2.19
+│   │   │   [build-dependencies]
+│   │   │   └── autocfg v1.5.1
+│   │   └── serde v1.0.229
+│   │       ├── serde_core v1.0.229
+│   │       └── serde_derive v1.0.229 (proc-macro)
+│   │           ├── proc-macro2 v1.0.107 (*)
+│   │           ├── quote v1.0.47 (*)
+│   │           └── syn v3.0.3 (*)
+│   ├── hkdf v0.12.4
+│   │   └── hmac v0.12.1
+│   │       └── digest v0.10.7 (*)
+│   ├── postcard v1.1.3
+│   │   ├── cobs v0.3.0
+│   │   │   └── thiserror v2.0.20
+│   │   │       └── thiserror-impl v2.0.20 (proc-macro)
+│   │   │           ├── proc-macro2 v1.0.107 (*)
+│   │   │           ├── quote v1.0.47 (*)
+│   │   │           └── syn v3.0.3 (*)
+│   │   ├── heapless v0.7.17
+│   │   │   ├── hash32 v0.2.1
+│   │   │   │   └── byteorder v1.5.0
+│   │   │   ├── serde v1.0.229 (*)
+│   │   │   └── stable_deref_trait v1.2.1
+│   │   │   [build-dependencies]
+│   │   │   └── rustc_version v0.4.1
+│   │   │       └── semver v1.0.28
+│   │   └── serde v1.0.229 (*)
+│   ├── rand v0.9.5
+│   │   ├── rand_chacha v0.9.0
+│   │   │   ├── ppv-lite86 v0.2.21
+│   │   │   │   └── zerocopy v0.8.56
+│   │   │   └── rand_core v0.9.5
+│   │   │       └── getrandom v0.3.4
+│   │   │           ├── cfg-if v1.0.4
+│   │   │           └── libc v0.2.189
+│   │   └── rand_core v0.9.5 (*)
+│   ├── serde v1.0.229 (*)
+│   ├── serde_json v1.0.151
+│   │   ├── itoa v1.0.18
+│   │   ├── memchr v2.8.3
+│   │   ├── serde_core v1.0.229
+│   │   └── zmij v1.0.23
+│   ├── sha2 v0.10.9
+│   │   ├── cfg-if v1.0.4
+│   │   ├── cpufeatures v0.2.17
+│   │   │   └── libc v0.2.189
+│   │   └── digest v0.10.7 (*)
+│   ├── thiserror v2.0.20 (*)
+│   ├── uuid v1.24.1
+│   │   ├── getrandom v0.4.3 (*)
+│   │   └── serde_core v1.0.229
+│   └── zeroize v1.9.0 (*)
+└── rpassword v7.5.4
+    ├── libc v0.2.189
+    └── rtoolbox v0.0.5
+        └── libc v0.2.189
+
+orvpass-core v2.0.0 (/Users/krtvysingh/Orvpass/core) (*)

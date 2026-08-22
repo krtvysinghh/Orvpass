@@ -1,11 +1,7 @@
-use std::path::PathBuf;
+use crate::vault::database;
 
-pub fn run() {
-    let base = PathBuf::from(std::env::var("HOME").unwrap()).join(".orvpass");
+pub fn execute() {
+    let count = database::list().len();
 
-    println!("Orvpass Status");
-
-    println!("Directory: {}", base.exists());
-
-    println!("Vault: {}", base.join("vault.orv").exists());
+    println!("Vault entries: {}", count);
 }

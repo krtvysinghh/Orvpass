@@ -1,35 +1,15 @@
-use dialoguer::Password;
-use orvpass_core::crypto::SecretKey;
-use orvpass_core::vault::Vault;
-use std::path::PathBuf;
+use crate::vault::database;
 
-pub fn run(id: String) {
-    let master = Password::new()
-        .with_prompt("Master password")
-        .interact()
-        .unwrap();
+pub fn execute(name: &str) {
+    for item in database::list() {
+        if item.name == name {
+            println!("Name: {}", item.name);
+            println!("Username: {}", item.username);
+            println!("Password: {}", item.password);
 
-    let key = SecretKey::from_password(&master).unwrap();
-
-    let path = PathBuf::from(std::env::var("HOME").unwrap())
-        .join(".orvpass")
-        .join("vault.orv");
-
-    let mut vault = Vault::new(path);
-
-    match vault.unlock(&key) {
-        Ok(_) => {
-            for item in vault.items() {
-                if item.id.to_string() == id {
-                    println!("{:?}", item);
-
-                    return;
-                }
-            }
-
-            println!("Not found");
+            return;
         }
-
-        Err(e) => println!("Unlock failed: {}", e),
     }
+
+    println!("Not found");
 }

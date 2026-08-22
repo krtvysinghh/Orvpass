@@ -6,7 +6,6 @@ pub struct HealthReport {
 }
 
 impl HealthReport {
-
     pub fn ok() -> Self {
         Self {
             healthy: true,

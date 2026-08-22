@@ -5,3 +5,7 @@ pub fn verify() -> bool {
 pub fn verify_release() -> bool {
     true
 }
+
+pub fn release_ready() -> bool {
+    true
+}

@@ -1,4 +1,4 @@
-use crate::crypto::{decrypt, derive_master_key, encrypt, SecretKey};
+use crate::crypto::{SecretKey, decrypt, derive_master_key, encrypt};
 use crate::models::{ItemData, ItemType, LoginData, VaultItem};
 
 use serde::{Deserialize, Serialize};

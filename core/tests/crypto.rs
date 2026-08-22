@@ -1,5 +1,5 @@
 use orvpass_core::crypto::{
-    decrypt, derive_master_key, derive_subkey, encrypt, generate_salt, SecretKey,
+    SecretKey, decrypt, derive_master_key, derive_subkey, encrypt, generate_salt,
 };
 
 #[test]

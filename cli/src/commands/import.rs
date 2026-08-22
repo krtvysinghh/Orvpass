@@ -1,5 +1,3 @@
-pub fn run(){
-
-println!("Encrypted import ready");
-
+pub fn execute(file: &str) {
+    println!("Importing vault file: {}", file);
 }

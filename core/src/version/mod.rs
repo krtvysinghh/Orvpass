@@ -1,2 +1,2 @@
-pub mod constants;
 pub mod check;
+pub mod constants;

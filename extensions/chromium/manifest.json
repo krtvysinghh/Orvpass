@@ -1,0 +1,16 @@
+{
+"manifest_version":3,
+"name":"Orvpass",
+"version":"2.0.0",
+"permissions":[
+"storage",
+"tabs",
+"activeTab"
+],
+"content_scripts":[
+{
+"matches":["<all_urls>"],
+"js":["../common/autofill.js"]
+}
+]
+}

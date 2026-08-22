@@ -13,7 +13,6 @@ pub struct TotpSecret {
 }
 
 impl TotpSecret {
-
     pub fn new(value: &str) -> Result<Self, TotpError> {
         Ok(Self {
             value: value.to_string(),
@@ -25,7 +24,6 @@ impl TotpSecret {
     }
 }
 
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct TotpConfig {
     pub digits: u32,
@@ -33,7 +31,6 @@ pub struct TotpConfig {
     pub skew_steps: u32,
     pub algorithm: TotpAlgorithm,
 }
-
 
 impl Default for TotpConfig {
     fn default() -> Self {
@@ -46,19 +43,16 @@ impl Default for TotpConfig {
     }
 }
 
-
 #[derive(Debug)]
 pub enum TotpError {
     InvalidTimestamp,
 }
-
 
 pub fn generate(
     secret: &TotpSecret,
     timestamp: u64,
     _config: TotpConfig,
 ) -> Result<TotpSecret, TotpError> {
-
     if timestamp == 0 {
         return Err(TotpError::InvalidTimestamp);
     }
@@ -66,12 +60,8 @@ pub fn generate(
     Ok(secret.clone())
 }
 
-
 impl std::fmt::Debug for TotpSecret {
-    fn fmt(
-        &self,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TotpSecret")
             .field("value", &"[REDACTED]")
             .finish()
