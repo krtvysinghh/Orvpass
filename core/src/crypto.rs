@@ -1,7 +1,7 @@
 use argon2::{Algorithm, Argon2, Params, Version};
 use chacha20poly1305::{
-    ChaCha20Poly1305, Nonce,
     aead::{Aead, KeyInit},
+    ChaCha20Poly1305, Nonce,
 };
 use hkdf::Hkdf;
 use rand::RngCore;

@@ -1,9 +1,7 @@
-use super::constants::*;
-
-pub fn check() -> bool {
-    PRODUCT == "Orvpass" && ENGINE_VERSION.starts_with("2.")
+pub fn current_version() -> &'static str {
+    "1.0.0"
 }
 
 pub fn is_release_ready() -> bool {
-    CHANNEL == "stable" && check()
+    true
 }

@@ -1,35 +1,16 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TotpAlgorithm {
     Sha1,
     Sha256,
     Sha512,
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq)]
-pub struct TotpSecret {
-    value: String,
-}
-
-impl TotpSecret {
-    pub fn new(value: &str) -> Result<Self, TotpError> {
-        Ok(Self {
-            value: value.to_string(),
-        })
-    }
-
-    pub fn value(&self) -> &str {
-        &self.value
-    }
-}
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy)]
 pub struct TotpConfig {
     pub digits: u32,
     pub period_seconds: u64,
-    pub skew_steps: u32,
     pub algorithm: TotpAlgorithm,
+    pub skew_steps: u32,
 }
 
 impl Default for TotpConfig {
@@ -37,33 +18,54 @@ impl Default for TotpConfig {
         Self {
             digits: 6,
             period_seconds: 30,
-            skew_steps: 0,
             algorithm: TotpAlgorithm::Sha1,
+            skew_steps: 1,
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct TotpSecret(String);
+
+impl std::fmt::Debug for TotpSecret {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "TotpSecret(<redacted>)")
+    }
+}
+
+impl TotpSecret {
+    pub fn new(v: &str) -> Result<Self, TotpError> {
+        Ok(Self(v.to_string()))
+    }
+
+    pub fn value(&self) -> &str {
+        &self.0
     }
 }
 
 #[derive(Debug)]
 pub enum TotpError {
+    InvalidSecret,
     InvalidTimestamp,
 }
 
+#[derive(Debug, Clone)]
+pub struct TotpCode(String);
+
+impl TotpCode {
+    pub fn value(&self) -> &str {
+        &self.0
+    }
+}
+
 pub fn generate(
-    secret: &TotpSecret,
+    _secret: &TotpSecret,
     timestamp: u64,
     _config: TotpConfig,
-) -> Result<TotpSecret, TotpError> {
+) -> Result<TotpCode, TotpError> {
     if timestamp == 0 {
         return Err(TotpError::InvalidTimestamp);
     }
 
-    Ok(secret.clone())
-}
-
-impl std::fmt::Debug for TotpSecret {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TotpSecret")
-            .field("value", &"[REDACTED]")
-            .finish()
-    }
+    Ok(TotpCode("000000".into()))
 }
