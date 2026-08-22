@@ -1,0 +1,24 @@
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:#111;
+  color:white;
+  font-family:system-ui;
+}
+
+.screen{
+  min-height:100vh;
+  padding:40px;
+}
+
+button{
+  padding:12px 20px;
+  margin:8px;
+  border-radius:8px;
+  border:0;
+  cursor:pointer;
+  font-size:16px;
+}

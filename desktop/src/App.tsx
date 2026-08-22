@@ -1,36 +1,14 @@
-import { useState } from "react";
+import {useState} from "react";
+import LockScreen from "./components/LockScreen";
+import Vault from "./components/Vault";
+import "./styles/app.css";
 
-export default function App() {
-  const [locked, setLocked] = useState(true);
+export default function App(){
 
-  return (
-    <div style={{
-      minHeight:"100vh",
-      background:"#111",
-      color:"#fff",
-      padding:"40px",
-      fontFamily:"system-ui"
-    }}>
-      <h1>🔐 Orvpass v3.0</h1>
+  const [unlocked,setUnlocked]=useState(false);
 
-      {locked ? (
-        <button
-          style={{
-            padding:"12px 20px",
-            fontSize:"18px"
-          }}
-          onClick={()=>setLocked(false)}
-        >
-          Unlock Vault
-        </button>
-      ) : (
-        <>
-          <h2>Vault</h2>
-          <button>Add Password</button>
-          <button>Generate</button>
-          <button>Settings</button>
-        </>
-      )}
-    </div>
-  );
+  return unlocked
+    ? <Vault/>
+    : <LockScreen onUnlock={()=>setUnlocked(true)}/>;
+
 }
