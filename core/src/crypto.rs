@@ -47,7 +47,7 @@ impl SecretKey {
 
     pub fn generate() -> Self {
         let mut bytes = [0u8; MASTER_KEY_BYTES];
-        rand::rng().fill_bytes(&mut bytes);
+        rand::thread_rng().fill_bytes(&mut bytes);
         Self(bytes)
     }
 
@@ -64,7 +64,7 @@ pub struct EncryptedData {
 
 pub fn generate_salt() -> [u8; SALT_BYTES] {
     let mut salt = [0u8; SALT_BYTES];
-    rand::rng().fill_bytes(&mut salt);
+    rand::thread_rng().fill_bytes(&mut salt);
     salt
 }
 
@@ -101,7 +101,7 @@ pub fn encrypt(key: &SecretKey, plaintext: &[u8]) -> Result<EncryptedData, Crypt
         .map_err(|_| CryptoError::InvalidParameters)?;
 
     let mut nonce_bytes = [0u8; NONCE_BYTES];
-    rand::rng().fill_bytes(&mut nonce_bytes);
+    rand::thread_rng().fill_bytes(&mut nonce_bytes);
 
     let ciphertext = cipher
         .encrypt(Nonce::from_slice(&nonce_bytes), plaintext)
