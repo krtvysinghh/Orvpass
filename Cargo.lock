@@ -2754,6 +2754,7 @@ dependencies = [
  "argon2",
  "chacha20poly1305",
  "chrono",
+ "dirs",
  "hex",
  "hkdf",
  "postcard",
