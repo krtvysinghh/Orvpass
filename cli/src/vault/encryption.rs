@@ -24,7 +24,7 @@ pub fn derive_key(password: &str, salt: &[u8]) -> [u8; 32] {
 pub fn encrypt(plaintext: &str, password: &str) -> String {
     let mut salt = [0u8; 16];
 
-    OsRng.fill_bytes(&mut salt).expect("salt generation failed");
+    OsRng.fill_bytes(&mut salt);
 
     let key = derive_key(password, &salt);
 
