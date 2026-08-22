@@ -4,6 +4,9 @@
   "version": "3.0.0",
   "identifier": "com.orvpass.desktop",
   "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -14,12 +17,11 @@
         "height": 800
       }
     ]
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/icon.png"
+    ]
   }
-,
-"bundle": {
-  "active": true,
-  "icon": [
-    "icons/icon.png"
-  ]
-}
 }
