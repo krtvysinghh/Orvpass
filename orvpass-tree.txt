@@ -1,0 +1,379 @@
+.
+├── android
+├── apps
+│   ├── android
+│   ├── components
+│   │   └── components.md
+│   ├── ios
+│   ├── ipados
+│   ├── linux
+│   ├── macos
+│   ├── README.md
+│   ├── shared
+│   │   └── ui_protocol.json
+│   ├── themes
+│   │   └── theme.json
+│   └── windows
+├── ARTIFACT_MANIFEST.md
+├── benches
+│   └── crypto.rs
+├── bindings
+│   ├── c
+│   ├── go
+│   ├── kotlin
+│   ├── node
+│   ├── python
+│   └── swift
+├── browser
+│   ├── manifest.json
+│   └── src
+├── BUILD_INFO.md
+├── Cargo.lock
+├── Cargo.toml
+├── CHANGELOG.md
+├── cli
+│   ├── Cargo.toml
+│   ├── src
+│   │   ├── clipboard
+│   │   ├── commands
+│   │   ├── completion
+│   │   ├── config
+│   │   ├── main.rs
+│   │   ├── main.rs.backup
+│   │   ├── output
+│   │   ├── password
+│   │   ├── search
+│   │   └── vault
+│   └── tests
+│       ├── basic.rs
+│       ├── encryption_real.rs
+│       └── release_cli.rs
+├── CLI_RELEASE_REPORT.md
+├── CONTRIBUTING.md
+├── core
+│   ├── attachments
+│   │   └── mod.rs
+│   ├── Cargo.toml
+│   ├── crypto
+│   ├── database
+│   │   └── mod.rs
+│   ├── generator
+│   │   └── password.rs
+│   ├── import_export
+│   │   ├── formats
+│   │   ├── mod.rs
+│   │   └── tests
+│   ├── models
+│   │   ├── identity.rs
+│   │   ├── password_entry.rs
+│   │   └── secure_note.rs
+│   ├── passkeys
+│   ├── search
+│   │   └── mod.rs
+│   ├── src
+│   │   ├── attachments
+│   │   ├── backup
+│   │   ├── build
+│   │   ├── clipboard
+│   │   ├── config
+│   │   ├── crypto
+│   │   ├── crypto.rs
+│   │   ├── database.rs
+│   │   ├── errors
+│   │   ├── export
+│   │   ├── generator.rs
+│   │   ├── import
+│   │   ├── import_export
+│   │   ├── info.rs
+│   │   ├── kdf.rs
+│   │   ├── lib.rs
+│   │   ├── logging
+│   │   ├── memory
+│   │   ├── models
+│   │   ├── passkeys.rs
+│   │   ├── password.rs
+│   │   ├── result
+│   │   ├── runtime
+│   │   ├── search.rs
+│   │   ├── security
+│   │   ├── storage
+│   │   ├── sync
+│   │   ├── totp
+│   │   ├── vault
+│   │   └── version
+│   ├── sync
+│   │   ├── conflict.rs
+│   │   ├── device.rs
+│   │   ├── protocol.rs
+│   │   └── queue.rs
+│   ├── tests
+│   │   ├── artifact_v1.rs
+│   │   ├── crypto.rs
+│   │   ├── documentation_v1.rs
+│   │   ├── final_release.rs
+│   │   ├── final_state_v1.rs
+│   │   ├── foundation.rs
+│   │   ├── freeze_audit.rs
+│   │   ├── freeze_v1.rs
+│   │   ├── integration_v1.rs
+│   │   ├── lifecycle.rs
+│   │   ├── models.rs
+│   │   ├── package_v1.rs
+│   │   ├── production_v1.rs
+│   │   ├── quality_gate_v1.rs
+│   │   ├── rc2_validation.rs
+│   │   ├── readiness_v1.rs
+│   │   ├── release_audit.rs
+│   │   ├── release_closure.rs
+│   │   ├── release_gate_v1.rs
+│   │   ├── release_v1.rs
+│   │   ├── runtime_health.rs
+│   │   ├── security_integrity.rs
+│   │   ├── security_regression.rs
+│   │   ├── security_release_gate.rs
+│   │   ├── security_v1.rs
+│   │   ├── signoff_v1.rs
+│   │   ├── stability_v1.rs
+│   │   ├── totp.rs
+│   │   ├── vault_persistence.rs
+│   │   ├── vault.rs
+│   │   ├── version_freeze.rs
+│   │   └── version_v1.rs
+│   ├── totp
+│   └── vault
+├── deny.toml
+├── desktop
+│   ├── ARCHITECTURE.md
+│   ├── dist
+│   │   ├── assets
+│   │   └── index.html
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── components
+│   │   ├── lib
+│   │   ├── main.rs
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   └── styles
+│   ├── src-tauri
+│   │   ├── build.rs
+│   │   ├── Cargo.toml
+│   │   ├── gen
+│   │   ├── icons
+│   │   ├── src
+│   │   └── tauri.conf.json
+│   └── vite.config.ts
+├── docs
+│   ├── architecture
+│   │   └── LOCKED.md
+│   ├── archive_internal
+│   │   ├── FINAL_INTEGRATION_REPORT.md
+│   │   ├── FINAL_STATE.md
+│   │   ├── FREEZE_AUDIT.md
+│   │   ├── PACKAGE_INFO.md
+│   │   ├── PACKAGE_STATUS.md
+│   │   ├── PRODUCTION_MANIFEST.md
+│   │   ├── QUALITY_GATE.md
+│   │   ├── RC2_VALIDATION_REPORT.md
+│   │   ├── RELEASE_AUDIT.md
+│   │   ├── RELEASE_BUILD.md
+│   │   ├── RELEASE_CHECKLIST.md
+│   │   ├── RELEASE_CLOSURE.md
+│   │   ├── RELEASE_FREEZE.md
+│   │   ├── RELEASE_INVENTORY.md
+│   │   ├── RELEASE_MANIFEST.md
+│   │   ├── RELEASE_NOTES_V1.md
+│   │   ├── RELEASE_SIGNOFF.md
+│   │   ├── scripts
+│   │   ├── SECURITY_CHECKLIST.md
+│   │   ├── SECURITY_RELEASE_REPORT.md
+│   │   ├── STABILITY_CHECKLIST.md
+│   │   ├── TEST_STATUS.md
+│   │   ├── V1_SIGNOFF.md
+│   │   └── VERSION_FREEZE.md
+│   ├── browser
+│   │   └── ARCHITECTURE.md
+│   ├── cargo-deny-report.txt
+│   ├── cli
+│   │   ├── CLI.md
+│   │   └── COMMAND_REFERENCE.md
+│   ├── COMMANDS.md
+│   ├── COMPLETION.md
+│   ├── CONFIG.md
+│   ├── dependency-duplicates.txt
+│   ├── dependency-report.txt
+│   ├── dependency-tree.txt
+│   ├── development
+│   ├── FEATURE_MATRIX.md
+│   ├── gui
+│   │   └── UI_GUIDE.md
+│   ├── HEALTH.md
+│   ├── import_export
+│   │   └── IMPORT_EXPORT.md
+│   ├── IMPORT_EXPORT.md
+│   ├── OFFLINE_MODE.md
+│   ├── PACKAGING.md
+│   ├── protocol
+│   ├── security
+│   │   ├── CRYPTOGRAPHY.md
+│   │   └── STORAGE.md
+│   ├── SECURITY.md
+│   ├── sync
+│   │   ├── ARCHITECTURE.md
+│   │   └── SYNC.md
+│   ├── udeps-report.txt
+│   ├── USAGE.md
+│   └── V3.md
+├── extensions
+│   ├── chromium
+│   │   └── manifest.json
+│   ├── common
+│   │   ├── autofill.js
+│   │   ├── bridge.js
+│   │   ├── manifest-template.json
+│   │   └── protocol.json
+│   ├── firefox
+│   │   └── manifest.json
+│   └── safari
+│       └── README.md
+├── git_release.sh
+├── LICENSE
+├── mobile
+│   ├── android
+│   ├── ARCHITECTURE.md
+│   ├── ios
+│   └── src
+│       └── lib.rs
+├── Orvpass
+│   ├── ARTIFACT_MANIFEST.md
+│   ├── benches
+│   │   └── crypto.rs
+│   ├── BUILD_INFO.md
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── CHANGELOG.md
+│   ├── cli
+│   │   ├── Cargo.toml
+│   │   ├── src
+│   │   └── tests
+│   ├── CLI_RELEASE_REPORT.md
+│   ├── CONTRIBUTING.md
+│   ├── core
+│   │   ├── Cargo.toml
+│   │   ├── src
+│   │   └── tests
+│   ├── deny.toml
+│   ├── docs
+│   │   ├── architecture
+│   │   ├── archive_internal
+│   │   ├── COMMANDS.md
+│   │   ├── COMPLETION.md
+│   │   ├── CONFIG.md
+│   │   ├── HEALTH.md
+│   │   ├── security
+│   │   ├── SECURITY.md
+│   │   └── USAGE.md
+│   ├── git_release.sh
+│   ├── LICENSE
+│   ├── ORVPASS_VERSION
+│   ├── ORVPASS.toml
+│   ├── README.md
+│   ├── release
+│   │   ├── orvpass
+│   │   └── SHA256SUMS
+│   ├── release_clean_check.sh
+│   ├── RELEASE.toml
+│   ├── ROADMAP.md
+│   ├── rust-toolchain.toml
+│   ├── scripts
+│   │   └── archive_internal
+│   ├── SECURITY.md
+│   ├── SHA256SUMS
+│   ├── tests
+│   │   ├── binary_smoke.sh
+│   │   ├── cli_release_smoke.sh
+│   │   ├── final_smoke.sh
+│   │   ├── release_smoke.sh
+│   │   ├── smoke.sh
+│   │   └── v1_smoke.sh
+│   └── verify_artifact.sh
+├── ORVPASS_VERSION
+├── orvpass-live-audit.txt
+├── orvpass-tree.txt
+├── ORVPASS.toml
+├── README.md
+├── release
+│   ├── artifacts
+│   ├── BUILD_MATRIX.md
+│   ├── orvpass
+│   ├── packages
+│   ├── REPRODUCIBLE_BUILD.md
+│   └── SHA256SUMS
+├── release_clean_check.sh
+├── RELEASE.toml
+├── ROADMAP.md
+├── rust-toolchain.toml
+├── scripts
+│   ├── archive_internal
+│   │   ├── artifact_check.sh
+│   │   ├── audit_project.sh
+│   │   ├── batch2_upgrade.sh
+│   │   ├── batch3_upgrade.sh
+│   │   ├── build_release.sh
+│   │   ├── clean_workspace_check.sh
+│   │   ├── final_audit.sh
+│   │   ├── final_release_check.sh
+│   │   ├── final_v1_check.sh
+│   │   ├── fix_batch1.sh
+│   │   ├── package_release.sh
+│   │   ├── package_v1_release.sh
+│   │   ├── prepare_v1_tag.sh
+│   │   ├── quality_gate.sh
+│   │   ├── release_audit.sh
+│   │   ├── release_pipeline.sh
+│   │   ├── release.sh
+│   │   ├── run_final_pipeline.sh
+│   │   ├── security_release_check.sh
+│   │   ├── upgrade_orvpass.sh
+│   │   ├── v1_signoff_check.sh
+│   │   ├── verify_release.sh
+│   │   └── verify_v1_release.sh
+│   └── build
+│       ├── build-all.sh
+│       └── checksum.sh
+├── sdk
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── security
+├── SECURITY.md
+├── server
+├── SHA256SUMS
+├── shared
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── sync-server
+│   ├── Cargo.toml
+│   ├── README.md
+│   └── src
+│       └── main.rs
+├── tests
+│   ├── binary_smoke.sh
+│   ├── cli_release_smoke.sh
+│   ├── final_smoke.sh
+│   ├── integration
+│   ├── interoperability
+│   ├── release_smoke.sh
+│   ├── security
+│   ├── smoke.sh
+│   └── v1_smoke.sh
+├── tools
+├── verify_artifact.sh
+└── VERSION
+
+138 directories, 239 files

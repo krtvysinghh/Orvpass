@@ -33,6 +33,7 @@ pub enum ItemData {
     Login(LoginData),
     SecureNote(SecureNoteData),
     Custom,
+    Totp(String),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,10 +60,15 @@ pub struct VaultItem {
     pub data: ItemData,
     pub tags: Vec<String>,
     pub custom_fields: Vec<CustomField>,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub favorite: bool,
 }
 
 impl VaultItem {
     pub fn new(item_type: ItemType, name: &str, data: ItemData) -> Self {
+        let now = chrono::Utc::now().timestamp();
+
         Self {
             id: Uuid::new_v4(),
             title: name.to_string(),
@@ -71,13 +77,26 @@ impl VaultItem {
             data,
             tags: Vec::new(),
             custom_fields: Vec::new(),
+            created_at: now,
+            updated_at: now,
+            favorite: false,
         }
     }
 
+    pub fn touch(&mut self) {
+        self.updated_at = chrono::Utc::now().timestamp();
+    }
+
     pub fn add_tag(&mut self, tag: &str) {
-        if !self.tags.contains(&tag.to_string()) {
+        if !self.tags.iter().any(|x| x == tag) {
             self.tags.push(tag.to_string());
+            self.touch();
         }
+    }
+
+    pub fn favorite(&mut self) {
+        self.favorite = true;
+        self.touch();
     }
 
     pub fn add_custom_field(&mut self, name: &str, value: &str, secret: bool) {
@@ -86,5 +105,6 @@ impl VaultItem {
             value: value.to_string(),
             secret,
         });
+        self.touch();
     }
 }
