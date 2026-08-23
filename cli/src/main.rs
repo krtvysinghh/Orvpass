@@ -13,7 +13,8 @@ mod search;
 #[command(
     name = "orvpass",
     version = "3.1.0",
-    about = "Secure offline password manager"
+    about = "Premium offline password manager",
+    long_about = "Orvpass — secure, private, offline-first password management"
 )]
 
 struct Cli {
@@ -24,12 +25,15 @@ struct Cli {
 #[derive(Subcommand)]
 
 enum Commands {
+    #[command(alias = "ls")]
     List,
 
+    #[command(alias = "show")]
     Get {
         name: String,
     },
 
+    #[command(alias = "rm")]
     Remove {
         name: String,
     },
@@ -44,6 +48,7 @@ enum Commands {
         query: String,
     },
 
+    #[command(alias = "gen")]
     Generate {
         #[arg(short, long, default_value_t = 20)]
         length: usize,
