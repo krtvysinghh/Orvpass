@@ -53,3 +53,21 @@ pub fn table(headers: &[&str], rows: &[Vec<String>]) {
 
     io::stdout().flush().ok();
 }
+
+pub struct Spinner {
+    message: String,
+}
+
+impl Spinner {
+    pub fn start(message: &str) -> Self {
+        println!("⠋ {}", message);
+        Self {
+            message: message.to_string(),
+        }
+    }
+
+    pub fn finish(self, message: &str) {
+        println!("✓ {}", message);
+        let _ = self.message;
+    }
+}

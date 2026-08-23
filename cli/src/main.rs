@@ -63,6 +63,9 @@ enum Commands {
 }
 
 fn main() {
+    let cfg = config::CliConfig::load();
+    output::header("Orvpass");
+    output::info(&format!("Theme: {}", cfg.theme));
     let cli = Cli::parse();
 
     match cli.command {
