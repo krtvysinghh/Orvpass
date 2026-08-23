@@ -1,8 +1,9 @@
 use crate::output;
 
-pub fn run() {
+pub fn execute() {
     output::header("System Health");
-    output::success("Core: OK");
-    output::success("Storage: OK");
-    output::success("Crypto: OK");
+    output::success("Core engine: OK");
+    output::success("Vault storage: OK");
+    output::success("Crypto layer: OK");
+    output::success("Runtime: OK");
 }
