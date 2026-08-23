@@ -1,25 +1,15 @@
+use orvpass_core::models::VaultItem;
 
+pub fn search(items: &[VaultItem], query: &str) -> Vec<VaultItem> {
+    let q = query.to_lowercase();
 
-pub fn fuzzy(
-query:&str,
-items:&Vec<String>
-)->Vec<String>{
-
-
-items
-
-.iter()
-
-.filter(
-|x| x.to_lowercase()
-.contains(&query.to_lowercase())
-)
-
-.cloned()
-
-.collect()
-
-
+    items
+        .iter()
+        .filter(|item| {
+            item.name.to_lowercase().contains(&q)
+                || item.title.to_lowercase().contains(&q)
+                || item.tags.iter().any(|t| t.to_lowercase().contains(&q))
+        })
+        .cloned()
+        .collect()
 }
-
-

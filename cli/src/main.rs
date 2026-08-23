@@ -7,6 +7,7 @@ mod commands;
 mod completion;
 mod config;
 mod output;
+mod search;
 
 #[derive(Parser)]
 #[command(
