@@ -1,6 +1,6 @@
 use crate::output;
 
-pub fn execute() {
+pub fn run() {
     output::header("System Health");
     output::success("Core engine: OK");
     output::success("Vault storage: OK");

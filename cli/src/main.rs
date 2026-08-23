@@ -12,7 +12,7 @@ mod search;
 #[derive(Parser)]
 #[command(
     name = "orvpass",
-    version = "3.0.0",
+    version = "3.1.0",
     about = "Secure offline password manager"
 )]
 
@@ -61,6 +61,11 @@ enum Commands {
 
     Init,
     Unlock,
+    Lock,
+    Doctor,
+    Health,
+    About,
+    Backup,
 }
 
 fn main() {
@@ -117,7 +122,27 @@ fn main() {
         }
 
         Commands::Version => {
-            println!("Orvpass 3.0.0");
+            commands::version::run();
+        }
+
+        Commands::Lock => {
+            commands::vault::lock::execute();
+        }
+
+        Commands::Doctor => {
+            commands::doctor::run();
+        }
+
+        Commands::Health => {
+            commands::health::run();
+        }
+
+        Commands::About => {
+            commands::about::run();
+        }
+
+        Commands::Backup => {
+            commands::backup::run();
         }
     }
 }

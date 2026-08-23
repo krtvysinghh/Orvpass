@@ -1,6 +1,6 @@
 use crate::output;
 
-pub fn execute() {
+pub fn run() {
     output::header("Orvpass Doctor");
 
     let checks = [
