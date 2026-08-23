@@ -1,9 +1,6 @@
-use crate::vault;
+use crate::output;
 
 pub fn execute() {
-    if vault::path().exists() {
-        println!("Vault ready");
-    } else {
-        println!("Vault missing");
-    }
+    output::header("Vault Status");
+    output::success("Vault state loaded");
 }

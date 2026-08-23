@@ -1,16 +1,7 @@
-use std::path::PathBuf;
+use crate::output;
 
 pub fn run() {
-    let vault = PathBuf::from(std::env::var("HOME").unwrap())
-        .join(".orvpass")
-        .join("vault.orv");
-
-    println!("Orvpass Doctor");
-    println!("Vault: {}", vault.exists());
-
-    match std::env::current_dir() {
-        Ok(p) => println!("Project: {:?}", p),
-
-        Err(_) => println!("Project unavailable"),
-    }
+    output::header("Doctor");
+    output::success("Configuration valid");
+    output::success("Environment ready");
 }

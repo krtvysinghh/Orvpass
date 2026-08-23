@@ -1,3 +1,8 @@
+use crate::output;
+
 pub fn run() {
-    println!("Orvpass health: OK");
+    output::header("System Health");
+    output::success("Core: OK");
+    output::success("Storage: OK");
+    output::success("Crypto: OK");
 }

@@ -1,3 +1,6 @@
+use crate::output;
+
 pub fn run() {
-    println!("Orvpass v1.0.0-alpha");
+    output::header("Orvpass");
+    output::info("Version 3.1 development");
 }
