@@ -17,10 +17,7 @@ pub fn execute(name: String) {
         return;
     }
 
-    let password = Password::new()
-        .with_prompt("Password")
-        .interact()
-        .unwrap();
+    let password = Password::new().with_prompt("Password").interact().unwrap();
 
     let item = VaultItem::new(
         ItemType::Login,

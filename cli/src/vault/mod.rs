@@ -4,8 +4,8 @@ pub mod item;
 pub mod session;
 pub mod store;
 
-use std::path::PathBuf;
 use orvpass_core::vault::Vault;
+use std::path::PathBuf;
 
 pub fn path() -> PathBuf {
     PathBuf::from(std::env::var("HOME").unwrap())

@@ -1,4 +1,4 @@
-use crate::crypto::{decrypt, derive_master_key, encrypt, SecretKey};
+use crate::crypto::{SecretKey, decrypt, derive_master_key, encrypt};
 use crate::models::{ItemData, ItemType, LoginData, VaultItem};
 
 use serde::{Deserialize, Serialize};
@@ -148,10 +148,10 @@ impl Vault {
 
             self.salt = Some(payload.salt);
             self.items = payload.items;
-        } else if let Some(expected) = self.key_check {
-            if expected != *key.as_bytes() {
-                return Err(VaultError::UnlockFailed);
-            }
+        } else if let Some(expected) = self.key_check
+            && expected != *key.as_bytes()
+        {
+            return Err(VaultError::UnlockFailed);
         }
 
         self.unlocked = true;

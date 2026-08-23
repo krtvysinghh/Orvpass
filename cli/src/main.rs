@@ -58,8 +58,8 @@ enum Commands {
 
     Version,
 
-Init,
-Unlock,
+    Init,
+    Unlock,
 }
 
 fn main() {
@@ -67,14 +67,14 @@ fn main() {
 
     match cli.command {
         Commands::Init => {
-        commands::init::execute();
-    }
+            commands::init::execute();
+        }
 
-    Commands::Unlock => {
-        commands::unlock::execute();
-    }
+        Commands::Unlock => {
+            commands::unlock::execute();
+        }
 
-    Commands::Add { name } => {
+        Commands::Add { name } => {
             commands::add::execute(name);
         }
 

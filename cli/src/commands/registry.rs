@@ -1,27 +1,12 @@
+pub fn available() {
+    let commands = [
+        "init", "add", "list", "get", "edit", "delete", "search", "generate", "status", "doctor",
+        "health", "info",
+    ];
 
-pub fn available(){
+    println!("Commands:");
 
-let commands=[
-"init",
-"add",
-"list",
-"get",
-"edit",
-"delete",
-"search",
-"generate",
-"status",
-"doctor",
-"health",
-"info"
-];
-
-
-println!("Commands:");
-
-for c in commands {
-println!("- {}",c);
+    for c in commands {
+        println!("- {}", c);
+    }
 }
-
-}
-

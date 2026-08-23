@@ -1,6 +1,3 @@
-pub fn run(){
-
-println!("Edit mode");
-
+pub fn run() {
+    println!("Edit mode");
 }
-

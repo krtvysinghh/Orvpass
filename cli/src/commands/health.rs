@@ -1,5 +1,3 @@
-pub fn run(){
-
+pub fn run() {
     println!("Orvpass health: OK");
-
 }

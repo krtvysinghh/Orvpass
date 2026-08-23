@@ -12,11 +12,9 @@ pub fn execute() {
 
     let key = SecretKey::from_password(&password).unwrap();
 
-    let dir = std::env::var("HOME")
-        .unwrap();
+    let dir = std::env::var("HOME").unwrap();
 
-    std::fs::create_dir_all(format!("{}/.orvpass", dir))
-        .unwrap();
+    std::fs::create_dir_all(format!("{}/.orvpass", dir)).unwrap();
 
     let mut v = vault::open();
 

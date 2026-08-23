@@ -1,23 +1,16 @@
 use std::path::PathBuf;
 
+pub fn run() {
+    let vault = PathBuf::from(std::env::var("HOME").unwrap())
+        .join(".orvpass")
+        .join("vault.orv");
 
-pub fn run(){
+    println!("Orvpass Doctor");
+    println!("Vault: {}", vault.exists());
 
-let vault =
-PathBuf::from(std::env::var("HOME").unwrap())
-.join(".orvpass")
-.join("vault.orv");
+    match std::env::current_dir() {
+        Ok(p) => println!("Project: {:?}", p),
 
-
-println!("Orvpass Doctor");
-println!("Vault: {}", vault.exists());
-
-match std::env::current_dir(){
-
-Ok(p)=>println!("Project: {:?}",p),
-
-Err(_)=>println!("Project unavailable")
-
-}
-
+        Err(_) => println!("Project unavailable"),
+    }
 }
