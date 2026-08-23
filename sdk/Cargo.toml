@@ -1,4 +1,6 @@
 [package]
+license = "MIT"
+
 name = "orvpass-sdk"
 version = "3.0.0"
 edition = "2021"
