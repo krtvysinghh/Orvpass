@@ -103,3 +103,25 @@ input, textarea {
 .text-theme-primary { color: var(--text-primary); }
 .text-theme-secondary { color: var(--text-secondary); }
 .text-theme-muted { color: var(--text-muted); }
+
+/* Liquid Smooth Transitions & Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+button, input, select, textarea, .group {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 180ms;
+}

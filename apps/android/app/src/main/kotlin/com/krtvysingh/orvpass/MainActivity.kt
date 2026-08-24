@@ -30,25 +30,42 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun showBiometricPrompt(onSuccess: () -> Unit) {
-        val executor = ContextCompat.getMainExecutor(this)
-        val biometricPrompt = BiometricPrompt(
-            this,
-            executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    onSuccess()
-                }
+        try {
+            val biometricManager = BiometricManager.from(this)
+            val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or 
+                                 BiometricManager.Authenticators.BIOMETRIC_WEAK or 
+                                 BiometricManager.Authenticators.DEVICE_CREDENTIAL
+
+            val canAuth = biometricManager.canAuthenticate(authenticators)
+            if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
+                return
             }
-        )
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Unlock Orvpass")
-            .setSubtitle("Authenticate using your biometric credentials")
-            .setNegativeButtonText("Cancel")
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK)
-            .build()
+            val executor = ContextCompat.getMainExecutor(this)
+            val biometricPrompt = BiometricPrompt(
+                this,
+                executor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        onSuccess()
+                    }
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        super.onAuthenticationError(errorCode, errString)
+                    }
+                }
+            )
 
-        biometricPrompt.authenticate(promptInfo)
+            // NOTE: In AndroidX Biometric, when DEVICE_CREDENTIAL is used, setNegativeButtonText MUST NOT be called.
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Unlock Orvpass")
+                .setSubtitle("Authenticate with biometrics or screen lock")
+                .setAllowedAuthenticators(authenticators)
+                .build()
+
+            biometricPrompt.authenticate(promptInfo)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
     }
 }

@@ -26,7 +26,6 @@ import {
   CheckCircle2,
   X,
   Sparkles,
-  Database,
   ArrowRight,
   Undo2,
   Fingerprint,
@@ -661,6 +660,31 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  // Robust CSV Line parser handling commas inside quotes
+  const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"' || char === "'") {
+        if (inQuotes && line[i + 1] === char) {
+          current += char;
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -677,49 +701,86 @@ export default function App() {
       try {
         if (file.name.endsWith('.json')) {
           const parsed = JSON.parse(text);
-          if (Array.isArray(parsed)) {
-            for (const item of parsed) {
-              const key = `${(item.title || '').toLowerCase()}|${(item.username || '').toLowerCase()}`;
-              if (existingKeys.has(key)) {
-                skippedCount++;
-                continue;
-              }
-              await invoke('add_item', {
-                itemType: item.type || 'Logins',
-                title: item.title || 'Imported Item',
-                username: item.username || null,
-                pass: item.password || null,
-                notes: item.notes || null,
-                cc: item.cc || null,
-                expMonth: item.expMonth || null,
-                expYear: item.expYear || null
-              });
-              existingKeys.add(key);
-              addedCount++;
+          const rawItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : []);
+          
+          for (const item of rawItems) {
+            const title = item.name || item.title || item.name_override || 'Imported Account';
+            let username = item.username || item.login_username || '';
+            let password = item.password || item.login_password || '';
+            let notes = item.notes || item.note || '';
+
+            // Handle Bitwarden JSON structure
+            if (item.login) {
+              username = item.login.username || username;
+              password = item.login.password || password;
             }
+
+            let type: 'Logins' | 'Secure Notes' | 'Credit Cards' = 'Logins';
+            if (item.type === 1 || item.type === 'login' || item.type === 'Logins') type = 'Logins';
+            else if (item.type === 2 || item.type === 'note' || item.type === 'Secure Notes') type = 'Secure Notes';
+            else if (item.type === 3 || item.type === 'card' || item.type === 'Credit Cards') type = 'Credit Cards';
+
+            const key = `${title.toLowerCase()}|${username.toLowerCase()}`;
+            if (existingKeys.has(key)) {
+              skippedCount++;
+              continue;
+            }
+
+            await invoke('add_item', {
+              itemType: type,
+              title,
+              username: username || null,
+              pass: password || null,
+              notes: notes || null,
+              cc: item.card_number || item.cc || null,
+              expMonth: item.expMonth || null,
+              expYear: item.expYear || null
+            });
+            existingKeys.add(key);
+            addedCount++;
           }
         } else {
-          // CSV Parser
+          // Universal Intelligent CSV Parser (Bitwarden, Chrome, 1Password, Proton Pass, KeePass, Dashlane)
           const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-          for (let i = 1; i < lines.length; i++) {
-            const cols = lines[i].split(',').map(c => c.replace(/^"(.*)"$/, '$1').trim());
-            if (cols.length >= 2) {
-              const title = cols[1] || cols[0];
-              const username = cols[2] || '';
+          if (lines.length > 0) {
+            const rawHeaders = parseCsvLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+            
+            // Map header indexes dynamically
+            const passIdx = rawHeaders.findIndex(h => h.includes('password') || h === 'pass' || h.includes('secret') || h.includes('loginpassword'));
+            const userIdx = rawHeaders.findIndex(h => h.includes('username') || h === 'user' || h.includes('email') || h.includes('login') || h.includes('loginusername'));
+            const titleIdx = rawHeaders.findIndex(h => h.includes('name') || h.includes('title') || h.includes('service') || h.includes('account') || h.includes('website'));
+            const notesIdx = rawHeaders.findIndex(h => h.includes('notes') || h.includes('note') || h.includes('comment') || h.includes('content') || h.includes('extra'));
+            const typeIdx = rawHeaders.findIndex(h => h.includes('type') || h.includes('folder') || h.includes('category'));
+
+            for (let i = 1; i < lines.length; i++) {
+              const cols = parseCsvLine(lines[i]);
+              if (cols.length < 2) continue;
+
+              const title = (titleIdx !== -1 ? cols[titleIdx] : '') || cols[0] || 'Imported Account';
+              const username = (userIdx !== -1 ? cols[userIdx] : '') || (cols.length > 2 ? cols[2] : '');
+              const password = (passIdx !== -1 ? cols[passIdx] : '') || (cols.length > 3 ? cols[3] : '');
+              const notes = (notesIdx !== -1 ? cols[notesIdx] : '') || (cols.length > 4 ? cols[4] : '');
+              const rawType = (typeIdx !== -1 ? cols[typeIdx] : '').toLowerCase();
+
+              let type: 'Logins' | 'Secure Notes' | 'Credit Cards' = 'Logins';
+              if (rawType.includes('note') || rawType.includes('secure')) type = 'Secure Notes';
+              else if (rawType.includes('card') || rawType.includes('credit')) type = 'Credit Cards';
+
               const key = `${title.toLowerCase()}|${username.toLowerCase()}`;
               if (existingKeys.has(key)) {
                 skippedCount++;
                 continue;
               }
+
               await invoke('add_item', {
-                itemType: cols[0] || 'Logins',
+                itemType: type,
                 title,
                 username: username || null,
-                pass: cols[3] || null,
-                notes: cols[4] || null,
-                cc: cols[5] || null,
-                expMonth: cols[6] || null,
-                expYear: cols[7] || null
+                pass: password || null,
+                notes: notes || null,
+                cc: null,
+                expMonth: null,
+                expYear: null
               });
               existingKeys.add(key);
               addedCount++;
@@ -728,8 +789,8 @@ export default function App() {
         }
 
         await loadItems();
-        setImportSummary(`Import complete: ${addedCount} items added, ${skippedCount} duplicate(s) skipped.`);
-        setTimeout(() => setImportSummary(null), 4000);
+        setImportSummary(`Import complete: ${addedCount} item(s) imported with passwords, ${skippedCount} duplicate(s) skipped.`);
+        setTimeout(() => setImportSummary(null), 5000);
       } catch (err) {
         alert("Failed to parse import file.");
       }
@@ -1199,14 +1260,137 @@ export default function App() {
               </div>
 
               {filteredItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-12 text-center bg-theme-card border border-theme-card rounded-2xl">
-                  <div className="w-12 h-12 rounded-xl bg-theme-tag flex items-center justify-center text-theme-muted mb-3">
-                    <Database className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-sm font-semibold text-theme-primary">No items found</h3>
-                  <p className="text-xs text-theme-muted mt-1 max-w-xs">
-                    {searchQuery ? 'Try matching a different keyword.' : 'Tap "+ Add Item" to securely store your first credential.'}
-                  </p>
+                <div className="flex flex-col items-center justify-center p-12 text-center bg-theme-card border border-theme-card rounded-3xl shadow-sm transition-all">
+                  {searchQuery ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-theme-tag flex items-center justify-center text-theme-muted mb-4 border border-theme">
+                        <Search className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">No results for "{searchQuery}"</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        We couldn't find any vault items matching your search query. Try searching by title, email, username, or note keywords.
+                      </p>
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="mt-5 px-4 h-9 bg-theme-tag hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-primary rounded-xl transition-all"
+                      >
+                        Clear Search Filter
+                      </button>
+                    </>
+                  ) : activeTab === 'Favorites' ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 border border-amber-500/20">
+                        <Star className="w-7 h-7 fill-amber-500/30" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">No Favorites Starred</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Star high-frequency logins, important notes, or primary payment cards to access them instantly from this priority list.
+                      </p>
+                      <button
+                        onClick={() => setActiveTab('All Items')}
+                        className="mt-5 px-4 h-9 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-xl shadow-md shadow-indigo-600/20 transition-all"
+                      >
+                        Browse Vault Items
+                      </button>
+                    </>
+                  ) : activeTab === 'Logins' ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 border border-indigo-500/20">
+                        <KeyRound className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">No Login Credentials</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Store usernames, generate high-entropy passwords, and generate live TOTP 2FA authentication tokens for your online accounts.
+                      </p>
+                      <button
+                        onClick={() => { setNewItemType('Logins'); setShowAddModal(true); }}
+                        className="mt-5 px-4 h-9 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add First Login</span>
+                      </button>
+                    </>
+                  ) : activeTab === 'Secure Notes' ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-4 border border-emerald-500/20">
+                        <FileText className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">No Secure Notes</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Safely store recovery phrases, server SSH configs, sensitive Wi-Fi passcodes, and confidential text under ChaCha20-Poly1305 encryption.
+                      </p>
+                      <button
+                        onClick={() => { setNewItemType('Secure Notes'); setShowAddModal(true); }}
+                        className="mt-5 px-4 h-9 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Create Secure Note</span>
+                      </button>
+                    </>
+                  ) : activeTab === 'Credit Cards' ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-500 mb-4 border border-violet-500/20">
+                        <CreditCard className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">No Payment Cards</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Encrypt and store your credit, debit, and virtual payment cards with cardholder names, expiration dates, and secure CVVs.
+                      </p>
+                      <button
+                        onClick={() => { setNewItemType('Credit Cards'); setShowAddModal(true); }}
+                        className="mt-5 px-4 h-9 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium rounded-xl shadow-md shadow-violet-600/20 transition-all flex items-center gap-1.5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add Payment Card</span>
+                      </button>
+                    </>
+                  ) : activeTab === 'Archive' ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4 border border-blue-500/20">
+                        <Archive className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">Archive is Empty</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Legacy or inactive accounts you archive will appear here safely hidden from search without being permanently deleted.
+                      </p>
+                    </>
+                  ) : activeTab === 'Trash' ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 mb-4 border border-rose-500/20">
+                        <Trash2 className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">Trash is Empty</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Deleted credentials remain stored in your Trash with 1-click restore protection before you decide to wipe them permanently.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 border border-indigo-500/20">
+                        <Shield className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-base font-bold text-theme-primary tracking-tight">Your Vault is Empty</h3>
+                      <p className="text-xs text-theme-secondary mt-1.5 max-w-sm">
+                        Start securing your credentials with Argon2id + ChaCha20 encryption. Add an item or import from your existing password manager.
+                      </p>
+                      <div className="mt-5 flex items-center gap-3">
+                        <button
+                          onClick={() => setShowAddModal(true)}
+                          className="px-4 h-9 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add Item</span>
+                        </button>
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-4 h-9 bg-theme-tag hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-primary rounded-xl transition-all flex items-center gap-1.5"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-indigo-500" />
+                          <span>Import File</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2.5">
