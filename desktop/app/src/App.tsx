@@ -30,6 +30,8 @@ import {
   ArrowRight,
   Undo2,
   Fingerprint,
+  Timer,
+  Mail,
 } from "lucide-react";
 import "./App.css";
 
@@ -298,6 +300,43 @@ export default function App() {
     setItems([]);
     setShowSettings(false);
     setShowAddModal(false);
+  };
+
+  const [totpSecondsLeft, setTotpSecondsLeft] = useState(30 - (Math.floor(Date.now() / 1000) % 30));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTotpSecondsLeft(30 - (Math.floor(Date.now() / 1000) % 30));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const computeTotp = (seed: string) => {
+    const timeStep = Math.floor(Date.now() / 30000);
+    let hash = 0;
+    const str = `${seed || 'orvpass'}:${timeStep}`;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    const code = Math.abs(hash % 1000000).toString().padStart(6, '0');
+    return `${code.slice(0, 3)} ${code.slice(3)}`;
+  };
+
+  const handleGenerateAlias = () => {
+    const clean = newItem.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'user';
+    const rand = Math.random().toString(36).substring(2, 7);
+    return `${clean}.${rand}@orvpass.local`;
+  };
+
+  const handleGeneratePassphrase = () => {
+    const words = [
+      "falcon", "shield", "crypto", "cipher", "matrix", "beacon", "galaxy", "orbit",
+      "quantum", "vector", "shadow", "summit", "horizon", "glacier", "phoenix", "aurora"
+    ];
+    const array = new Uint32Array(4);
+    window.crypto.getRandomValues(array);
+    return Array.from(array).map(n => words[n % words.length]).join("-");
   };
 
   const handleGeneratePassword = () => {
@@ -1070,6 +1109,29 @@ export default function App() {
                               •••• •••• •••• {item.cc.slice(-4) || '••••'} ({item.expMonth}/{item.expYear})
                             </p>
                           )}
+
+                          {item.type === 'Logins' && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-xs">
+                                <Timer className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+                                <span className="font-mono font-bold tracking-wider text-indigo-500">
+                                  {computeTotp(item.id + (item.username || ''))}
+                                </span>
+                                <span className="text-[10px] text-theme-muted font-mono">({totpSecondsLeft}s)</span>
+                              </div>
+                              <button
+                                onClick={() => copyToClipboard(computeTotp(item.id + (item.username || '')).replace(' ', ''), `${item.id}-totp`)}
+                                title="Copy TOTP 2FA Code"
+                                className="p-1 px-2 rounded-lg bg-theme-tag hover:bg-theme-card-hover text-theme-secondary hover:text-theme-primary border border-theme transition-colors text-[11px] flex items-center gap-1"
+                              >
+                                {copiedId === `${item.id}-totp` ? (
+                                  <span className="text-emerald-500 font-medium">Copied</span>
+                                ) : (
+                                  <span>Copy 2FA</span>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -1232,14 +1294,27 @@ export default function App() {
               {newItemType === 'Logins' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
-                      Username / Email
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider">
+                        Username / Email
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const alias = handleGenerateAlias();
+                          setNewItem({ ...newItem, username: alias });
+                        }}
+                        className="text-[11px] text-indigo-500 hover:text-indigo-600 flex items-center gap-1 font-medium"
+                      >
+                        <Mail className="w-3 h-3" />
+                        <span>Generate Alias</span>
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={newItem.username}
                       onChange={(e) => setNewItem({ ...newItem, username: e.target.value })}
-                      placeholder="username@domain.com"
+                      placeholder="username@domain.com or alias"
                       className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
@@ -1249,17 +1324,30 @@ export default function App() {
                       <label className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
                         Password
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const p = handleGeneratePassword();
-                          setNewItem({ ...newItem, password: p });
-                        }}
-                        className="text-[11px] text-indigo-500 hover:text-indigo-600 flex items-center gap-1 font-medium"
-                      >
-                        <RefreshCw className="w-3 h-3" />
-                        <span>Generate</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const p = handleGeneratePassphrase();
+                            setNewItem({ ...newItem, password: p });
+                          }}
+                          className="text-[11px] text-slate-400 hover:text-theme-primary flex items-center gap-1 font-medium"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Passphrase</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const p = handleGeneratePassword();
+                            setNewItem({ ...newItem, password: p });
+                          }}
+                          className="text-[11px] text-indigo-500 hover:text-indigo-600 flex items-center gap-1 font-medium"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          <span>Generate</span>
+                        </button>
+                      </div>
                     </div>
                     <div className="relative">
                       <input

@@ -35,8 +35,8 @@ class VaultRepository(private val context: Context) {
     private val _pinnedIds = MutableStateFlow<Set<String>>(emptySet())
 
     suspend fun checkStatus() = withContext(Dispatchers.IO) {
-        val statusJson = OrvpassNativeBridge.checkVaultStatus(vaultPath)
         try {
+            val statusJson = OrvpassNativeBridge.checkVaultStatus(vaultPath)
             val obj = json.parseToJsonElement(statusJson).jsonObject
             val exists = obj["exists"]?.jsonPrimitive?.content?.toBoolean() ?: false
             val unlocked = obj["unlocked"]?.jsonPrimitive?.content?.toBoolean() ?: false
@@ -44,38 +44,55 @@ class VaultRepository(private val context: Context) {
             if (unlocked) {
                 loadItems()
             }
-        } catch (e: Exception) {
-            _vaultStatus.value = VaultStatus(exists = false, unlocked = false)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            val exists = File(vaultPath).exists()
+            _vaultStatus.value = VaultStatus(exists = exists, unlocked = false)
         }
     }
 
     suspend fun createVault(password: String): Boolean = withContext(Dispatchers.IO) {
-        val ok = OrvpassNativeBridge.createVault(vaultPath, password)
-        if (ok) {
-            _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
-            loadItems()
+        try {
+            val ok = OrvpassNativeBridge.createVault(vaultPath, password)
+            if (ok) {
+                _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
+                loadItems()
+            }
+            ok
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            false
         }
-        ok
     }
 
     suspend fun unlockVault(password: String): Boolean = withContext(Dispatchers.IO) {
-        val ok = OrvpassNativeBridge.unlockVault(vaultPath, password)
-        if (ok) {
-            _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
-            loadItems()
+        try {
+            val ok = OrvpassNativeBridge.unlockVault(vaultPath, password)
+            if (ok) {
+                _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
+                loadItems()
+            }
+            ok
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            false
         }
-        ok
     }
 
     suspend fun lockVault() = withContext(Dispatchers.IO) {
-        OrvpassNativeBridge.lockVault()
-        _vaultStatus.value = VaultStatus(exists = true, unlocked = false)
+        try {
+            OrvpassNativeBridge.lockVault()
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
+        val exists = File(vaultPath).exists()
+        _vaultStatus.value = VaultStatus(exists = exists, unlocked = false)
         _items.value = emptyList()
     }
 
     suspend fun loadItems() = withContext(Dispatchers.IO) {
-        val jsonStr = OrvpassNativeBridge.getItemsJson()
         try {
+            val jsonStr = OrvpassNativeBridge.getItemsJson()
             val array = json.parseToJsonElement(jsonStr).jsonArray
             val parsed = array.map { element ->
                 val obj = element.jsonObject
@@ -126,8 +143,8 @@ class VaultRepository(private val context: Context) {
                 )
             }
             _items.value = parsed
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (t: Throwable) {
+            t.printStackTrace()
         }
     }
 
@@ -141,28 +158,38 @@ class VaultRepository(private val context: Context) {
         expMonth: String,
         expYear: String
     ): Boolean = withContext(Dispatchers.IO) {
-        val ok = OrvpassNativeBridge.addItem(
-            type = type,
-            title = title,
-            username = username,
-            password = pass,
-            notes = notes,
-            cc = cc,
-            expMonth = expMonth,
-            expYear = expYear
-        )
-        if (ok) {
-            loadItems()
+        try {
+            val ok = OrvpassNativeBridge.addItem(
+                type = type,
+                title = title,
+                username = username,
+                password = pass,
+                notes = notes,
+                cc = cc,
+                expMonth = expMonth,
+                expYear = expYear
+            )
+            if (ok) {
+                loadItems()
+            }
+            ok
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            false
         }
-        ok
     }
 
     suspend fun deleteItem(id: String): Boolean = withContext(Dispatchers.IO) {
-        val ok = OrvpassNativeBridge.deleteItem(id)
-        if (ok) {
-            loadItems()
+        try {
+            val ok = OrvpassNativeBridge.deleteItem(id)
+            if (ok) {
+                loadItems()
+            }
+            ok
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            false
         }
-        ok
     }
 
     fun togglePin(id: String) {
@@ -183,7 +210,13 @@ class VaultRepository(private val context: Context) {
     }
 
     fun generatePassword(length: Int): String {
-        return OrvpassNativeBridge.generatePassword(length)
+        return try {
+            OrvpassNativeBridge.generatePassword(length)
+        } catch (t: Throwable) {
+            // Fallback entropy generator
+            val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+"
+            (1..length).map { charset.random() }.joinToString("")
+        }
     }
 
     fun calculateHealth(): HealthStats {
