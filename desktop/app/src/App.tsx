@@ -31,21 +31,24 @@ function App() {
       })
       .catch(console.error);
 
-    // Register global shortcut
-    import('@tauri-apps/plugin-global-shortcut').then(async ({ register }) => {
-      try {
-        await register('CmdOrControl+Shift+Space', () => {
-          import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-            const w = getCurrentWindow();
-            w.isVisible().then(v => v ? w.hide() : w.show());
-            w.setFocus();
+    // Register global shortcut (desktop only)
+    try {
+      import('@tauri-apps/plugin-global-shortcut').then(async ({ register }) => {
+        try {
+          await register('CmdOrControl+Shift+Space', () => {
+            import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+              const w = getCurrentWindow();
+              w.isVisible().then(v => v ? w.hide() : w.show());
+              w.setFocus();
+            }).catch(() => {});
           });
-        });
-      } catch (e) {
-        console.error("Global shortcut error:", e);
-      }
-    });
-
+        } catch (e) {
+          // ignore on platforms without global shortcuts
+        }
+      }).catch(() => {});
+    } catch (e) {
+      // ignore
+    }
   }, []);
 
   const loadItems = () => {
