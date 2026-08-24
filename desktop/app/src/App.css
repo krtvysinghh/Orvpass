@@ -1,16 +1,39 @@
 @import "tailwindcss";
 
-:root {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+:root, .dark {
   color-scheme: dark;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
+  --bg-main: #030712;
+  --bg-sidebar: rgba(15, 23, 42, 0.75);
+  --bg-surface: #0f172a;
+  --bg-card: rgba(30, 41, 59, 0.45);
+  --bg-card-hover: rgba(30, 41, 59, 0.75);
+  --border-subtle: rgba(51, 65, 85, 0.6);
+  --border-card: rgba(51, 65, 85, 0.5);
+  --text-primary: #f9fafb;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --input-bg: rgba(3, 7, 18, 0.85);
+  --tag-bg: rgba(30, 41, 59, 0.6);
+  --header-bg: rgba(15, 23, 42, 0.4);
+  --modal-bg: #0f172a;
 }
 
 .light {
   color-scheme: light;
+  --bg-main: #f8fafc;
+  --bg-sidebar: rgba(241, 245, 249, 0.9);
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-card: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --input-bg: #ffffff;
+  --tag-bg: #f1f5f9;
+  --header-bg: rgba(255, 255, 255, 0.7);
+  --modal-bg: #ffffff;
 }
 
 html, body, #root {
@@ -19,10 +42,12 @@ html, body, #root {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: transparent;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 input, textarea {
@@ -60,3 +85,21 @@ input, textarea {
 .safe-margin-bottom {
   margin-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
+
+/* Theme Classes */
+.bg-theme-main { background-color: var(--bg-main); }
+.bg-theme-sidebar { background-color: var(--bg-sidebar); }
+.bg-theme-surface { background-color: var(--bg-surface); }
+.bg-theme-card { background-color: var(--bg-card); }
+.bg-theme-card-hover:hover { background-color: var(--bg-card-hover); }
+.bg-theme-input { background-color: var(--input-bg); }
+.bg-theme-tag { background-color: var(--tag-bg); }
+.bg-theme-header { background-color: var(--header-bg); }
+.bg-theme-modal { background-color: var(--modal-bg); }
+
+.border-theme { border-color: var(--border-subtle); }
+.border-theme-card { border-color: var(--border-card); }
+
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }

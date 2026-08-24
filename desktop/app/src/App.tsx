@@ -110,21 +110,27 @@ export default function App() {
     checkStatus();
   }, []);
 
-  // Theme application
+  // Theme application with system matchMedia listener
   useEffect(() => {
     localStorage.setItem('orvpass_theme', theme);
     const root = document.documentElement;
-    const isDark =
-      theme === 'dark' ||
-      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    if (isDark) {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.remove('dark');
-      root.classList.add('light');
-    }
+    const applyTheme = () => {
+      const isDark =
+        theme === 'dark' || (theme === 'system' && mediaQuery.matches);
+      if (isDark) {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+      }
+    };
+
+    applyTheme();
+    mediaQuery.addEventListener('change', applyTheme);
+    return () => mediaQuery.removeEventListener('change', applyTheme);
   }, [theme]);
 
   // Auto-lock inactivity tracker
@@ -602,14 +608,14 @@ export default function App() {
   // ==========================================
   if (vaultStatus && !vaultStatus.exists && !vaultStatus.unlocked) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-slate-950 text-slate-100 p-6 safe-padding-top safe-padding-bottom">
-        <div className="w-full max-w-md bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-xl">
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-theme-main text-theme-primary p-6 safe-padding-top safe-padding-bottom">
+        <div className="w-full max-w-md bg-theme-card border border-theme-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 mb-4">
               <Shield className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Welcome to Orvpass</h1>
-            <p className="text-sm text-slate-400 mt-2">
+            <h1 className="text-2xl font-bold tracking-tight text-theme-primary">Welcome to Orvpass</h1>
+            <p className="text-sm text-theme-secondary mt-2">
               Create your Master Password. Your vault is encrypted locally with Argon2id + ChaCha20-Poly1305.
             </p>
           </div>
@@ -623,7 +629,7 @@ export default function App() {
 
           <form onSubmit={handleCreateVault} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-2">
                 Master Password
               </label>
               <div className="relative">
@@ -632,7 +638,7 @@ export default function App() {
                   value={masterPasswordInput}
                   onChange={(e) => setMasterPasswordInput(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="w-full h-12 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full h-12 bg-theme-input border border-theme rounded-xl px-4 text-sm text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   required
                   autoFocus
                 />
@@ -647,7 +653,7 @@ export default function App() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-2">
                 Confirm Master Password
               </label>
               <input
@@ -655,7 +661,7 @@ export default function App() {
                 value={confirmPasswordInput}
                 onChange={(e) => setConfirmPasswordInput(e.target.value)}
                 placeholder="Re-enter master password"
-                className="w-full h-12 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full h-12 bg-theme-input border border-theme rounded-xl px-4 text-sm text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -678,7 +684,7 @@ export default function App() {
             </div>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-500">
+          <div className="mt-6 pt-6 border-t border-theme flex items-center justify-center gap-2 text-xs text-theme-muted">
             <Shield className="w-3.5 h-3.5" />
             <span>Zero telemetry · 100% Offline Local-First</span>
           </div>
@@ -692,14 +698,14 @@ export default function App() {
   // ==========================================
   if (vaultStatus && vaultStatus.exists && !vaultStatus.unlocked) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-slate-950 text-slate-100 p-6 safe-padding-top safe-padding-bottom">
-        <div className="w-full max-w-md bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-xl">
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-theme-main text-theme-primary p-6 safe-padding-top safe-padding-bottom">
+        <div className="w-full max-w-md bg-theme-card border border-theme-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 mb-4">
               <Lock className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Orvpass</h1>
-            <p className="text-sm text-slate-400 mt-2">
+            <h1 className="text-2xl font-bold tracking-tight text-theme-primary">Orvpass</h1>
+            <p className="text-sm text-theme-secondary mt-2">
               Enter your master password to unlock your vault.
             </p>
           </div>
@@ -719,7 +725,7 @@ export default function App() {
                   value={masterPasswordInput}
                   onChange={(e) => setMasterPasswordInput(e.target.value)}
                   placeholder="Master Password"
-                  className="w-full h-12 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full h-12 bg-theme-input border border-theme rounded-xl px-4 text-sm text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   required
                   autoFocus
                 />
@@ -752,14 +758,14 @@ export default function App() {
               type="button"
               onClick={handleBiometricUnlock}
               disabled={isAuthenticating}
-              className="w-full h-12 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 active:scale-[0.99] text-slate-200 font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+              className="w-full h-12 bg-theme-input hover:bg-theme-card-hover border border-theme active:scale-[0.99] text-theme-primary font-medium rounded-xl transition-all flex items-center justify-center gap-2"
             >
-              <Fingerprint className="w-5 h-5 text-indigo-400" />
+              <Fingerprint className="w-5 h-5 text-indigo-500" />
               <span>Unlock with Touch ID / Biometrics</span>
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+          <div className="mt-6 pt-6 border-t border-theme flex items-center justify-between text-xs text-theme-muted">
             <span>Argon2id + ChaCha20</span>
             <span>v4.2.0</span>
           </div>
@@ -781,11 +787,11 @@ export default function App() {
   ];
 
   return (
-    <div className="flex h-screen w-screen bg-slate-950 text-slate-100 overflow-hidden select-none font-sans">
+    <div className="flex h-screen w-screen bg-theme-main text-theme-primary overflow-hidden select-none font-sans">
       {/* ========================================================= */}
       {/* DESKTOP SIDEBAR (Visible on md and up) */}
       {/* ========================================================= */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-slate-800/70 bg-slate-900/60 backdrop-blur-xl px-4 pb-4 pt-11 safe-padding-bottom relative">
+      <aside className="hidden md:flex flex-col w-64 border-r border-theme bg-theme-sidebar backdrop-blur-xl px-4 pb-4 pt-11 safe-padding-bottom relative">
         {/* macOS Window Drag Region & Traffic Lights Safe Margin */}
         <div data-tauri-drag-region className="absolute top-0 left-0 right-0 h-9 z-10 pointer-events-auto" />
         <div className="flex items-center justify-between px-2 mb-6 mt-1">
@@ -794,8 +800,8 @@ export default function App() {
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-sm tracking-tight text-white">Orvpass</h2>
-              <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Vault</span>
+              <h2 className="font-bold text-sm tracking-tight text-theme-primary">Orvpass</h2>
+              <span className="text-[10px] text-theme-secondary uppercase tracking-widest font-semibold">Vault</span>
             </div>
           </div>
           <button
