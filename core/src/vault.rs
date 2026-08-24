@@ -148,10 +148,11 @@ impl Vault {
 
             self.salt = Some(payload.salt);
             self.items = payload.items;
-        } else if let Some(expected) = self.key_check {
-            if expected != *key.as_bytes() {
-                return Err(VaultError::UnlockFailed);
-            }
+        } else if self
+            .key_check
+            .is_some_and(|expected| expected != *key.as_bytes())
+        {
+            return Err(VaultError::UnlockFailed);
         }
 
         self.unlocked = true;

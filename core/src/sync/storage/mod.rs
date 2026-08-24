@@ -4,6 +4,12 @@ pub struct SyncQueue {
     items: Vec<Vec<u8>>,
 }
 
+impl Default for SyncQueue {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SyncQueue {
     pub fn new() -> Self {
         Self { items: Vec::new() }
