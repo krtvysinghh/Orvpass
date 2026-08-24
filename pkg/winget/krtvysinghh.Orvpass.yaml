@@ -14,6 +14,6 @@ Installers:
   - Architecture: x64
     InstallerUrl: https://github.com/krtvysinghh/Orvpass/releases/download/v4.0.8/Orvpass_4.0.8_x64_en-US.msi
     InstallerType: msi
-    InstallerSha256: "0000"
+    InstallerSha256: 536b1074579e236f3ab62be124666ee957ed2cfc6f449486335ce7dc86801d18
 ManifestType: singleton
 ManifestVersion: 1.4.0
