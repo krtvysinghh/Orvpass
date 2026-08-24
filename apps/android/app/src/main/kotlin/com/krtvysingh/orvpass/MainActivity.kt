@@ -3,19 +3,23 @@ package com.krtvysingh.orvpass
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import com.krtvysingh.orvpass.data.VaultRepository
 
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var repository: VaultRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        try {
+            enableEdgeToEdge()
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
 
         repository = VaultRepository(applicationContext)
 
