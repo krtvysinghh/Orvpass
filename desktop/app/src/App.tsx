@@ -660,29 +660,47 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Robust CSV Line parser handling commas inside quotes
-  const parseCsvLine = (line: string): string[] => {
-    const result: string[] = [];
-    let current = '';
+  // RFC 4180 compliant CSV parser with multiline and quote escaping support
+  const parseCsvRecords = (csvText: string): string[][] => {
+    const clean = csvText.replace(/^\uFEFF/, '');
+    const records: string[][] = [];
+    let record: string[] = [];
+    let field = '';
     let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"' || char === "'") {
-        if (inQuotes && line[i + 1] === char) {
-          current += char;
+
+    for (let i = 0; i < clean.length; i++) {
+      const char = clean[i];
+      if (char === '"') {
+        if (inQuotes && clean[i + 1] === '"') {
+          field += '"';
           i++;
         } else {
           inQuotes = !inQuotes;
         }
       } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
+        record.push(field.trim());
+        field = '';
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && clean[i + 1] === '\n') {
+          i++;
+        }
+        record.push(field.trim());
+        if (record.some(f => f.length > 0)) {
+          records.push(record);
+        }
+        record = [];
+        field = '';
       } else {
-        current += char;
+        field += char;
       }
     }
-    result.push(current.trim());
-    return result;
+    if (field.length > 0 || record.length > 0) {
+      record.push(field.trim());
+      if (record.some(f => f.length > 0)) {
+        records.push(record);
+      }
+    }
+    return records;
   };
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -702,7 +720,7 @@ export default function App() {
         if (file.name.endsWith('.json')) {
           const parsed = JSON.parse(text);
           const rawItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : []);
-          
+
           for (const item of rawItems) {
             const title = item.name || item.title || item.name_override || 'Imported Account';
             let username = item.username || item.login_username || '';
@@ -740,20 +758,20 @@ export default function App() {
             addedCount++;
           }
         } else {
-          // Universal Intelligent CSV Parser (Bitwarden, Chrome, 1Password, Proton Pass, KeePass, Dashlane)
-          const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-          if (lines.length > 0) {
-            const rawHeaders = parseCsvLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
-            
-            // Map header indexes dynamically
+          // Universal RFC 4180 CSV Parser (Bitwarden, Chrome, 1Password, Proton Pass, KeePass, Dashlane)
+          const records = parseCsvRecords(text);
+          if (records.length > 0) {
+            const rawHeaders = records[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+            // Dynamically locate column indices
             const passIdx = rawHeaders.findIndex(h => h.includes('password') || h === 'pass' || h.includes('secret') || h.includes('loginpassword'));
             const userIdx = rawHeaders.findIndex(h => h.includes('username') || h === 'user' || h.includes('email') || h.includes('login') || h.includes('loginusername'));
             const titleIdx = rawHeaders.findIndex(h => h.includes('name') || h.includes('title') || h.includes('service') || h.includes('account') || h.includes('website'));
             const notesIdx = rawHeaders.findIndex(h => h.includes('notes') || h.includes('note') || h.includes('comment') || h.includes('content') || h.includes('extra'));
             const typeIdx = rawHeaders.findIndex(h => h.includes('type') || h.includes('folder') || h.includes('category'));
 
-            for (let i = 1; i < lines.length; i++) {
-              const cols = parseCsvLine(lines[i]);
+            for (let i = 1; i < records.length; i++) {
+              const cols = records[i];
               if (cols.length < 2) continue;
 
               const title = (titleIdx !== -1 ? cols[titleIdx] : '') || cols[0] || 'Imported Account';
@@ -789,9 +807,10 @@ export default function App() {
         }
 
         await loadItems();
-        setImportSummary(`Import complete: ${addedCount} item(s) imported with passwords, ${skippedCount} duplicate(s) skipped.`);
+        setImportSummary(`Import complete: ${addedCount} item(s) imported successfully (${skippedCount} duplicates skipped).`);
         setTimeout(() => setImportSummary(null), 5000);
       } catch (err) {
+        console.error("Import error:", err);
         alert("Failed to parse import file.");
       }
     };
@@ -2024,13 +2043,6 @@ export default function App() {
                   <Upload className="w-4 h-4 text-indigo-500" />
                   <span>Import File</span>
                 </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv,.json"
-                  onChange={handleFileImport}
-                  className="hidden"
-                />
 
                 <button
                   onClick={() => exportData('csv')}
@@ -2180,6 +2192,15 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ALWAYS-MOUNTED ROOT FILE INPUT */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,.json,.txt"
+        onChange={handleFileImport}
+        className="hidden"
+      />
     </div>
   );
 }
