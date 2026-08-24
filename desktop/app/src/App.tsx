@@ -859,29 +859,29 @@ export default function App() {
       {/* ========================================================= */}
       {/* MAIN CONTENT AREA */}
       {/* ========================================================= */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-950 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 bg-theme-main overflow-hidden">
         {/* Top App Bar with safe insets */}
-        <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md safe-padding-top">
+        <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-theme bg-theme-header backdrop-blur-md safe-padding-top" data-tauri-drag-region>
           <div className="flex items-center gap-2 md:hidden">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-sm">
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-sm text-white">Orvpass</span>
+            <span className="font-bold text-sm text-theme-primary">Orvpass</span>
           </div>
 
           <div className="flex-1 max-w-md relative">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+            <Search className="w-4 h-4 absolute left-3 top-3 text-theme-muted" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search vault items..."
-              className="w-full h-10 bg-slate-900/80 border border-slate-800/80 rounded-xl pl-9 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="w-full h-10 bg-theme-input border border-theme rounded-xl pl-9 pr-4 text-xs text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-3 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-3 text-theme-muted hover:text-theme-primary"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -898,13 +898,13 @@ export default function App() {
             </button>
             <button
               onClick={() => setShowSettings(true)}
-              className="md:hidden p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="md:hidden p-2 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-card transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <Settings className="w-5 h-5" />
             </button>
             <button
               onClick={handleLockVault}
-              className="md:hidden p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="md:hidden p-2 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-card transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <Lock className="w-5 h-5" />
             </button>
@@ -913,7 +913,7 @@ export default function App() {
 
         {/* Import Summary Toast */}
         {importSummary && (
-          <div className="bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-400 text-xs px-4 py-2 flex items-center justify-between">
+          <div className="bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-500 text-xs px-4 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               <span>{importSummary}</span>
@@ -933,37 +933,37 @@ export default function App() {
             <div className="max-w-3xl mx-auto space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-xl font-bold text-white tracking-tight">Security Health</h1>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <h1 className="text-xl font-bold text-theme-primary tracking-tight">Security Health</h1>
+                  <p className="text-xs text-theme-secondary mt-1">
                     Audited locally from your {healthStats.total} credential(s).
                   </p>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300">
-                  <Shield className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-theme-tag border border-theme text-xs text-theme-secondary">
+                  <Shield className="w-3.5 h-3.5 text-indigo-500" />
                   <span>Argon2id + ChaCha20-Poly1305</span>
                 </div>
               </div>
 
               {/* Health Score Card */}
-              <div className="bg-gradient-to-br from-slate-900/90 to-slate-900/40 border border-slate-800/80 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+              <div className="bg-theme-card border border-theme-card rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
                       Overall Health Score
                     </span>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-4xl font-extrabold text-white tracking-tight">
+                      <span className="text-4xl font-extrabold text-theme-primary tracking-tight">
                         {healthStats.score}%
                       </span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-theme-secondary">
                         {healthStats.score >= 80 ? 'Strong Protection' : healthStats.score >= 50 ? 'Needs Attention' : 'Vulnerable'}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-2">
+                    <p className="text-xs text-theme-muted mt-2">
                       Zero external lookups. Evaluated directly on your device.
                     </p>
                   </div>
-                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500">
                     <Sparkles className="w-8 h-8" />
                   </div>
                 </div>
@@ -971,35 +971,35 @@ export default function App() {
 
               {/* Actionable Breakdown Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-theme-card border border-theme-card rounded-2xl p-4">
+                  <div className="flex items-center justify-between text-theme-secondary mb-2">
                     <span className="text-xs font-medium">Weak (&lt;12 chars)</span>
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                    <AlertTriangle className="w-4 h-4 text-amber-500" />
                   </div>
-                  <div className="text-2xl font-bold text-white">{healthStats.weak}</div>
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <div className="text-2xl font-bold text-theme-primary">{healthStats.weak}</div>
+                  <p className="text-[11px] text-theme-muted mt-1">
                     {healthStats.weak === 0 ? 'No weak passwords found' : 'Vulnerable to brute force'}
                   </p>
                 </div>
 
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-theme-card border border-theme-card rounded-2xl p-4">
+                  <div className="flex items-center justify-between text-theme-secondary mb-2">
                     <span className="text-xs font-medium">Reused Passwords</span>
-                    <RefreshCw className="w-4 h-4 text-red-400" />
+                    <RefreshCw className="w-4 h-4 text-red-500" />
                   </div>
-                  <div className="text-2xl font-bold text-white">{healthStats.reused}</div>
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <div className="text-2xl font-bold text-theme-primary">{healthStats.reused}</div>
+                  <p className="text-[11px] text-theme-muted mt-1">
                     {healthStats.reused === 0 ? 'All passwords unique' : 'Password shared across services'}
                   </p>
                 </div>
 
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-theme-card border border-theme-card rounded-2xl p-4">
+                  <div className="flex items-center justify-between text-theme-secondary mb-2">
                     <span className="text-xs font-medium">Strong Passwords</span>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   </div>
-                  <div className="text-2xl font-bold text-white">{healthStats.strong}</div>
-                  <p className="text-[11px] text-slate-500 mt-1">Unique &amp; complex</p>
+                  <div className="text-2xl font-bold text-theme-primary">{healthStats.strong}</div>
+                  <p className="text-[11px] text-theme-muted mt-1">Unique &amp; complex</p>
                 </div>
               </div>
             </div>
@@ -1010,18 +1010,18 @@ export default function App() {
             <div className="max-w-4xl mx-auto space-y-3">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-white tracking-tight">{activeTab}</h1>
-                  <span className="text-xs text-slate-500">({filteredItems.length})</span>
+                  <h1 className="text-lg font-bold text-theme-primary tracking-tight">{activeTab}</h1>
+                  <span className="text-xs text-theme-muted">({filteredItems.length})</span>
                 </div>
               </div>
 
               {filteredItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-12 text-center bg-slate-900/30 border border-slate-800/50 rounded-2xl">
-                  <div className="w-12 h-12 rounded-xl bg-slate-800/60 flex items-center justify-center text-slate-500 mb-3">
+                <div className="flex flex-col items-center justify-center p-12 text-center bg-theme-card border border-theme-card rounded-2xl">
+                  <div className="w-12 h-12 rounded-xl bg-theme-tag flex items-center justify-center text-theme-muted mb-3">
                     <Database className="w-6 h-6" />
                   </div>
-                  <h3 className="text-sm font-semibold text-slate-300">No items found</h3>
-                  <p className="text-xs text-slate-500 mt-1 max-w-xs">
+                  <h3 className="text-sm font-semibold text-theme-primary">No items found</h3>
+                  <p className="text-xs text-theme-muted mt-1 max-w-xs">
                     {searchQuery ? 'Try matching a different keyword.' : 'Tap "+ Add Item" to securely store your first credential.'}
                   </p>
                 </div>
@@ -1030,10 +1030,10 @@ export default function App() {
                   {filteredItems.map(item => (
                     <div
                       key={item.id}
-                      className="group bg-slate-900/70 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="group bg-theme-card hover:bg-theme-card-hover border border-theme-card rounded-2xl p-4 transition-all shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
                       <div className="flex items-start gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center shrink-0 mt-0.5 text-indigo-400">
+                        <div className="w-10 h-10 rounded-xl bg-theme-tag border border-theme flex items-center justify-center shrink-0 mt-0.5 text-indigo-500">
                           {item.type === 'Secure Notes' ? (
                             <FileText className="w-5 h-5" />
                           ) : item.type === 'Credit Cards' ? (
@@ -1045,28 +1045,28 @@ export default function App() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-semibold text-white truncate tracking-tight">
+                            <h3 className="text-sm font-semibold text-theme-primary truncate tracking-tight">
                               {item.title}
                             </h3>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-medium">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-theme-tag text-theme-secondary font-medium">
                               {item.type}
                             </span>
                           </div>
 
                           {item.username && (
-                            <p className="text-xs text-slate-400 truncate mt-0.5 font-mono">
+                            <p className="text-xs text-theme-secondary truncate mt-0.5 font-mono">
                               {item.username}
                             </p>
                           )}
 
                           {item.notes && (
-                            <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">
+                            <p className="text-xs text-theme-secondary line-clamp-1 mt-0.5">
                               {item.notes}
                             </p>
                           )}
 
                           {item.cc && (
-                            <p className="text-xs text-slate-400 font-mono mt-0.5">
+                            <p className="text-xs text-theme-secondary font-mono mt-0.5">
                               •••• •••• •••• {item.cc.slice(-4) || '••••'} ({item.expMonth}/{item.expYear})
                             </p>
                           )}
@@ -1079,12 +1079,12 @@ export default function App() {
                           <button
                             onClick={() => copyToClipboard(item.password || '', `${item.id}-pass`)}
                             title="Copy Password"
-                            className="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 active:scale-95 text-slate-300 hover:text-white border border-slate-700/50 transition-all flex items-center gap-1.5 text-xs min-h-[40px]"
+                            className="p-2.5 rounded-xl bg-theme-tag hover:bg-theme-card-hover active:scale-95 text-theme-secondary hover:text-theme-primary border border-theme transition-all flex items-center gap-1.5 text-xs min-h-[40px]"
                           >
                             {copiedId === `${item.id}-pass` ? (
                               <>
-                                <Check className="w-4 h-4 text-emerald-400" />
-                                <span className="text-emerald-400 font-medium">Copied</span>
+                                <Check className="w-4 h-4 text-emerald-500" />
+                                <span className="text-emerald-500 font-medium">Copied</span>
                               </>
                             ) : (
                               <>
@@ -1099,10 +1099,10 @@ export default function App() {
                           <button
                             onClick={() => copyToClipboard(item.username || '', `${item.id}-user`)}
                             title="Copy Username"
-                            className="p-2.5 rounded-xl bg-slate-800/40 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/30 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
+                            className="p-2.5 rounded-xl bg-theme-tag hover:bg-theme-card-hover text-theme-secondary hover:text-theme-primary border border-theme transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
                           >
                             {copiedId === `${item.id}-user` ? (
-                              <Check className="w-4 h-4 text-emerald-400" />
+                              <Check className="w-4 h-4 text-emerald-500" />
                             ) : (
                               <KeyRound className="w-4 h-4" />
                             )}
@@ -1114,8 +1114,8 @@ export default function App() {
                           title={item.pinned ? 'Unfavorite' : 'Favorite'}
                           className={`p-2.5 rounded-xl border transition-all min-h-[40px] min-w-[40px] flex items-center justify-center ${
                             item.pinned
-                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                              : 'bg-slate-800/40 hover:bg-slate-800 border-slate-700/30 text-slate-400 hover:text-slate-200'
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+                              : 'bg-theme-tag hover:bg-theme-card-hover border-theme text-theme-secondary hover:text-theme-primary'
                           }`}
                         >
                           <Star className={`w-4 h-4 ${item.pinned ? 'fill-amber-400' : ''}`} />
@@ -1124,7 +1124,7 @@ export default function App() {
                         <button
                           onClick={() => handleDelete(item.id)}
                           title="Delete Item"
-                          className="p-2.5 rounded-xl bg-slate-800/40 hover:bg-red-500/10 text-slate-400 hover:text-red-400 border border-slate-700/30 hover:border-red-500/30 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
+                          className="p-2.5 rounded-xl bg-theme-tag hover:bg-red-500/10 text-theme-secondary hover:text-red-500 border border-theme hover:border-red-500/30 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1139,8 +1139,8 @@ export default function App() {
 
         {/* Undo Toast */}
         {undoToast && (
-          <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-4 text-xs">
-            <span className="text-slate-200">"{undoToast.item.title}" deleted</span>
+          <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-theme-modal border border-theme rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-4 text-xs">
+            <span className="text-theme-primary">"{undoToast.item.title}" deleted</span>
             <button
               onClick={handleUndoDelete}
               className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg flex items-center gap-1.5 transition-colors"
@@ -1154,7 +1154,7 @@ export default function App() {
         {/* ========================================================= */}
         {/* MOBILE BOTTOM NAVIGATION BAR (Visible < md) */}
         {/* ========================================================= */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl px-2 py-1.5 safe-padding-bottom flex items-center justify-around z-40">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-theme bg-theme-sidebar backdrop-blur-xl px-2 py-1.5 safe-padding-bottom flex items-center justify-around z-40">
           {navItems.map(item => {
             const Icon = item.icon;
             const active = activeTab === item.id;
@@ -1163,7 +1163,7 @@ export default function App() {
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all min-h-[48px] min-w-[48px] ${
-                  active ? 'text-indigo-400 font-semibold' : 'text-slate-500 hover:text-slate-300'
+                  active ? 'text-indigo-500 font-semibold' : 'text-theme-muted hover:text-theme-primary'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : ''}`} />
@@ -1178,25 +1178,25 @@ export default function App() {
       {/* MODAL: ADD ITEM / PASSWORD GENERATOR */}
       {/* ========================================================= */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 safe-padding-top safe-padding-bottom">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 safe-padding-top safe-padding-bottom">
+          <div className="w-full max-w-lg bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-500 flex items-center justify-center">
                   <Plus className="w-4 h-4" />
                 </div>
-                <h2 className="text-base font-bold text-white tracking-tight">Add to Vault</h2>
+                <h2 className="text-base font-bold text-theme-primary tracking-tight">Add to Vault</h2>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-card min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Segmented type switcher */}
-            <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-2xl border border-slate-800/80 mb-5">
+            <div className="grid grid-cols-3 gap-1 bg-theme-main p-1 rounded-2xl border border-theme mb-5">
               {(['Logins', 'Secure Notes', 'Credit Cards'] as const).map(type => (
                 <button
                   key={type}
@@ -1204,8 +1204,8 @@ export default function App() {
                   onClick={() => setNewItemType(type)}
                   className={`py-2 rounded-xl text-xs font-medium transition-all ${
                     newItemType === type
-                      ? 'bg-slate-800 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-theme-card text-theme-primary shadow-sm border border-theme'
+                      : 'text-theme-secondary hover:text-theme-primary'
                   }`}
                 >
                   {type === 'Logins' ? 'Login' : type === 'Secure Notes' ? 'Note' : 'Card'}
@@ -1215,7 +1215,7 @@ export default function App() {
 
             <form onSubmit={handleAddItem} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                   Title / Service Name *
                 </label>
                 <input
@@ -1223,7 +1223,7 @@ export default function App() {
                   value={newItem.title}
                   onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                   placeholder="e.g. GitHub, ProtonMail, Bank"
-                  className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   required
                   autoFocus
                 />
@@ -1232,7 +1232,7 @@ export default function App() {
               {newItemType === 'Logins' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                       Username / Email
                     </label>
                     <input
@@ -1240,13 +1240,13 @@ export default function App() {
                       value={newItem.username}
                       onChange={(e) => setNewItem({ ...newItem, username: e.target.value })}
                       placeholder="username@domain.com"
-                      className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      <label className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
                         Password
                       </label>
                       <button
@@ -1255,7 +1255,7 @@ export default function App() {
                           const p = handleGeneratePassword();
                           setNewItem({ ...newItem, password: p });
                         }}
-                        className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+                        className="text-[11px] text-indigo-500 hover:text-indigo-600 flex items-center gap-1 font-medium"
                       >
                         <RefreshCw className="w-3 h-3" />
                         <span>Generate</span>
@@ -1267,7 +1267,7 @@ export default function App() {
                         value={newItem.password}
                         onChange={(e) => setNewItem({ ...newItem, password: e.target.value })}
                         placeholder="••••••••••••••••"
-                        className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl pl-4 pr-10 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        className="w-full h-11 bg-theme-input border border-theme rounded-xl pl-4 pr-10 text-xs font-mono text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                       />
                       <button
                         type="button"
@@ -1283,32 +1283,30 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setShowGenOptions(!showGenOptions)}
-                        className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1 font-medium transition-colors"
+                        className="text-[11px] text-theme-secondary hover:text-theme-primary flex items-center gap-1 font-medium transition-colors"
                       >
                         <span>{showGenOptions ? "Hide Generator Options" : "Customize Password Options"}</span>
                       </button>
 
                       {showGenOptions && (
-                        <div className="mt-2.5 p-3.5 rounded-xl bg-slate-950/90 border border-slate-800/90 space-y-3">
-                          <div className="flex items-center justify-between text-xs text-slate-300">
-                            <span>Length: <strong className="font-mono text-indigo-400">{genLength}</strong></span>
+                        <div className="mt-2.5 p-3.5 rounded-xl bg-theme-card border border-theme space-y-3">
+                          <div className="flex items-center justify-between text-xs text-theme-primary">
+                            <span>Length: <strong className="font-mono text-indigo-500">{genLength}</strong></span>
                             <input
                               type="range"
                               min={8}
                               max={64}
                               value={genLength}
                               onChange={(e) => {
-                                const len = parseInt(e.target.value, 10);
-                                setGenLength(len);
-                                const p = handleGeneratePassword();
-                                setNewItem({ ...newItem, password: p });
+                                const val = parseInt(e.target.value, 10);
+                                setGenLength(val);
                               }}
                               className="w-32 accent-indigo-500"
                             />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 text-xs">
-                            <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-theme text-xs">
+                            <label className="flex items-center gap-2 text-theme-secondary cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={genUpper}
@@ -1317,7 +1315,7 @@ export default function App() {
                               />
                               <span>A-Z (Upper)</span>
                             </label>
-                            <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                            <label className="flex items-center gap-2 text-theme-secondary cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={genLower}
@@ -1326,7 +1324,7 @@ export default function App() {
                               />
                               <span>a-z (Lower)</span>
                             </label>
-                            <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                            <label className="flex items-center gap-2 text-theme-secondary cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={genNumbers}
@@ -1335,7 +1333,7 @@ export default function App() {
                               />
                               <span>0-9 (Numbers)</span>
                             </label>
-                            <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                            <label className="flex items-center gap-2 text-theme-secondary cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={genSymbols}
@@ -1354,7 +1352,7 @@ export default function App() {
 
               {newItemType === 'Secure Notes' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                     Note Content
                   </label>
                   <textarea
@@ -1362,7 +1360,7 @@ export default function App() {
                     value={newItem.notes}
                     onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
                     placeholder="Enter confidential notes, recovery phrases, or keys..."
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+                    className="w-full bg-theme-input border border-theme rounded-xl p-3.5 text-xs text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
                   />
                 </div>
               )}
@@ -1370,7 +1368,7 @@ export default function App() {
               {newItemType === 'Credit Cards' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                       Cardholder Name
                     </label>
                     <input
@@ -1378,12 +1376,12 @@ export default function App() {
                       value={newItem.username}
                       onChange={(e) => setNewItem({ ...newItem, username: e.target.value })}
                       placeholder="Jane Doe"
-                      className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                       Card Number
                     </label>
                     <input
@@ -1391,13 +1389,13 @@ export default function App() {
                       value={newItem.cc}
                       onChange={(e) => setNewItem({ ...newItem, cc: e.target.value })}
                       placeholder="4000 1234 5678 9010"
-                      className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs font-mono text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                         Exp Month
                       </label>
                       <input
@@ -1406,11 +1404,11 @@ export default function App() {
                         onChange={(e) => setNewItem({ ...newItem, expMonth: e.target.value })}
                         placeholder="12"
                         maxLength={2}
-                        className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center"
+                        className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs font-mono text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
                         Exp Year
                       </label>
                       <input
@@ -1419,12 +1417,12 @@ export default function App() {
                         onChange={(e) => setNewItem({ ...newItem, expYear: e.target.value })}
                         placeholder="28"
                         maxLength={4}
-                        className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center"
+                        className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs font-mono text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                        CVV / CVC
+                      <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1.5">
+                        CVV
                       </label>
                       <input
                         type="password"
@@ -1432,18 +1430,18 @@ export default function App() {
                         onChange={(e) => setNewItem({ ...newItem, password: e.target.value })}
                         placeholder="•••"
                         maxLength={4}
-                        className="w-full h-11 bg-slate-950/80 border border-slate-800 rounded-xl px-4 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center"
+                        className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-xs font-mono text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center"
                       />
                     </div>
                   </div>
                 </>
               )}
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-theme">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 h-11 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 min-h-[44px]"
+                  className="px-4 h-11 text-xs font-medium text-theme-secondary hover:text-theme-primary transition-colors min-h-[44px]"
                 >
                   Cancel
                 </button>
@@ -1463,18 +1461,18 @@ export default function App() {
       {/* MODAL: SETTINGS & VAULT MANAGEMENT */}
       {/* ========================================================= */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 safe-padding-top safe-padding-bottom">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 safe-padding-top safe-padding-bottom">
+          <div className="w-full max-w-lg bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="flex items-center justify-between border-b border-theme pb-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-theme-tag text-theme-primary flex items-center justify-center">
                   <Settings className="w-4 h-4" />
                 </div>
-                <h2 className="text-base font-bold text-white tracking-tight">Settings</h2>
+                <h2 className="text-base font-bold text-theme-primary tracking-tight">Settings</h2>
               </div>
               <button
                 onClick={() => setShowSettings(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-card min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1482,15 +1480,15 @@ export default function App() {
 
             {/* Security Section */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
                 Security &amp; Auto-Lock
               </h3>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-theme-card border border-theme-card">
                   <div>
-                    <span className="text-xs font-medium text-slate-200">Auto-Lock Timer</span>
-                    <p className="text-[11px] text-slate-500">Lock vault after period of inactivity</p>
+                    <span className="text-xs font-medium text-theme-primary">Auto-Lock Timer</span>
+                    <p className="text-[11px] text-theme-muted">Lock vault after period of inactivity</p>
                   </div>
                   <select
                     value={autoLockMinutes}
@@ -1499,7 +1497,7 @@ export default function App() {
                       setAutoLockMinutes(val);
                       localStorage.setItem('orvpass_autolock', val.toString());
                     }}
-                    className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="bg-theme-input border border-theme rounded-lg px-2.5 py-1 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
                   >
                     <option value={1}>1 Minute</option>
                     <option value={5}>5 Minutes</option>
@@ -1509,10 +1507,10 @@ export default function App() {
                   </select>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-theme-card border border-theme-card">
                   <div>
-                    <span className="text-xs font-medium text-slate-200">Clear Clipboard</span>
-                    <p className="text-[11px] text-slate-500">Clear copied passwords automatically</p>
+                    <span className="text-xs font-medium text-theme-primary">Clear Clipboard</span>
+                    <p className="text-[11px] text-theme-muted">Clear copied passwords automatically</p>
                   </div>
                   <select
                     value={clearClipboardSeconds}
@@ -1521,7 +1519,7 @@ export default function App() {
                       setClearClipboardSeconds(val);
                       localStorage.setItem('orvpass_clip_timer', val.toString());
                     }}
-                    className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="bg-theme-input border border-theme rounded-lg px-2.5 py-1 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
                   >
                     <option value={15}>15 Seconds</option>
                     <option value={30}>30 Seconds</option>
@@ -1534,7 +1532,7 @@ export default function App() {
 
             {/* Appearance Section */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
                 Theme
               </h3>
               <div className="grid grid-cols-3 gap-2">
@@ -1551,8 +1549,8 @@ export default function App() {
                       onClick={() => setTheme(t.id as any)}
                       className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                         active
-                          ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                          ? 'bg-indigo-600/20 border-indigo-500 text-indigo-500 font-semibold'
+                          : 'bg-theme-card border-theme text-theme-secondary hover:text-theme-primary'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -1565,16 +1563,16 @@ export default function App() {
 
             {/* Data Management Section */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
                 Import &amp; Export
               </h3>
 
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-all min-h-[44px]"
+                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-theme-card hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-primary transition-all min-h-[44px]"
                 >
-                  <Upload className="w-4 h-4 text-indigo-400" />
+                  <Upload className="w-4 h-4 text-indigo-500" />
                   <span>Import File</span>
                 </button>
                 <input
@@ -1587,39 +1585,39 @@ export default function App() {
 
                 <button
                   onClick={() => exportData('csv')}
-                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-all min-h-[44px]"
+                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-theme-card hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-primary transition-all min-h-[44px]"
                 >
-                  <Download className="w-4 h-4 text-indigo-400" />
+                  <Download className="w-4 h-4 text-indigo-500" />
                   <span>Export CSV</span>
                 </button>
 
                 <button
                   onClick={() => exportData('json')}
-                  className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-all min-h-[44px]"
+                  className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-theme-card hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-primary transition-all min-h-[44px]"
                 >
-                  <Download className="w-4 h-4 text-indigo-400" />
+                  <Download className="w-4 h-4 text-indigo-500" />
                   <span>Export JSON</span>
                 </button>
               </div>
             </div>
 
             {/* About & Cryptography */}
-            <div className="pt-2 border-t border-slate-800/80 space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="pt-2 border-t border-theme space-y-2">
+              <div className="flex items-center justify-between text-xs text-theme-secondary">
                 <span>Version</span>
-                <span className="font-mono text-slate-200">Orvpass v4.2.0</span>
+                <span className="font-mono text-theme-primary font-medium">Orvpass v4.2.0</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center justify-between text-xs text-theme-secondary">
                 <span>Key Derivation</span>
-                <span className="font-mono text-slate-200">Argon2id (64MB, 3 iter)</span>
+                <span className="font-mono text-theme-primary">Argon2id (64MB, 3 iter)</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center justify-between text-xs text-theme-secondary">
                 <span>AEAD Encryption</span>
-                <span className="font-mono text-slate-200">ChaCha20-Poly1305</span>
+                <span className="font-mono text-theme-primary">ChaCha20-Poly1305</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center justify-between text-xs text-theme-secondary">
                 <span>Telemetry</span>
-                <span className="text-emerald-400 font-medium">None (100% Local)</span>
+                <span className="text-emerald-500 font-medium">None (100% Local)</span>
               </div>
             </div>
           </div>
