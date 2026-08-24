@@ -94,10 +94,17 @@ jobs:
 
       - name: Sign APK
         working-directory: desktop/app
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > orvpass.p12
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -1)
-          $BUILD_TOOLS/apksigner sign --ks orvpass.p12 --ks-type pkcs12 --ks-pass pass:orvpass123 --ks-key-alias orvpass_key src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+          $BUILD_TOOLS/apksigner sign --ks orvpass.p12 --ks-type pkcs12 --ks-pass "pass:$KEYSTORE_PASSWORD" --key-pass "pass:$KEY_PASSWORD" --ks-key-alias "$KEY_ALIAS" src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
           mv src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk src-tauri/gen/android/app/build/outputs/apk/universal/release/Orvpass.apk
+          rm orvpass.p12
 
       - name: Release APK
         uses: softprops/action-gh-release@v2
