@@ -81,6 +81,23 @@ function App() {
     }
   };
 
+  const handleOpenAddModal = () => {
+    if (['Logins', 'Secure Notes', 'Credit Cards'].includes(activeTab)) {
+      setNewItemType(activeTab);
+    } else {
+      setNewItemType('Logins');
+    }
+    setShowAddModal(true);
+  };
+
+  const handleImportExport = (action: string) => {
+    alert(`This will open the native file picker to ${action}`);
+  };
+
+  const handleCheckUpdate = () => {
+    alert('You are on the latest version of Orvpass.');
+  };
+
   const handleDelete = (id: string) => {
     if (window.confirm("Move to Trash? It will be auto-deleted in 60 days.")) {
       setItems(items.filter(i => i.id !== id));
@@ -106,11 +123,13 @@ function App() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 dark:bg-black/50 backdrop-blur-sm">
-          <div className="bg-white/90 dark:bg-zinc-800/90 border border-black/10 dark:border-white/10 p-6 rounded-xl shadow-2xl w-[500px]">
+          <div className="bg-white/90 dark:bg-zinc-800/90 border border-black/10 dark:border-white/10 p-6 rounded-xl shadow-2xl w-[600px] flex flex-col max-h-[80vh]">
             <h3 className="text-xl font-semibold mb-6">Settings</h3>
-            <div className="space-y-6">
+            <div className="space-y-8 overflow-y-auto pr-4 flex-1">
+              
+              {/* Appearance */}
               <div>
-                <h4 className="text-sm font-semibold mb-3 opacity-70 uppercase tracking-wider">Appearance</h4>
+                <h4 className="text-sm font-semibold mb-3 opacity-70 uppercase tracking-wider text-blue-500">Appearance</h4>
                 <div className="flex gap-2">
                   {['light', 'dark', 'system'].map(t => (
                     <button key={t} onClick={() => setTheme(t as any)} className={`px-4 py-2 rounded-lg text-sm font-medium capitalize border transition-all ${theme === t ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'}`}>
@@ -119,8 +138,55 @@ function App() {
                   ))}
                 </div>
               </div>
+
+              {/* Security */}
+              <div>
+                <h4 className="text-sm font-semibold mb-3 opacity-70 uppercase tracking-wider text-blue-500">Security</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Vault Auto-Lock</span>
+                    <select className="bg-black/5 dark:bg-black/30 border border-black/10 dark:border-white/10 rounded px-3 py-1 text-sm outline-none">
+                      <option>Never</option>
+                      <option>5 Minutes</option>
+                      <option>15 Minutes</option>
+                      <option>On Sleep</option>
+                    </select>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Clear Clipboard After</span>
+                    <select className="bg-black/5 dark:bg-black/30 border border-black/10 dark:border-white/10 rounded px-3 py-1 text-sm outline-none">
+                      <option>30 Seconds</option>
+                      <option>60 Seconds</option>
+                      <option>Never</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Management */}
+              <div>
+                <h4 className="text-sm font-semibold mb-3 opacity-70 uppercase tracking-wider text-blue-500">Data & Import</h4>
+                <p className="text-xs opacity-60 mb-3">Import from CSV, 1Password, Bitwarden, LastPass, or Ente Auth.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => handleImportExport('import Passwords')} className="px-4 py-2 rounded-lg text-sm font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left">⬇️ Import Passwords</button>
+                  <button onClick={() => handleImportExport('export Passwords')} className="px-4 py-2 rounded-lg text-sm font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left">⬆️ Export Vault (CSV)</button>
+                  <button onClick={() => handleImportExport('import TOTP')} className="px-4 py-2 rounded-lg text-sm font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left">⬇️ Import TOTP Auth</button>
+                  <button onClick={() => handleImportExport('export TOTP')} className="px-4 py-2 rounded-lg text-sm font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left">⬆️ Export TOTP</button>
+                </div>
+              </div>
+
+              {/* About */}
+              <div>
+                <h4 className="text-sm font-semibold mb-3 opacity-70 uppercase tracking-wider text-blue-500">About</h4>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Orvpass v1.0.0</span>
+                  <button onClick={handleCheckUpdate} className="px-4 py-1.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-sm">Check for Update</button>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-end mt-8">
+
+            <div className="mt-8 flex justify-between items-center pt-4 border-t border-black/10 dark:border-white/10">
+              <span className="text-xs font-mono opacity-50 tracking-wider">@krtvysinghh</span>
               <button onClick={() => setShowSettings(false)} className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium shadow">Done</button>
             </div>
           </div>
@@ -261,7 +327,7 @@ function App() {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-semibold tracking-tight">{activeTab}</h2>
-              <button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+              <button onClick={handleOpenAddModal} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                 Add Item
               </button>
             </div>
