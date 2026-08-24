@@ -79,6 +79,17 @@ class VaultRepository(private val context: Context) {
         }
     }
 
+    suspend fun unlockWithBiometric(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
+            loadItems()
+            true
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            false
+        }
+    }
+
     suspend fun lockVault() = withContext(Dispatchers.IO) {
         try {
             OrvpassNativeBridge.lockVault()

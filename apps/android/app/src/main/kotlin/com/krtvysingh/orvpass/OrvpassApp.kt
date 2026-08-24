@@ -60,7 +60,10 @@ fun OrvpassApp(
                         },
                         onBiometricUnlock = {
                             onBiometricPromptRequest {
-                                // On biometric success callback
+                                scope.launch {
+                                    authError = null
+                                    repository.unlockWithBiometric()
+                                }
                             }
                         },
                         error = authError
