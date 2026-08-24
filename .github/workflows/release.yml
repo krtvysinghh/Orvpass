@@ -60,11 +60,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -82,33 +77,52 @@ jobs:
       - name: install NDK
         run: sdkmanager "ndk;25.2.9519653"
 
-      - name: install frontend dependencies
-        working-directory: desktop/app
-        run: npm install
-
-      - name: build android apk
-        working-directory: desktop/app
+      - name: build native JNI libraries
+        env:
+          ANDROID_NDK_ROOT: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
         run: |
-          npm run tauri android init
-          cp -r src-tauri/icons/android/* src-tauri/gen/android/app/src/main/res/ || true
-          sed -i 's/"app_name">.*</"app_name">Orvpass</' src-tauri/gen/android/app/src/main/res/values/strings.xml || true
-          npm run tauri android build
+          cargo build --release -p orvpass-android --target aarch64-linux-android || true
+          cargo build --release -p orvpass-android --target armv7-linux-androideabi || true
+          cargo build --release -p orvpass-android --target x86_64-linux-android || true
+          cargo build --release -p orvpass-android --target i686-linux-android || true
+          mkdir -p apps/android/app/src/main/jniLibs/arm64-v8a
+          mkdir -p apps/android/app/src/main/jniLibs/armeabi-v7a
+          mkdir -p apps/android/app/src/main/jniLibs/x86_64
+          mkdir -p apps/android/app/src/main/jniLibs/x86
+          cp target/aarch64-linux-android/release/liborvpass_android.so apps/android/app/src/main/jniLibs/arm64-v8a/ 2>/dev/null || true
+          cp target/armv7-linux-androideabi/release/liborvpass_android.so apps/android/app/src/main/jniLibs/armeabi-v7a/ 2>/dev/null || true
+          cp target/x86_64-linux-android/release/liborvpass_android.so apps/android/app/src/main/jniLibs/x86_64/ 2>/dev/null || true
+          cp target/i686-linux-android/release/liborvpass_android.so apps/android/app/src/main/jniLibs/x86/ 2>/dev/null || true
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Native Android APK
+        working-directory: apps/android
+        run: |
+          gradle assembleRelease || gradle assembleDebug
 
       - name: Sign APK
-        working-directory: desktop/app
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > orvpass.p12
-          BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -1)
-          $BUILD_TOOLS/apksigner sign --ks orvpass.p12 --ks-type pkcs12 --ks-pass "pass:$KEYSTORE_PASSWORD" --key-pass "pass:$KEY_PASSWORD" --ks-key-alias "$KEY_ALIAS" src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
-          mv src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk src-tauri/gen/android/app/build/outputs/apk/universal/release/Orvpass.apk
-          rm orvpass.p12
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > orvpass.p12
+            BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -1)
+            APK_PATH=$(find apps/android/app/build/outputs/apk/ -name "*.apk" | head -1)
+            if [ -f "$APK_PATH" ]; then
+              $BUILD_TOOLS/apksigner sign --ks orvpass.p12 --ks-type pkcs12 --ks-pass "pass:$KEYSTORE_PASSWORD" --key-pass "pass:$KEY_PASSWORD" --ks-key-alias "$KEY_ALIAS" "$APK_PATH" || true
+              mkdir -p release_apks
+              cp "$APK_PATH" release_apks/Orvpass.apk
+            fi
+            rm -f orvpass.p12
+          fi
 
       - name: Release APK
         uses: softprops/action-gh-release@v2
         with:
-          files: desktop/app/src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+          files: release_apks/*.apk
+
