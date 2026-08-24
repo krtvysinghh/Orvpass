@@ -144,7 +144,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "app"
-version = "4.2.0"
+version = "5.0.0"
 dependencies = [
  "dirs",
  "orvpass-core",
@@ -2958,7 +2958,7 @@ dependencies = [
 
 [[package]]
 name = "orvpass-android"
-version = "4.2.0"
+version = "5.0.0"
 dependencies = [
  "jni",
  "orvpass-core",
@@ -2969,7 +2969,7 @@ dependencies = [
 
 [[package]]
 name = "orvpass-cli"
-version = "2.0.0"
+version = "5.0.0"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -2988,7 +2988,7 @@ dependencies = [
 
 [[package]]
 name = "orvpass-core"
-version = "2.0.0"
+version = "5.0.0"
 dependencies = [
  "argon2",
  "chacha20poly1305",

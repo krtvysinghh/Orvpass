@@ -158,7 +158,7 @@ fun UnlockVaultScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Argon2id + ChaCha20", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("v4.2.0 Native", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("v5.0.0 Native", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

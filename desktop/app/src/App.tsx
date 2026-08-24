@@ -2085,7 +2085,7 @@ export default function App() {
             <div className="pt-2 border-t border-theme space-y-2">
               <div className="flex items-center justify-between text-xs text-theme-secondary">
                 <span>Version</span>
-                <span className="font-mono text-theme-primary font-medium">Orvpass v4.2.0</span>
+                <span className="font-mono text-theme-primary font-medium">Orvpass v5.0.0</span>
               </div>
               <div className="flex items-center justify-between text-xs text-theme-secondary">
                 <span>Key Derivation</span>

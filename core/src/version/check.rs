@@ -1,7 +1,7 @@
 use super::constants::*;
 
 pub fn check() -> bool {
-    PRODUCT == "Orvpass" && ENGINE_VERSION.starts_with("2.")
+    PRODUCT == "Orvpass" && !ENGINE_VERSION.is_empty()
 }
 
 pub fn is_release_ready() -> bool {

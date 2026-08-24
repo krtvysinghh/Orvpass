@@ -9,6 +9,6 @@ pub const VERSION: &str = "1.0.0";
 /*
  Current engine release.
 */
-pub const ENGINE_VERSION: &str = "2.0.0";
+pub const ENGINE_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub const CHANNEL: &str = "stable";
