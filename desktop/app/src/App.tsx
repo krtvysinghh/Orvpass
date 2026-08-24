@@ -30,6 +30,22 @@ function App() {
         loadItems();
       })
       .catch(console.error);
+
+    // Register global shortcut
+    import('@tauri-apps/plugin-global-shortcut').then(async ({ register }) => {
+      try {
+        await register('CmdOrControl+Shift+Space', () => {
+          import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+            const w = getCurrentWindow();
+            w.isVisible().then(v => v ? w.hide() : w.show());
+            w.setFocus();
+          });
+        });
+      } catch (e) {
+        console.error("Global shortcut error:", e);
+      }
+    });
+
   }, []);
 
   const loadItems = () => {
@@ -94,8 +110,23 @@ function App() {
     alert(`This will open the native file picker to ${action}`);
   };
 
-  const handleCheckUpdate = () => {
-    alert('You are on the latest version of Orvpass.');
+  const handleCheckUpdate = async () => {
+    try {
+      const { check } = await import('@tauri-apps/plugin-updater');
+      const update = await check();
+      if (update) {
+        if (window.confirm(`Update ${update.version} is available! Do you want to download and install it now?`)) {
+          await update.downloadAndInstall();
+          const { relaunch } = await import('@tauri-apps/plugin-process');
+          await relaunch();
+        }
+      } else {
+        alert('You are on the latest version of Orvpass.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Failed to check for updates. Make sure tauri.conf.json has update endpoints configured.');
+    }
   };
 
   const handleDelete = (id: string) => {

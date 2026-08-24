@@ -88,6 +88,9 @@ pub fn run() {
 
             Ok(())
         })
+        .plugin(tauri_plugin_updater::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![initialize_vault, get_items, add_item, generate_password])
         .run(tauri::generate_context!())
