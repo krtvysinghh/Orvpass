@@ -29,6 +29,7 @@ import {
   Database,
   ArrowRight,
   Undo2,
+  Fingerprint,
 } from "lucide-react";
 import "./App.css";
 
@@ -234,6 +235,23 @@ export default function App() {
       loadItems();
     } catch (err: any) {
       setAuthError(typeof err === 'string' ? err : 'Incorrect password');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleBiometricUnlock = async () => {
+    setIsAuthenticating(true);
+    setAuthError(null);
+
+    try {
+      const ok = await invoke<boolean>('authenticate_biometrics');
+      if (ok) {
+        setVaultStatus({ exists: true, unlocked: true });
+        await loadItems();
+      }
+    } catch (err: any) {
+      setAuthError(typeof err === 'string' ? err : 'Touch ID authentication cancelled or failed');
     } finally {
       setIsAuthenticating(false);
     }
@@ -729,6 +747,16 @@ export default function App() {
                 </>
               )}
             </button>
+
+            <button
+              type="button"
+              onClick={handleBiometricUnlock}
+              disabled={isAuthenticating}
+              className="w-full h-12 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 active:scale-[0.99] text-slate-200 font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Fingerprint className="w-5 h-5 text-indigo-400" />
+              <span>Unlock with Touch ID / Biometrics</span>
+            </button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
@@ -757,8 +785,10 @@ export default function App() {
       {/* ========================================================= */}
       {/* DESKTOP SIDEBAR (Visible on md and up) */}
       {/* ========================================================= */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-4 safe-padding-top safe-padding-bottom">
-        <div className="flex items-center justify-between px-2 mb-6">
+      <aside className="hidden md:flex flex-col w-64 border-r border-slate-800/70 bg-slate-900/60 backdrop-blur-xl px-4 pb-4 pt-11 safe-padding-bottom relative">
+        {/* macOS Window Drag Region & Traffic Lights Safe Margin */}
+        <div data-tauri-drag-region className="absolute top-0 left-0 right-0 h-9 z-10 pointer-events-auto" />
+        <div className="flex items-center justify-between px-2 mb-6 mt-1">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
               <Shield className="w-5 h-5 text-white" />

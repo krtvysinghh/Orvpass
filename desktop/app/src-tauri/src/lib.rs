@@ -204,6 +204,47 @@ fn generate_password(length: usize) -> String {
         .collect()
 }
 
+#[tauri::command]
+fn authenticate_biometrics() -> Result<bool, String> {
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+        let script = r#"
+import LocalAuthentication
+import Foundation
+let context = LAContext()
+var error: NSError?
+if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+    let sema = DispatchSemaphore(value: 0)
+    var ok = false
+    context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "Unlock Orvpass Vault with Touch ID") { success, _ in
+        ok = success
+        sema.signal()
+    }
+    sema.wait()
+    exit(ok ? 0 : 1)
+} else {
+    exit(2)
+}
+"#;
+        let output = Command::new("swift")
+            .arg("-e")
+            .arg(script)
+            .output()
+            .map_err(|e| e.to_string())?;
+
+        if output.status.success() {
+            Ok(true)
+        } else {
+            Err("Touch ID authentication was cancelled or failed".into())
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err("Biometric authentication is not supported on this platform".into())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
@@ -238,7 +279,8 @@ pub fn run() {
             get_items,
             add_item,
             delete_item,
-            generate_password
+            generate_password,
+            authenticate_biometrics
         ]);
 
     #[cfg(desktop)]
