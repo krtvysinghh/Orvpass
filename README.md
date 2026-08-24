@@ -35,6 +35,7 @@
 **macOS**
 
 ```bash
+brew tap krtvysinghh/tap
 brew install --cask orvpass
 ```
 
