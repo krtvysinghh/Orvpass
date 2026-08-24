@@ -2,7 +2,9 @@ use jni::objects::{JClass, JString};
 use jni::sys::{jboolean, jint, jstring};
 use jni::JNIEnv;
 use orvpass_core::crypto::SecretKey;
-use orvpass_core::models::{CreditCardData, ItemData, ItemType, LoginData, SecureNoteData, VaultItem};
+use orvpass_core::models::{
+    CreditCardData, ItemData, ItemType, LoginData, SecureNoteData, VaultItem,
+};
 use orvpass_core::vault::Vault;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -17,7 +19,12 @@ pub extern "system" fn Java_com_krtvysingh_orvpass_bridge_OrvpassNativeBridge_ch
 ) -> jstring {
     let path: String = match env.get_string(&path_str) {
         Ok(s) => s.into(),
-        Err(_) => return env.new_string("{\"exists\":false,\"unlocked\":false}").unwrap().into_raw(),
+        Err(_) => {
+            return env
+                .new_string("{\"exists\":false,\"unlocked\":false}")
+                .unwrap()
+                .into_raw()
+        }
     };
 
     let p = PathBuf::from(path);
@@ -139,14 +146,42 @@ pub extern "system" fn Java_com_krtvysingh_orvpass_bridge_OrvpassNativeBridge_ad
     exp_month_str: JString,
     exp_year_str: JString,
 ) -> jboolean {
-    let item_type: String = env.get_string(&type_str).map(|s| s.into()).unwrap_or_default();
-    let title: String = env.get_string(&title_str).map(|s| s.into()).unwrap_or_default();
-    let username: Option<String> = env.get_string(&user_str).ok().map(|s| s.into()).filter(|s: &String| !s.is_empty());
-    let password: Option<String> = env.get_string(&pass_str).ok().map(|s| s.into()).filter(|s: &String| !s.is_empty());
-    let notes: Option<String> = env.get_string(&notes_str).ok().map(|s| s.into()).filter(|s: &String| !s.is_empty());
-    let cc: Option<String> = env.get_string(&cc_str).ok().map(|s| s.into()).filter(|s: &String| !s.is_empty());
-    let exp_month: String = env.get_string(&exp_month_str).map(|s| s.into()).unwrap_or_else(|_| "12".into());
-    let exp_year: String = env.get_string(&exp_year_str).map(|s| s.into()).unwrap_or_else(|_| "28".into());
+    let item_type: String = env
+        .get_string(&type_str)
+        .map(|s| s.into())
+        .unwrap_or_default();
+    let title: String = env
+        .get_string(&title_str)
+        .map(|s| s.into())
+        .unwrap_or_default();
+    let username: Option<String> = env
+        .get_string(&user_str)
+        .ok()
+        .map(|s| s.into())
+        .filter(|s: &String| !s.is_empty());
+    let password: Option<String> = env
+        .get_string(&pass_str)
+        .ok()
+        .map(|s| s.into())
+        .filter(|s: &String| !s.is_empty());
+    let notes: Option<String> = env
+        .get_string(&notes_str)
+        .ok()
+        .map(|s| s.into())
+        .filter(|s: &String| !s.is_empty());
+    let cc: Option<String> = env
+        .get_string(&cc_str)
+        .ok()
+        .map(|s| s.into())
+        .filter(|s: &String| !s.is_empty());
+    let exp_month: String = env
+        .get_string(&exp_month_str)
+        .map(|s| s.into())
+        .unwrap_or_else(|_| "12".into());
+    let exp_year: String = env
+        .get_string(&exp_year_str)
+        .map(|s| s.into())
+        .unwrap_or_else(|_| "28".into());
 
     let mut guard = VAULT_STATE.lock().unwrap();
     if let Some((v, key)) = &mut *guard {

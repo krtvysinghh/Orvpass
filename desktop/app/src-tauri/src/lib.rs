@@ -1,5 +1,7 @@
 use orvpass_core::crypto::SecretKey;
-use orvpass_core::models::{CreditCardData, ItemData, ItemType, LoginData, SecureNoteData, VaultItem};
+use orvpass_core::models::{
+    CreditCardData, ItemData, ItemType, LoginData, SecureNoteData, VaultItem,
+};
 use orvpass_core::vault::Vault;
 use serde::Serialize;
 use std::path::PathBuf;
@@ -28,7 +30,10 @@ fn resolve_vault_path(app: &tauri::AppHandle) -> PathBuf {
 }
 
 #[tauri::command]
-fn check_vault_status(app: tauri::AppHandle, state: State<AppState>) -> Result<VaultStatus, String> {
+fn check_vault_status(
+    app: tauri::AppHandle,
+    state: State<AppState>,
+) -> Result<VaultStatus, String> {
     let path = resolve_vault_path(&app);
     let guard = state.vault_data.lock().unwrap();
     Ok(VaultStatus {
@@ -51,11 +56,11 @@ fn unlock_vault(
     let mut v = Vault::new_locked_at(&path);
     let key = SecretKey::from_password(password).map_err(|e| e.to_string())?;
 
-    v.unlock(&key).map_err(|e| {
-        match e {
-            orvpass_core::vault::VaultError::TemporarilyLocked => "Vault is temporarily locked due to too many failed attempts.".to_string(),
-            _ => "Incorrect master password. Please try again.".to_string(),
+    v.unlock(&key).map_err(|e| match e {
+        orvpass_core::vault::VaultError::TemporarilyLocked => {
+            "Vault is temporarily locked due to too many failed attempts.".to_string()
         }
+        _ => "Incorrect master password. Please try again.".to_string(),
     })?;
 
     *state.vault_data.lock().unwrap() = Some((v, key));
@@ -99,7 +104,8 @@ fn initialize_vault(
     let key = SecretKey::from_password(password).map_err(|e| e.to_string())?;
 
     if path.exists() {
-        v.unlock(&key).map_err(|_| "Incorrect master password".to_string())?;
+        v.unlock(&key)
+            .map_err(|_| "Incorrect master password".to_string())?;
         *state.vault_data.lock().unwrap() = Some((v, key));
         Ok("Unlocked".into())
     } else {
@@ -237,8 +243,7 @@ pub fn run() {
 
     #[cfg(desktop)]
     {
-        builder = builder
-            .plugin(tauri_plugin_global_shortcut::Builder::new().build());
+        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
     }
 
     builder
