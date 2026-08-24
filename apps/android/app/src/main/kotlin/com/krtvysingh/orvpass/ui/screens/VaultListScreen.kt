@@ -149,22 +149,55 @@ fun VaultListScreen(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.Shield,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(56.dp)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(64.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = when {
+                                        searchQuery.isNotEmpty() -> Icons.Default.Search
+                                        selectedTab == "Favorites" -> Icons.Default.Star
+                                        selectedTab == "Logins" -> Icons.Default.Key
+                                        selectedTab == "Secure Notes" -> Icons.Default.Description
+                                        selectedTab == "Credit Cards" -> Icons.Default.CreditCard
+                                        else -> Icons.Default.Shield
+                                    },
+                                    contentDescription = null,
+                                    tint = IndigoPrimary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = if (searchQuery.isNotEmpty()) "No matching records found" else "Vault is empty",
+                            text = when {
+                                searchQuery.isNotEmpty() -> "No matching records"
+                                selectedTab == "Favorites" -> "No Favorites Starred"
+                                selectedTab == "Logins" -> "No Login Credentials"
+                                selectedTab == "Secure Notes" -> "No Secure Notes"
+                                selectedTab == "Credit Cards" -> "No Payment Cards"
+                                else -> "Your Vault is Empty"
+                            },
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = if (searchQuery.isNotEmpty()) "Try a different search term" else "Tap '+ Add Item' to secure your first credential",
+                            text = when {
+                                searchQuery.isNotEmpty() -> "Check your spelling or search terms"
+                                selectedTab == "Favorites" -> "Star items to access them quickly here"
+                                selectedTab == "Logins" -> "Store usernames and passwords securely"
+                                selectedTab == "Secure Notes" -> "Keep recovery keys and private notes encrypted"
+                                selectedTab == "Credit Cards" -> "Safely store credit cards and CVVs"
+                                else -> "Tap '+ Add Item' to store your first credential"
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
