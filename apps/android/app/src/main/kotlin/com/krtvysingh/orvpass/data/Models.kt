@@ -14,6 +14,7 @@ enum class ItemType {
     CreditCard
 }
 
+@Serializable
 data class VaultItem(
     val id: String,
     val title: String,
@@ -27,11 +28,13 @@ data class VaultItem(
     val isPinned: Boolean = false
 )
 
+@Serializable
 data class VaultStatus(
     val exists: Boolean,
     val unlocked: Boolean
 )
 
+@Serializable
 data class HealthStats(
     val score: Int,
     val total: Int,

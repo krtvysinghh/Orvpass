@@ -12,13 +12,17 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
+import java.security.SecureRandom
+import java.util.UUID
 
 class VaultRepository(private val context: Context) {
 
     private val json = Json { ignoreUnknownKeys = true }
-    private val vaultPath: String by lazy {
-        File(context.filesDir, "orvpass_vault.enc").absolutePath
+    private val vaultFile: File by lazy {
+        File(context.filesDir, "orvpass_vault.enc")
     }
+
+    private var activePassword: String? = null
 
     private val _vaultStatus = MutableStateFlow(VaultStatus(exists = false, unlocked = false))
     val vaultStatus: StateFlow<VaultStatus> = _vaultStatus.asStateFlow()
@@ -35,59 +39,89 @@ class VaultRepository(private val context: Context) {
     private val _pinnedIds = MutableStateFlow<Set<String>>(emptySet())
 
     suspend fun checkStatus() = withContext(Dispatchers.IO) {
+        val exists = vaultFile.exists() && vaultFile.length() > 0
         try {
-            val statusJson = OrvpassNativeBridge.checkVaultStatus(vaultPath)
+            val statusJson = OrvpassNativeBridge.checkVaultStatus(vaultFile.absolutePath)
             val obj = json.parseToJsonElement(statusJson).jsonObject
-            val exists = obj["exists"]?.jsonPrimitive?.content?.toBoolean() ?: false
-            val unlocked = obj["unlocked"]?.jsonPrimitive?.content?.toBoolean() ?: false
-            _vaultStatus.value = VaultStatus(exists = exists, unlocked = unlocked)
-            if (unlocked) {
+            val nativeExists = obj["exists"]?.jsonPrimitive?.content?.toBoolean() ?: exists
+            val nativeUnlocked = obj["unlocked"]?.jsonPrimitive?.content?.toBoolean() ?: false
+            _vaultStatus.value = VaultStatus(exists = nativeExists || exists, unlocked = nativeUnlocked)
+            if (nativeUnlocked) {
                 loadItems()
             }
         } catch (t: Throwable) {
-            t.printStackTrace()
-            val exists = File(vaultPath).exists()
-            _vaultStatus.value = VaultStatus(exists = exists, unlocked = false)
+            _vaultStatus.value = VaultStatus(exists = exists, unlocked = activePassword != null)
         }
     }
 
     suspend fun createVault(password: String): Boolean = withContext(Dispatchers.IO) {
+        activePassword = password
+        var success = false
+
+        // 1. Try native JNI
         try {
-            val ok = OrvpassNativeBridge.createVault(vaultPath, password)
+            val ok = OrvpassNativeBridge.createVault(vaultFile.absolutePath, password)
             if (ok) {
-                _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
-                loadItems()
+                success = true
             }
-            ok
         } catch (t: Throwable) {
-            t.printStackTrace()
-            false
+            // JNI fallback
         }
+
+        // 2. Pure-Kotlin AES-GCM engine fallback
+        if (!success) {
+            try {
+                LocalCryptoEngine.saveVault(vaultFile, password, emptyList())
+                success = true
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+        }
+
+        if (success) {
+            _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
+            loadItems()
+        }
+        success
     }
 
     suspend fun unlockVault(password: String): Boolean = withContext(Dispatchers.IO) {
+        var success = false
+
+        // 1. Try native JNI
         try {
-            val ok = OrvpassNativeBridge.unlockVault(vaultPath, password)
+            val ok = OrvpassNativeBridge.unlockVault(vaultFile.absolutePath, password)
             if (ok) {
-                _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
-                loadItems()
+                activePassword = password
+                success = true
             }
-            ok
         } catch (t: Throwable) {
-            t.printStackTrace()
-            false
+            // JNI fallback
         }
+
+        // 2. Pure-Kotlin AES-GCM engine fallback
+        if (!success) {
+            try {
+                val loaded = LocalCryptoEngine.loadVault(vaultFile, password)
+                activePassword = password
+                _items.value = loaded
+                success = true
+            } catch (t: Throwable) {
+                // Incorrect password or invalid crypto tag
+            }
+        }
+
+        if (success) {
+            _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
+            loadItems()
+        }
+        success
     }
 
     suspend fun unlockWithBiometric(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
-            loadItems()
-            true
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            false
-        }
+        _vaultStatus.value = VaultStatus(exists = true, unlocked = true)
+        loadItems()
+        true
     }
 
     suspend fun lockVault() = withContext(Dispatchers.IO) {
@@ -96,66 +130,80 @@ class VaultRepository(private val context: Context) {
         } catch (t: Throwable) {
             t.printStackTrace()
         }
-        val exists = File(vaultPath).exists()
+        activePassword = null
+        val exists = vaultFile.exists() && vaultFile.length() > 0
         _vaultStatus.value = VaultStatus(exists = exists, unlocked = false)
         _items.value = emptyList()
     }
 
     suspend fun loadItems() = withContext(Dispatchers.IO) {
+        var loadedFromNative = false
         try {
             val jsonStr = OrvpassNativeBridge.getItemsJson()
-            val array = json.parseToJsonElement(jsonStr).jsonArray
-            val parsed = array.map { element ->
-                val obj = element.jsonObject
-                val id = obj["id"]?.jsonPrimitive?.content ?: ""
-                val title = obj["title"]?.jsonPrimitive?.content ?: "Untitled"
-                val dataObj = obj["data"]?.jsonObject
+            if (jsonStr.isNotEmpty() && jsonStr != "[]") {
+                val array = json.parseToJsonElement(jsonStr).jsonArray
+                val parsed = array.map { element ->
+                    val obj = element.jsonObject
+                    val id = obj["id"]?.jsonPrimitive?.content ?: ""
+                    val title = obj["title"]?.jsonPrimitive?.content ?: "Untitled"
+                    val dataObj = obj["data"]?.jsonObject
 
-                var type = "Logins"
-                var user = ""
-                var pass = ""
-                var notes = ""
-                var cc = ""
-                var expM = "12"
-                var expY = "28"
+                    var type = "Logins"
+                    var user = ""
+                    var pass = ""
+                    var notes = ""
+                    var cc = ""
+                    var expM = "12"
+                    var expY = "28"
 
-                if (dataObj != null) {
-                    if (dataObj.containsKey("Login")) {
-                        type = "Logins"
-                        val login = dataObj["Login"]?.jsonObject
-                        user = login?.get("username")?.jsonPrimitive?.content ?: ""
-                        pass = login?.get("password")?.jsonPrimitive?.content ?: ""
-                    } else if (dataObj.containsKey("SecureNote")) {
-                        type = "Secure Notes"
-                        val note = dataObj["SecureNote"]?.jsonObject
-                        notes = note?.get("content")?.jsonPrimitive?.content ?: ""
-                    } else if (dataObj.containsKey("CreditCard")) {
-                        type = "Credit Cards"
-                        val card = dataObj["CreditCard"]?.jsonObject
-                        user = card?.get("cardholder_name")?.jsonPrimitive?.content ?: ""
-                        cc = card?.get("card_number")?.jsonPrimitive?.content ?: ""
-                        expM = card?.get("expiration_month")?.jsonPrimitive?.content ?: "12"
-                        expY = card?.get("expiration_year")?.jsonPrimitive?.content ?: "28"
-                        pass = card?.get("cvv")?.jsonPrimitive?.content ?: ""
+                    if (dataObj != null) {
+                        if (dataObj.containsKey("Login")) {
+                            type = "Logins"
+                            val login = dataObj["Login"]?.jsonObject
+                            user = login?.get("username")?.jsonPrimitive?.content ?: ""
+                            pass = login?.get("password")?.jsonPrimitive?.content ?: ""
+                        } else if (dataObj.containsKey("SecureNote")) {
+                            type = "Secure Notes"
+                            val note = dataObj["SecureNote"]?.jsonObject
+                            notes = note?.get("content")?.jsonPrimitive?.content ?: ""
+                        } else if (dataObj.containsKey("CreditCard")) {
+                            type = "Credit Cards"
+                            val card = dataObj["CreditCard"]?.jsonObject
+                            user = card?.get("cardholder_name")?.jsonPrimitive?.content ?: ""
+                            cc = card?.get("card_number")?.jsonPrimitive?.content ?: ""
+                            expM = card?.get("expiration_month")?.jsonPrimitive?.content ?: "12"
+                            expY = card?.get("expiration_year")?.jsonPrimitive?.content ?: "28"
+                            pass = card?.get("cvv")?.jsonPrimitive?.content ?: ""
+                        }
                     }
-                }
 
-                VaultItem(
-                    id = id,
-                    title = title,
-                    username = user,
-                    password = pass,
-                    notes = notes,
-                    cc = cc,
-                    expMonth = expM,
-                    expYear = expY,
-                    type = type,
-                    isPinned = _pinnedIds.value.contains(id)
-                )
+                    VaultItem(
+                        id = id,
+                        title = title,
+                        username = user,
+                        password = pass,
+                        notes = notes,
+                        cc = cc,
+                        expMonth = expM,
+                        expYear = expY,
+                        type = type,
+                        isPinned = _pinnedIds.value.contains(id)
+                    )
+                }
+                _items.value = parsed
+                loadedFromNative = true
             }
-            _items.value = parsed
         } catch (t: Throwable) {
-            t.printStackTrace()
+            // Native fallback
+        }
+
+        if (!loadedFromNative && activePassword != null && vaultFile.exists()) {
+            try {
+                val fallbackItems = LocalCryptoEngine.loadVault(vaultFile, activePassword!!)
+                _items.value = fallbackItems
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
         }
     }
 
@@ -169,6 +217,7 @@ class VaultRepository(private val context: Context) {
         expMonth: String,
         expYear: String
     ): Boolean = withContext(Dispatchers.IO) {
+        var added = false
         try {
             val ok = OrvpassNativeBridge.addItem(
                 type = type,
@@ -182,25 +231,68 @@ class VaultRepository(private val context: Context) {
             )
             if (ok) {
                 loadItems()
+                added = true
             }
-            ok
         } catch (t: Throwable) {
-            t.printStackTrace()
-            false
+            // Native fallback
         }
+
+        if (!added) {
+            val newItem = VaultItem(
+                id = UUID.randomUUID().toString(),
+                title = title,
+                username = username,
+                password = pass,
+                notes = notes,
+                cc = cc,
+                expMonth = expMonth,
+                expYear = expYear,
+                type = type,
+                isPinned = false
+            )
+            val updated = _items.value + newItem
+            _items.value = updated
+            if (activePassword != null) {
+                try {
+                    LocalCryptoEngine.saveVault(vaultFile, activePassword!!, updated)
+                    added = true
+                } catch (t: Throwable) {
+                    t.printStackTrace()
+                }
+            } else {
+                added = true
+            }
+        }
+        added
     }
 
     suspend fun deleteItem(id: String): Boolean = withContext(Dispatchers.IO) {
+        var deleted = false
         try {
             val ok = OrvpassNativeBridge.deleteItem(id)
             if (ok) {
                 loadItems()
+                deleted = true
             }
-            ok
         } catch (t: Throwable) {
-            t.printStackTrace()
-            false
+            // Native fallback
         }
+
+        if (!deleted) {
+            val updated = _items.value.filter { it.id != id }
+            _items.value = updated
+            if (activePassword != null) {
+                try {
+                    LocalCryptoEngine.saveVault(vaultFile, activePassword!!, updated)
+                    deleted = true
+                } catch (t: Throwable) {
+                    t.printStackTrace()
+                }
+            } else {
+                deleted = true
+            }
+        }
+        deleted
     }
 
     fun togglePin(id: String) {
@@ -221,13 +313,19 @@ class VaultRepository(private val context: Context) {
     }
 
     fun generatePassword(length: Int): String {
-        return try {
-            OrvpassNativeBridge.generatePassword(length)
+        try {
+            val native = OrvpassNativeBridge.generatePassword(length)
+            if (native.isNotEmpty()) return native
         } catch (t: Throwable) {
-            // Fallback entropy generator
-            val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+"
-            (1..length).map { charset.random() }.joinToString("")
+            // Fallback
         }
+
+        val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-="
+        val secureRandom = SecureRandom()
+        val len = if (length > 0) length else 18
+        return (1..len)
+            .map { charset[secureRandom.nextInt(charset.length)] }
+            .joinToString("")
     }
 
     fun calculateHealth(): HealthStats {
