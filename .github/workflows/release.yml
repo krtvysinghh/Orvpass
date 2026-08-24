@@ -52,7 +52,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Orvpass ${{ github.ref_name }}'
           releaseBody: 'See the assets below for the latest installers.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
 
   build-android:
