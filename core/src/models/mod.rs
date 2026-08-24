@@ -7,6 +7,7 @@ pub enum ItemType {
     SecureNote,
     Custom,
     Totp,
+    CreditCard,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,9 +30,19 @@ pub struct CustomField {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreditCardData {
+    pub cardholder_name: String,
+    pub card_number: String,
+    pub expiration_month: String,
+    pub expiration_year: String,
+    pub cvv: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ItemData {
     Login(LoginData),
     SecureNote(SecureNoteData),
+    CreditCard(CreditCardData),
     Custom,
 }
 

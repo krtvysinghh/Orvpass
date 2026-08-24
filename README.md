@@ -9,12 +9,28 @@ Secure • Local-First • Open-Source Password Manager
       ╚██████╔╝██║  ██║╚██████╔╝██║     ██║  ██║███████║███████║
        ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝
 
-Orvpass is a secure password manager written in Rust.
+# Orvpass
 
-It provides encrypted local storage for passwords, credentials, secure
-notes, and sensitive information.
+Orvpass is a lightning-fast, highly secure, natively designed password manager built with Rust, Tauri, and React. 
 
-Core principles:
+## Features
+- **Military-Grade Security**: Uses ChaCha20Poly1305 and Argon2id.
+- **Native Apple UI**: Features a beautiful, fluid glassmorphism UI with native window vibrancy.
+- **Persistent Storage**: Data is seamlessly encrypted and written to disk natively.
+- **Integrated Password Generator**: Generate secure cryptographic passwords locally.
+- **Cross-Platform Installers**: Zero-dependency automated builds for macOS (.dmg), Windows (.exe), Linux (.deb), and Android (.apk) via GitHub Actions.
+
+## Building and Running
+```bash
+# Core & CLI
+cd core && cargo build
+cd cli && cargo build
+
+# Desktop/Mobile Tauri App
+cd desktop/app
+npm install
+npm run tauri dev
+```
 
 🔒 Security first
 🛡️ Privacy by default
