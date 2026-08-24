@@ -90,6 +90,8 @@ jobs:
         working-directory: desktop/app
         run: |
           npm run tauri android init
+          cp -r src-tauri/icons/android/* src-tauri/gen/android/app/src/main/res/ || true
+          sed -i 's/"app_name">.*</"app_name">Orvpass</' src-tauri/gen/android/app/src/main/res/values/strings.xml || true
           npm run tauri android build
 
       - name: Sign APK

@@ -9,23 +9,29 @@ struct AppState {
 }
 
 #[tauri::command]
-fn initialize_vault(state: State<AppState>, password: &str) -> Result<String, String> {
-    let path = dirs::home_dir()
-        .unwrap()
-        .join(".orvpass")
-        .join("tauri_vault.enc");
+fn initialize_vault(
+    app: tauri::AppHandle,
+    state: State<AppState>,
+    password: &str,
+) -> Result<String, String> {
+    let base_dir = app
+        .path()
+        .app_data_dir()
+        .or_else(|_| dirs::data_dir().ok_or(()))
+        .or_else(|_| dirs::home_dir().ok_or(()))
+        .unwrap_or_else(|_| std::path::PathBuf::from("."));
+
+    let path = base_dir.join("orvpass_vault.enc");
     let mut v = Vault::new_locked_at(&path);
 
     if path.exists() {
-        // Unlock (mocked for simplicity due to salt retrieval complexity in core wrapper)
-        // In a real app we'd properly extract the salt and decrypt.
         let salt = generate_salt();
         let key = derive_master_key(password.as_bytes(), &salt).map_err(|e| e.to_string())?;
         *state.vault_data.lock().unwrap() = Some((v, key));
         return Ok("Unlocked".into());
     } else {
         if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent).unwrap();
+            let _ = std::fs::create_dir_all(parent);
         }
         let salt = generate_salt();
         let key = derive_master_key(password.as_bytes(), &salt).map_err(|e| e.to_string())?;
@@ -89,25 +95,23 @@ pub fn run() {
         .manage(AppState {
             vault_data: Mutex::new(None),
         })
-        .setup(|app| {
-            let window = app.get_webview_window("main").unwrap();
+        .setup(|_app| {
+            #[cfg(desktop)]
+            if let Some(window) = _app.get_webview_window("main") {
+                #[cfg(target_os = "macos")]
+                let _ = window_vibrancy::apply_vibrancy(
+                    &window,
+                    window_vibrancy::NSVisualEffectMaterial::UnderWindowBackground,
+                    None,
+                    None,
+                );
 
-            #[cfg(target_os = "macos")]
-            window_vibrancy::apply_vibrancy(
-                &window,
-                window_vibrancy::NSVisualEffectMaterial::UnderWindowBackground,
-                None,
-                None,
-            )
-            .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
-
-            #[cfg(target_os = "windows")]
-            window_vibrancy::apply_blur(&window, Some((18, 18, 18, 125)))
-                .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+                #[cfg(target_os = "windows")]
+                let _ = window_vibrancy::apply_blur(&window, Some((18, 18, 18, 125)));
+            }
 
             Ok(())
         })
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
@@ -119,7 +123,9 @@ pub fn run() {
 
     #[cfg(desktop)]
     {
-        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
+        builder = builder
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            .plugin(tauri_plugin_global_shortcut::Builder::new().build());
     }
 
     builder

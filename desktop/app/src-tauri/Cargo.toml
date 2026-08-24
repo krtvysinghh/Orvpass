@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "4.0.8"
+version = "4.0.9"
 description = "Orvpass — Lightning-fast, secure password manager"
 authors = ["Kartavya Singh"]
 edition = "2021"
