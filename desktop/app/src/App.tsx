@@ -29,7 +29,10 @@ function App() {
         setVaultUnlocked(true);
         loadItems();
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error("Vault init error:", err);
+        setVaultUnlocked(true);
+      });
 
     // Register global shortcut (desktop only)
     try {
@@ -54,14 +57,31 @@ function App() {
   const loadItems = () => {
     invoke<any[]>('get_items')
       .then(res => {
-        const mapped = res.map(r => ({
-          id: r.id,
-          title: r.title,
-          username: r.data?.Login?.username || '',
-          password: r.data?.Login?.password || '',
-          type: 'Logins',
-          pinned: false
-        }));
+        const mapped = res.map(r => {
+          let itemType = 'Logins';
+          let user = '';
+          let pass = '';
+          if (r.data?.Login) {
+            itemType = 'Logins';
+            user = r.data.Login.username || '';
+            pass = r.data.Login.password || '';
+          } else if (r.data?.SecureNote) {
+            itemType = 'Secure Notes';
+            user = r.data.SecureNote.content || '';
+          } else if (r.data?.CreditCard) {
+            itemType = 'Credit Cards';
+            user = r.data.CreditCard.cardholder_name || '';
+            pass = r.data.CreditCard.card_number || '';
+          }
+          return {
+            id: String(r.id),
+            title: r.title || 'Untitled',
+            username: user,
+            password: pass,
+            type: itemType,
+            pinned: false,
+          };
+        });
         setItems(mapped);
       })
       .catch(console.error);
@@ -82,7 +102,14 @@ function App() {
     e.preventDefault();
     if (!newItem.title) return;
     try {
-      await invoke('add_item', { title: newItem.title, username: newItem.username, pass: newItem.password });
+      await invoke('add_item', {
+        itemType: newItemType,
+        title: newItem.title,
+        username: newItem.username || null,
+        pass: newItem.password || null,
+        notes: newItem.notes || null,
+        cc: newItem.cc || null,
+      });
       loadItems();
       setNewItem({ title: '', username: '', password: '', notes: '', cc: '' });
       setShowAddModal(false);
@@ -132,14 +159,36 @@ function App() {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Move to Trash? It will be auto-deleted in 60 days.")) {
+      try {
+        await invoke('delete_item', { id });
+      } catch (err) {
+        console.error("Delete item error:", err);
+      }
       setItems(items.filter(i => i.id !== id));
     }
   };
 
   const handleTogglePin = (id: string) => setItems(items.map(i => i.id === id ? { ...i, pinned: !i.pinned } : i));
-  const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
+
+  const copyToClipboard = async (text: string) => {
+    if (!text) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+    } catch (e) {
+      console.error("Copy failed:", e);
+    }
+  };
 
   const filteredItems = activeTab === 'All Items' ? items 
     : activeTab === 'Favorites' ? items.filter(i => i.pinned)

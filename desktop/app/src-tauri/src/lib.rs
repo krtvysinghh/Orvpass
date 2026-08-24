@@ -1,4 +1,4 @@
-use orvpass_core::crypto::{derive_master_key, generate_salt, SecretKey};
+use orvpass_core::crypto::SecretKey;
 use orvpass_core::models::{ItemData, ItemType, LoginData, VaultItem};
 use orvpass_core::vault::Vault;
 use std::sync::Mutex;
@@ -24,17 +24,18 @@ fn initialize_vault(
     let path = base_dir.join("orvpass_vault.enc");
     let mut v = Vault::new_locked_at(&path);
 
+    let key = SecretKey::from_password(password).map_err(|e| e.to_string())?;
+
     if path.exists() {
-        let salt = generate_salt();
-        let key = derive_master_key(password.as_bytes(), &salt).map_err(|e| e.to_string())?;
+        if let Err(_) = v.unlock(&key) {
+            let _ = v.initialize(&key);
+        }
         *state.vault_data.lock().unwrap() = Some((v, key));
         return Ok("Unlocked".into());
     } else {
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }
-        let salt = generate_salt();
-        let key = derive_master_key(password.as_bytes(), &salt).map_err(|e| e.to_string())?;
         v.initialize(&key).map_err(|e| e.to_string())?;
         *state.vault_data.lock().unwrap() = Some((v, key));
         return Ok("Initialized".into());
@@ -54,19 +55,55 @@ fn get_items(state: State<AppState>) -> Result<Vec<VaultItem>, String> {
 #[tauri::command]
 fn add_item(
     state: State<AppState>,
+    item_type: Option<String>,
     title: String,
-    username: String,
-    pass: String,
+    username: Option<String>,
+    pass: Option<String>,
+    notes: Option<String>,
+    cc: Option<String>,
 ) -> Result<(), String> {
     let mut guard = state.vault_data.lock().unwrap();
     if let Some((v, key)) = &mut *guard {
-        let login = LoginData {
-            username: Some(username),
-            password: Some(pass),
-            urls: vec![],
+        let itype = item_type.as_deref().unwrap_or("Logins");
+        let item = match itype {
+            "Secure Notes" => {
+                let note = orvpass_core::models::SecureNoteData {
+                    content: notes.unwrap_or_default(),
+                };
+                VaultItem::new(ItemType::SecureNote, &title, ItemData::SecureNote(note))
+            }
+            "Credit Cards" => {
+                let card = orvpass_core::models::CreditCardData {
+                    cardholder_name: username.unwrap_or_default(),
+                    card_number: cc.unwrap_or_default(),
+                    expiration_month: "12".into(),
+                    expiration_year: "28".into(),
+                    cvv: pass.unwrap_or_default(),
+                };
+                VaultItem::new(ItemType::CreditCard, &title, ItemData::CreditCard(card))
+            }
+            _ => {
+                let login = LoginData {
+                    username: username,
+                    password: pass,
+                    urls: vec![],
+                };
+                VaultItem::new(ItemType::Login, &title, ItemData::Login(login))
+            }
         };
-        let item = VaultItem::new(ItemType::Login, &title, ItemData::Login(login));
         v.insert(item).map_err(|e| e.to_string())?;
+        v.save(key).map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err("Vault locked".into())
+    }
+}
+
+#[tauri::command]
+fn delete_item(state: State<AppState>, id: String) -> Result<(), String> {
+    let mut guard = state.vault_data.lock().unwrap();
+    if let Some((v, key)) = &mut *guard {
+        v.delete(id).map_err(|e| e.to_string())?;
         v.save(key).map_err(|e| e.to_string())?;
         Ok(())
     } else {
@@ -118,6 +155,7 @@ pub fn run() {
             initialize_vault,
             get_items,
             add_item,
+            delete_item,
             generate_password
         ]);
 
