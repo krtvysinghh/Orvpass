@@ -330,31 +330,34 @@ function App() {
         </div>
       )}
 
-      {/* Sidebar */}
-      <div className="w-64 border-r border-black/5 dark:border-white/10 bg-black/5 dark:bg-black/20 flex flex-col pt-8 pb-4">
-        <div className="px-6 mb-8 flex justify-between items-center">
+      {/* Sidebar (Desktop) / Bottom Nav (Mobile) */}
+      <div className="w-full md:w-64 border-r border-black/5 dark:border-white/10 bg-black/5 dark:bg-black/20 flex md:flex-col pt-4 md:pt-8 pb-4 absolute md:relative bottom-0 z-40">
+        <div className="hidden md:flex px-6 mb-8 justify-between items-center">
           <h1 className="text-xl font-semibold tracking-tight">Orvpass</h1>
           <button onClick={() => setShowSettings(true)} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-xl" title="Settings">⚙️</button>
         </div>
-        <nav className="flex-1 space-y-1 px-3">
-          {['All Items', 'Favorites', 'Logins', 'Secure Notes', 'Credit Cards'].map((item) => (
-            <button key={item} onClick={() => setActiveTab(item)} className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === item ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100'}`}>
+        <nav className="flex flex-row md:flex-col flex-1 justify-around space-y-0 md:space-y-1 px-3 w-full">
+          {['All Items', 'Favorites', 'Health', 'Authenticator'].map((item) => (
+            <button key={item} onClick={() => setActiveTab(item)} className={`md:w-full flex items-center justify-center md:justify-start px-3 py-3 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${activeTab === item ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100'}`}>
               {item}
             </button>
           ))}
+          <button onClick={() => setShowSettings(true)} className="md:hidden flex items-center justify-center px-3 py-3 text-xs font-medium rounded-md hover:bg-black/5 dark:hover:bg-white/5 opacity-70">
+            Settings
+          </button>
         </nav>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <header data-tauri-drag-region className="h-14 border-b border-black/5 dark:border-white/10 flex items-center justify-between px-6 bg-white/30 dark:bg-black/10">
+      <div className="flex-1 flex flex-col mb-16 md:mb-0">
+        <header data-tauri-drag-region className="h-14 border-b border-black/5 dark:border-white/10 flex items-center justify-between px-6 bg-white/30 dark:bg-black/10 mt-safe">
           <div className="flex-1" />
-          <div className="relative">
-            <input type="text" placeholder="Search vault..." className="w-64 bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/10 rounded-md py-1.5 pl-3 pr-3 text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" />
+          <div className="relative w-full md:w-auto">
+            <input type="text" placeholder="Search vault..." className="w-full md:w-64 bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/10 rounded-md py-1.5 pl-3 pr-3 text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" />
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-semibold tracking-tight">{activeTab}</h2>
@@ -363,6 +366,31 @@ function App() {
               </button>
             </div>
             
+            {activeTab === 'Health' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
+                  <h3 className="font-semibold text-lg">2 Breached</h3>
+                  <p className="text-xs mt-1">Passwords found in data breaches</p>
+                </div>
+                <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+                  <h3 className="font-semibold text-lg">5 Weak</h3>
+                  <p className="text-xs mt-1">Passwords easily guessable</p>
+                </div>
+                <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400">
+                  <h3 className="font-semibold text-lg">85% Score</h3>
+                  <p className="text-xs mt-1">Overall vault health</p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'Authenticator' && (
+              <div className="text-center py-12 opacity-50">
+                <div className="text-4xl mb-4">⏱️</div>
+                <p>No TOTP tokens configured yet.</p>
+                <p className="text-xs mt-2">Edit a login to add a TOTP secret.</p>
+              </div>
+            )}
+
             <div className="grid gap-3">
               {sortedItems.length === 0 ? (
                 <div className="text-center py-12 opacity-50">No items found.</div>
