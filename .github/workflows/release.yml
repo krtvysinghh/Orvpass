@@ -85,10 +85,11 @@ jobs:
 
       - name: build android apk
         working-directory: desktop/app
-        run: npm run tauri android build
+        run: |
+          npm run tauri android init
+          npm run tauri android build
 
-      - name: upload apk artifact
-        uses: actions/upload-artifact@v4
+      - name: Release APK
+        uses: softprops/action-gh-release@v2
         with:
-          name: orvpass-android-apk
-          path: desktop/app/src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+          files: desktop/app/src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
