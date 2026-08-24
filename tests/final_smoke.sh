@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-./target/release/cli --version >/dev/null
+./target/release/orvpass --version >/dev/null
 
 echo "FINAL SMOKE PASS"

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-BIN="./target/release/cli"
+BIN="./target/release/orvpass"
 
 test -x "$BIN"
 

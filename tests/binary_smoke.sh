@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-./target/release/cli --version >/dev/null || true
+./target/release/orvpass --version >/dev/null
 
 echo "CLI binary smoke PASS"
