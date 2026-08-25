@@ -379,9 +379,24 @@ export default function App() {
     try {
       const res = await invoke<string>('check_vault_status');
       const status: VaultStatus = JSON.parse(res);
-      setVaultStatus(status);
-      if (status.unlocked) {
+      
+      const sessionActive = sessionStorage.getItem('orvpass_session_unlocked') === 'true';
+      if (status.unlocked || sessionActive) {
+        setVaultStatus({ exists: true, unlocked: true });
+        sessionStorage.setItem('orvpass_session_unlocked', 'true');
         loadItems();
+      } else {
+        setVaultStatus(status);
+        // Automatic Biometric verification on launch for seamless entry
+        if (status.exists && !status.unlocked) {
+          invoke<boolean>('authenticate_biometrics').then(ok => {
+            if (ok) {
+              setVaultStatus({ exists: true, unlocked: true });
+              sessionStorage.setItem('orvpass_session_unlocked', 'true');
+              loadItems();
+            }
+          }).catch(() => {});
+        }
       }
     } catch (err) {
       setVaultStatus({ exists: false, unlocked: false });
@@ -480,6 +495,7 @@ export default function App() {
       } else if (nextPin === quickPin || nextPin === '1234') {
         setIsDecoyMode(false);
         setVaultStatus({ exists: true, unlocked: true });
+        sessionStorage.setItem('orvpass_session_unlocked', 'true');
         setEnteredPin('');
         logAudit('QUICK_PIN_UNLOCK', 'Vault unlocked via Quick PIN');
         await loadItems();
@@ -534,6 +550,7 @@ export default function App() {
       await invoke('unlock_vault', { password: masterPasswordInput });
       setIsDecoyMode(false);
       setVaultStatus({ exists: true, unlocked: true });
+      sessionStorage.setItem('orvpass_session_unlocked', 'true');
       setMasterPasswordInput('');
       loadItems();
     } catch (err: any) {
@@ -552,6 +569,7 @@ export default function App() {
       if (ok) {
         setIsDecoyMode(false);
         setVaultStatus({ exists: true, unlocked: true });
+        sessionStorage.setItem('orvpass_session_unlocked', 'true');
         await loadItems();
       }
     } catch (err: any) {
@@ -647,6 +665,7 @@ export default function App() {
     try {
       await invoke('create_vault', { password: masterPasswordInput });
       setVaultStatus({ exists: true, unlocked: true });
+      sessionStorage.setItem('orvpass_session_unlocked', 'true');
       setMasterPasswordInput('');
       setConfirmPasswordInput('');
       loadItems();
@@ -661,6 +680,7 @@ export default function App() {
     try {
       await invoke('lock_vault');
     } catch (e) {}
+    sessionStorage.removeItem('orvpass_session_unlocked');
     setVaultStatus({ exists: true, unlocked: false });
     setItems([]);
     setShowSettings(false);
