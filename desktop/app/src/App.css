@@ -2,38 +2,60 @@
 
 :root, .dark {
   color-scheme: dark;
-  --bg-main: #030712;
-  --bg-sidebar: rgba(15, 23, 42, 0.75);
-  --bg-surface: #0f172a;
-  --bg-card: rgba(30, 41, 59, 0.45);
-  --bg-card-hover: rgba(30, 41, 59, 0.75);
-  --border-subtle: rgba(51, 65, 85, 0.6);
-  --border-card: rgba(51, 65, 85, 0.5);
-  --text-primary: #f9fafb;
+  --bg-main: #070b14;
+  --bg-sidebar: rgba(13, 20, 36, 0.65);
+  --bg-surface: rgba(19, 29, 51, 0.7);
+  --bg-card: rgba(25, 39, 68, 0.35);
+  --bg-card-hover: rgba(35, 54, 95, 0.55);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.09);
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --input-bg: rgba(3, 7, 18, 0.85);
-  --tag-bg: rgba(30, 41, 59, 0.6);
-  --header-bg: rgba(15, 23, 42, 0.4);
-  --modal-bg: #0f172a;
+  --input-bg: rgba(7, 12, 24, 0.75);
+  --tag-bg: rgba(255, 255, 255, 0.05);
+  --header-bg: rgba(13, 20, 36, 0.55);
+  --modal-bg: rgba(15, 23, 42, 0.85);
 }
 
 .light {
   color-scheme: light;
-  --bg-main: #f8fafc;
-  --bg-sidebar: rgba(241, 245, 249, 0.9);
+  --bg-main: #f1f5f9;
+  --bg-sidebar: rgba(255, 255, 255, 0.75);
   --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --border-subtle: #e2e8f0;
-  --border-card: #e2e8f0;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-card: rgba(0, 0, 0, 0.07);
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --input-bg: #ffffff;
-  --tag-bg: #f1f5f9;
-  --header-bg: rgba(255, 255, 255, 0.7);
-  --modal-bg: #ffffff;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --tag-bg: rgba(0, 0, 0, 0.04);
+  --header-bg: rgba(255, 255, 255, 0.75);
+  --modal-bg: rgba(255, 255, 255, 0.95);
+}
+
+/* Apple Native Glassmorphic Materials */
+.glass-panel {
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-card {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background-color: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 html, body, #root {

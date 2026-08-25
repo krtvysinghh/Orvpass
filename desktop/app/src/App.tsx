@@ -2616,7 +2616,7 @@ export default function App() {
                 <div className="space-y-4 animate-fadeIn">
                   <div className="space-y-3 p-4 rounded-2xl bg-theme-card border border-theme">
                     <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
-                      Lock &amp; Clipboard Safety
+                      Security &amp; Timers
                     </h3>
 
                     <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
@@ -2668,7 +2668,7 @@ export default function App() {
                   {/* Password Generator Rules */}
                   <div className="space-y-3 p-4 rounded-2xl bg-theme-card border border-theme">
                     <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
-                      Password Generator Defaults
+                      Password Defaults
                     </h3>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
@@ -2705,7 +2705,7 @@ export default function App() {
                   {/* Biometrics & Hardware Keys */}
                   <div className="space-y-3 p-4 rounded-2xl bg-theme-card border border-theme">
                     <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
-                      Biometrics &amp; Hardware Keys
+                      Biometrics
                     </h3>
 
                     <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
@@ -2718,7 +2718,7 @@ export default function App() {
 
                     <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
                       <div>
-                        <span className="text-xs font-medium text-theme-primary block">Quick Unlock PIN (4 Digits)</span>
+                        <span className="text-xs font-medium text-theme-primary block">Quick PIN (4 Digits)</span>
                         <p className="text-[11px] text-theme-muted">Fast keypad unlock code (Default: 1234)</p>
                       </div>
                       <input
@@ -2739,7 +2739,7 @@ export default function App() {
 
                     <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
                       <div>
-                        <span className="text-xs font-medium text-theme-primary block">FIDO2 / YubiKey Hardware 2FA</span>
+                        <span className="text-xs font-medium text-theme-primary block">FIDO2 / YubiKey Hardware Key</span>
                         <p className="text-[11px] text-theme-muted">Require physical security key tap before decryption</p>
                       </div>
                       <input
@@ -2755,7 +2755,7 @@ export default function App() {
 
                     <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
                       <div>
-                        <span className="text-xs font-medium text-theme-primary block">Travel Mode (Border Protection)</span>
+                        <span className="text-xs font-medium text-theme-primary block">Travel Mode</span>
                         <p className="text-[11px] text-theme-muted">Temporarily hide sensitive marked credentials from device</p>
                       </div>
                       <input
@@ -2773,10 +2773,10 @@ export default function App() {
                   {/* Digital Will & Emergency Access */}
                   <div className="space-y-3 p-4 rounded-2xl bg-theme-card border border-theme">
                     <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
-                      Digital Will &amp; Emergency Access
+                      Emergency Access
                     </h3>
                     <div className="space-y-2">
-                      <label className="text-xs text-theme-primary font-medium block">Trusted Emergency Contact Email</label>
+                      <label className="text-xs text-theme-primary font-medium block">Emergency Contact Email</label>
                       <input
                         type="email"
                         value={emergencyContact}
@@ -2790,7 +2790,7 @@ export default function App() {
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-theme">
                       <div>
-                        <span className="text-xs font-medium text-theme-primary block">Waiting Period Before Access</span>
+                        <span className="text-xs font-medium text-theme-primary block">Waiting Period</span>
                         <p className="text-[11px] text-theme-muted">Time allowed for you to decline an emergency request</p>
                       </div>
                       <select
@@ -2813,7 +2813,7 @@ export default function App() {
                   <div className="space-y-2 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                     <div className="flex items-center gap-2 text-amber-500 text-xs font-semibold">
                       <ShieldAlert className="w-4 h-4" />
-                      <span>Duress &amp; Coercion Protection</span>
+                      <span>Decoy Vault (Duress Mode)</span>
                     </div>
                     <p className="text-[11px] text-theme-secondary leading-relaxed">
                       Entering master password <strong className="font-mono text-amber-500">duress</strong> or PIN <strong className="font-mono text-amber-500">0000</strong> opens a plausible deniability Decoy Vault under coercion.
@@ -2827,7 +2827,7 @@ export default function App() {
                 <div className="space-y-4 animate-fadeIn">
                   <div className="space-y-3 p-4 rounded-2xl bg-theme-card border border-theme">
                     <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
-                      Vault Migration &amp; Backups
+                      Import &amp; Export
                     </h3>
 
                     <div className="grid grid-cols-2 gap-2">
@@ -2991,7 +2991,7 @@ export default function App() {
                 <div className="space-y-4 animate-fadeIn">
                   <div className="space-y-2.5 p-4 rounded-2xl bg-theme-card border border-theme">
                     <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-2">
-                      Zero-Knowledge Crypto Architecture
+                      Cryptographic Engine
                     </h3>
                     <div className="flex items-center justify-between text-xs text-theme-secondary">
                       <span>Key Derivation Function</span>
