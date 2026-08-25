@@ -2,10 +2,11 @@ package com.krtvysingh.orvpass.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -29,8 +30,21 @@ fun UnlockVaultScreen(
     onBiometricUnlock: () -> Unit,
     error: String?
 ) {
+    var unlockMode by remember { mutableStateOf("biometric_pin") }
+    var enteredPin by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        onBiometricUnlock()
+    }
+
+    LaunchedEffect(enteredPin) {
+        if (enteredPin.length == 4) {
+            onUnlockVault(enteredPin)
+            enteredPin = ""
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -61,7 +75,7 @@ fun UnlockVaultScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Lock,
+                        imageVector = Icons.Default.Shield,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(32.dp)
@@ -71,18 +85,18 @@ fun UnlockVaultScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Orvpass",
+                    text = "Orvpass Vault",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
-                    text = "Enter master password to unlock your encrypted vault.",
+                    text = if (unlockMode == "biometric_pin") "Touch ID & Quick PIN Unlock" else "Enter Master Password",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
+                    modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
                 )
 
                 error?.let { err ->
@@ -97,61 +111,132 @@ fun UnlockVaultScreen(
                             text = err,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier.padding(12.dp),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Master Password") },
-                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }) {
-                            Icon(
-                                imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = null
+                if (unlockMode == "biometric_pin") {
+                    FilledIconButton(
+                        onClick = onBiometricUnlock,
+                        modifier = Modifier.size(72.dp),
+                        shape = CircleShape,
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = IndigoPrimary.copy(alpha = 0.15f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Fingerprint,
+                            contentDescription = "Biometric Unlock",
+                            tint = IndigoPrimary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        for (i in 0..3) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .background(
+                                        color = if (enteredPin.length > i) IndigoPrimary else MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = CircleShape
+                                    )
                             )
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    singleLine = true
-                )
+                    }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                Button(
-                    onClick = {
-                        if (password.isNotEmpty()) {
-                            onUnlockVault(password)
+                    val digits = listOf(
+                        listOf("1", "2", "3"),
+                        listOf("4", "5", "6"),
+                        listOf("7", "8", "9"),
+                        listOf("C", "0", "⌫")
+                    )
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        digits.forEach { row ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                row.forEach { key ->
+                                    FilledTonalButton(
+                                        onClick = {
+                                            when (key) {
+                                                "C" -> enteredPin = ""
+                                                "⌫" -> if (enteredPin.isNotEmpty()) enteredPin = enteredPin.dropLast(1)
+                                                else -> if (enteredPin.length < 4) enteredPin += key
+                                            }
+                                        },
+                                        modifier = Modifier.size(64.dp, 44.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                        )
+                                    ) {
+                                        Text(key, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    }
+                                }
+                            }
                         }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimary)
-                ) {
-                    Text("Unlock Vault", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    TextButton(onClick = { unlockMode = "master_password" }) {
+                        Text("Use Master Password instead", color = IndigoPrimary, style = MaterialTheme.typography.bodySmall)
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Master Password") },
+                        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { showPassword = !showPassword }) {
+                                Icon(
+                                    imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            if (password.isNotEmpty()) {
+                                onUnlockVault(password)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimary)
+                    ) {
+                        Text("Unlock Vault", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    TextButton(onClick = { unlockMode = "biometric_pin" }) {
+                        Text("Use Touch ID & Quick PIN instead", color = IndigoPrimary, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedButton(
-                    onClick = onBiometricUnlock,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Fingerprint, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Biometric Unlock", fontWeight = FontWeight.Medium)
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

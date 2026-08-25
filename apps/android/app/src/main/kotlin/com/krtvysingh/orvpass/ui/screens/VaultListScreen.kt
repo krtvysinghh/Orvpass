@@ -48,7 +48,7 @@ fun VaultListScreen(
     val scope = rememberCoroutineScope()
     var copiedItemId by remember { mutableStateOf<String?>(null) }
 
-    val categories = listOf("All Items", "Favorites", "Logins", "Secure Notes", "Credit Cards")
+    val categories = listOf("All Items", "Favorites", "Logins", "Passkeys", "Secure Notes", "Credit Cards")
 
     val filteredItems = remember(items, selectedTab, searchQuery) {
         items.filter { item ->
@@ -62,6 +62,7 @@ fun VaultListScreen(
             when (selectedTab) {
                 "Favorites" -> item.isPinned
                 "Logins" -> item.type == "Logins"
+                "Passkeys" -> item.type == "Passkeys" || item.notes.contains("FIDO2")
                 "Secure Notes" -> item.type == "Secure Notes"
                 "Credit Cards" -> item.type == "Credit Cards"
                 else -> true
