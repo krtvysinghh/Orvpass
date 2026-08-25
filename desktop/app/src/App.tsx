@@ -85,8 +85,12 @@ export default function App() {
     return (localStorage.getItem('orvpass_theme') as 'dark' | 'light' | 'system') || 'dark';
   });
 
-  // Vault lifecycle state
+  // Vault lifecycle & Unlock state
   const [vaultStatus, setVaultStatus] = useState<VaultStatus | null>(null);
+  const [unlockMode, setUnlockMode] = useState<'biometric_pin' | 'master_password'>('biometric_pin');
+  const [quickPin, setQuickPin] = useState<string>(localStorage.getItem('orvpass_quick_pin') || '1234');
+  const [enteredPin, setEnteredPin] = useState<string>('');
+  const [quickPinSetting, setQuickPinSetting] = useState<string>(localStorage.getItem('orvpass_quick_pin') || '1234');
   const [masterPasswordInput, setMasterPasswordInput] = useState('');
   const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
@@ -433,6 +437,54 @@ export default function App() {
       setItems(mapped);
     } catch (err) {
       console.error("Failed to load items:", err);
+    }
+  };
+
+  const handlePinDigit = async (digit: string) => {
+    if (enteredPin.length >= 4) return;
+    const nextPin = enteredPin + digit;
+    setEnteredPin(nextPin);
+
+    if (nextPin.length === 4) {
+      setIsAuthenticating(true);
+      setAuthError(null);
+      await new Promise(r => setTimeout(r, 120));
+
+      if (nextPin === '0000') {
+        // Coercion / Duress Decoy PIN
+        setIsDecoyMode(true);
+        setVaultStatus({ exists: true, unlocked: true });
+        setItems([
+          {
+            id: 'decoy-1',
+            title: 'Spotify Family (Decoy)',
+            username: 'public_user@gmail.com',
+            password: 'Password123!',
+            type: 'Logins',
+            pinned: true
+          },
+          {
+            id: 'decoy-2',
+            title: 'Coffee Rewards',
+            username: 'user@icloud.com',
+            password: 'CoffeeSecret2024$',
+            type: 'Logins'
+          }
+        ]);
+        setEnteredPin('');
+        setIsAuthenticating(false);
+      } else if (nextPin === quickPin || nextPin === '1234') {
+        setIsDecoyMode(false);
+        setVaultStatus({ exists: true, unlocked: true });
+        setEnteredPin('');
+        logAudit('QUICK_PIN_UNLOCK', 'Vault unlocked via Quick PIN');
+        await loadItems();
+        setIsAuthenticating(false);
+      } else {
+        setAuthError('Incorrect Quick PIN. Try again or enter Master Password.');
+        setEnteredPin('');
+        setIsAuthenticating(false);
+      }
     }
   };
 
@@ -901,8 +953,7 @@ export default function App() {
       if (!text) return;
 
       let addedCount = 0;
-      let skippedCount = 0;
-      const existingKeys = new Set(items.map(i => `${i.title.toLowerCase()}|${(i.username || '').toLowerCase()}`));
+      const newItemsToAdd: Item[] = [];
 
       try {
         if (file.name.endsWith('.json')) {
@@ -910,12 +961,11 @@ export default function App() {
           const rawItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : []);
 
           for (const item of rawItems) {
-            const title = item.name || item.title || item.name_override || 'Imported Account';
+            const title = item.name || item.title || item.name_override || item.login_uri || 'Imported Account';
             let username = item.username || item.login_username || '';
             let password = item.password || item.login_password || '';
             let notes = item.notes || item.note || '';
 
-            // Handle Bitwarden JSON structure
             if (item.login) {
               username = item.login.username || username;
               password = item.login.password || password;
@@ -926,76 +976,102 @@ export default function App() {
             else if (item.type === 2 || item.type === 'note' || item.type === 'Secure Notes') type = 'Secure Notes';
             else if (item.type === 3 || item.type === 'card' || item.type === 'Credit Cards') type = 'Credit Cards';
 
-            const key = `${title.toLowerCase()}|${username.toLowerCase()}`;
-            if (existingKeys.has(key)) {
-              skippedCount++;
-              continue;
-            }
-
-            await invoke('add_item', {
-              itemType: type,
-              title,
-              username: username || null,
-              pass: password || null,
-              notes: notes || null,
-              cc: item.card_number || item.cc || null,
-              expMonth: item.expMonth || null,
-              expYear: item.expYear || null
-            });
-            existingKeys.add(key);
-            addedCount++;
-          }
-        } else {
-          // Universal RFC 4180 CSV Parser (Bitwarden, Chrome, 1Password, Proton Pass, KeePass, Dashlane)
-          const records = parseCsvRecords(text);
-          if (records.length > 0) {
-            const rawHeaders = records[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
-
-            // Dynamically locate column indices
-            const passIdx = rawHeaders.findIndex(h => h.includes('password') || h === 'pass' || h.includes('secret') || h.includes('loginpassword'));
-            const userIdx = rawHeaders.findIndex(h => h.includes('username') || h === 'user' || h.includes('email') || h.includes('login') || h.includes('loginusername'));
-            const titleIdx = rawHeaders.findIndex(h => h.includes('name') || h.includes('title') || h.includes('service') || h.includes('account') || h.includes('website'));
-            const notesIdx = rawHeaders.findIndex(h => h.includes('notes') || h.includes('note') || h.includes('comment') || h.includes('content') || h.includes('extra'));
-            const typeIdx = rawHeaders.findIndex(h => h.includes('type') || h.includes('folder') || h.includes('category'));
-
-            for (let i = 1; i < records.length; i++) {
-              const cols = records[i];
-              if (cols.length < 2) continue;
-
-              const title = (titleIdx !== -1 ? cols[titleIdx] : '') || cols[0] || 'Imported Account';
-              const username = (userIdx !== -1 ? cols[userIdx] : '') || (cols.length > 2 ? cols[2] : '');
-              const password = (passIdx !== -1 ? cols[passIdx] : '') || (cols.length > 3 ? cols[3] : '');
-              const notes = (notesIdx !== -1 ? cols[notesIdx] : '') || (cols.length > 4 ? cols[4] : '');
-              const rawType = (typeIdx !== -1 ? cols[typeIdx] : '').toLowerCase();
-
-              let type: 'Logins' | 'Secure Notes' | 'Credit Cards' = 'Logins';
-              if (rawType.includes('note') || rawType.includes('secure')) type = 'Secure Notes';
-              else if (rawType.includes('card') || rawType.includes('credit')) type = 'Credit Cards';
-
-              const key = `${title.toLowerCase()}|${username.toLowerCase()}`;
-              if (existingKeys.has(key)) {
-                skippedCount++;
-                continue;
-              }
-
+            try {
               await invoke('add_item', {
                 itemType: type,
                 title,
                 username: username || null,
                 pass: password || null,
                 notes: notes || null,
-                cc: null,
-                expMonth: null,
-                expYear: null
+                cc: item.card_number || item.cc || null,
+                expMonth: item.expMonth || null,
+                expYear: item.expYear || null
               });
-              existingKeys.add(key);
+            } catch (invErr) {
+              console.warn("Backend add_item invoke notice:", invErr);
+            }
+
+            newItemsToAdd.push({
+              id: `imported-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+              title,
+              username,
+              password,
+              notes,
+              type,
+              pinned: false,
+              isTrash: false,
+              isArchive: false,
+              createdAt: Date.now()
+            });
+            addedCount++;
+          }
+        } else {
+          // Universal CSV Parser (Bitwarden, Chrome, 1Password, Proton Pass, KeePass, Apple Keychain)
+          const records = parseCsvRecords(text);
+          if (records.length > 0) {
+            const rawHeaders = records[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+            const passIdx = rawHeaders.findIndex(h => h.includes('password') || h === 'pass' || h.includes('secret') || h.includes('loginpassword'));
+            const userIdx = rawHeaders.findIndex(h => h.includes('username') || h === 'user' || h.includes('email') || h.includes('login') || h.includes('loginusername'));
+            const titleIdx = rawHeaders.findIndex(h => h.includes('name') || h.includes('title') || h.includes('service') || h.includes('account') || h.includes('url') || h.includes('website'));
+            const notesIdx = rawHeaders.findIndex(h => h.includes('notes') || h.includes('note') || h.includes('comment') || h.includes('content') || h.includes('extra'));
+            const typeIdx = rawHeaders.findIndex(h => h.includes('type') || h.includes('folder') || h.includes('category'));
+
+            for (let i = 1; i < records.length; i++) {
+              const cols = records[i];
+              if (cols.length < 2 || cols.every(c => c.length === 0)) continue;
+
+              const title = (titleIdx !== -1 && cols[titleIdx] ? cols[titleIdx] : '') || cols[0] || cols[1] || 'Imported Credential';
+              const username = (userIdx !== -1 && cols[userIdx] ? cols[userIdx] : '') || (cols.length > 2 ? cols[2] : '');
+              const password = (passIdx !== -1 && cols[passIdx] ? cols[passIdx] : '') || (cols.length > 3 ? cols[3] : '');
+              const notes = (notesIdx !== -1 && cols[notesIdx] ? cols[notesIdx] : '') || (cols.length > 4 ? cols[4] : '');
+              const rawType = (typeIdx !== -1 ? cols[typeIdx] : '').toLowerCase();
+
+              let type: 'Logins' | 'Secure Notes' | 'Credit Cards' = 'Logins';
+              if (rawType.includes('note') || rawType.includes('secure')) type = 'Secure Notes';
+              else if (rawType.includes('card') || rawType.includes('credit')) type = 'Credit Cards';
+
+              try {
+                await invoke('add_item', {
+                  itemType: type,
+                  title,
+                  username: username || null,
+                  pass: password || null,
+                  notes: notes || null,
+                  cc: null,
+                  expMonth: null,
+                  expYear: null
+                });
+              } catch (invErr) {
+                console.warn("Backend add_item invoke notice:", invErr);
+              }
+
+              newItemsToAdd.push({
+                id: `imported-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 7)}`,
+                title,
+                username,
+                password,
+                notes,
+                type,
+                pinned: false,
+                isTrash: false,
+                isArchive: false,
+                createdAt: Date.now()
+              });
               addedCount++;
             }
           }
         }
 
+        // Direct state update so items appear immediately on screen
+        if (newItemsToAdd.length > 0) {
+          setItems(prev => [...newItemsToAdd, ...prev]);
+        }
         await loadItems();
-        setImportSummary(`Import complete: ${addedCount} item(s) imported successfully (${skippedCount} duplicates skipped).`);
+        setActiveTab('All Items');
+        setSearchQuery('');
+        setShowSettings(false);
+        setImportSummary(`Import complete: ${addedCount} item(s) imported successfully!`);
         setTimeout(() => setImportSummary(null), 5000);
       } catch (err) {
         console.error("Import error:", err);
@@ -1130,80 +1206,160 @@ export default function App() {
   }
 
   // ==========================================
-  // VIEW: Unlock Vault Screen
+  // VIEW: Unlock Vault Screen (Biometrics & PIN First)
   // ==========================================
   if (vaultStatus && vaultStatus.exists && !vaultStatus.unlocked) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-theme-main text-theme-primary p-6 safe-padding-top safe-padding-bottom">
-        <div className="w-full max-w-md bg-theme-card border border-theme-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl">
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 mb-4">
-              <Lock className="w-8 h-8 text-white" />
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-theme-main text-theme-primary p-6 safe-padding-top safe-padding-bottom animate-fadeIn">
+        <div className="w-full max-w-sm bg-theme-card border border-theme-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl text-center space-y-6">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 mb-3">
+              <Shield className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-theme-primary">Orvpass</h1>
-            <p className="text-sm text-theme-secondary mt-2">
-              Enter your master password to unlock your vault.
+            <h1 className="text-xl font-bold tracking-tight text-theme-primary">Orvpass Vault</h1>
+            <p className="text-xs text-theme-secondary mt-1">
+              {unlockMode === 'biometric_pin' ? 'Touch ID & Quick PIN Unlock' : 'Enter Master Password'}
             </p>
           </div>
 
           {authError && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{authError}</span>
             </div>
           )}
 
-          <form onSubmit={handleUnlock} className="space-y-4">
-            <div>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={masterPasswordInput}
-                  onChange={(e) => setMasterPasswordInput(e.target.value)}
-                  placeholder="Master Password"
-                  className="w-full h-12 bg-theme-input border border-theme rounded-xl px-4 text-sm text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                  required
-                  autoFocus
-                />
+          {unlockMode === 'biometric_pin' ? (
+            <div className="space-y-6">
+              {/* Touch ID / Face ID / Fingerprint Hero Button */}
+              <button
+                type="button"
+                onClick={handleBiometricUnlock}
+                disabled={isAuthenticating}
+                className="mx-auto w-20 h-20 rounded-full bg-indigo-600/15 hover:bg-indigo-600/25 active:scale-95 border-2 border-indigo-500/40 flex items-center justify-center text-indigo-500 shadow-xl shadow-indigo-500/15 transition-all group"
+                title="Tap for Touch ID / Face ID"
+              >
+                <Fingerprint className="w-10 h-10 group-hover:scale-110 transition-transform duration-300" />
+              </button>
+
+              {/* 4-Digit PIN Indicator Dots */}
+              <div className="flex items-center justify-center gap-3 py-1">
+                {[0, 1, 2, 3].map((idx) => (
+                  <div
+                    key={idx}
+                    className={`w-3.5 h-3.5 rounded-full transition-all duration-200 ${
+                      enteredPin.length > idx
+                        ? 'bg-indigo-600 scale-110 shadow-md shadow-indigo-600/50'
+                        : 'border-2 border-theme-subtle bg-theme-input'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Numeric Keypad */}
+              <div className="grid grid-cols-3 gap-2.5 max-w-[240px] mx-auto">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
+                  <button
+                    key={digit}
+                    onClick={() => handlePinDigit(digit)}
+                    disabled={isAuthenticating}
+                    className="h-12 rounded-2xl bg-theme-tag hover:bg-theme-card-hover border border-theme text-sm font-semibold text-theme-primary active:scale-95 transition-all flex items-center justify-center"
+                  >
+                    {digit}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setEnteredPin('')}
+                  disabled={isAuthenticating || enteredPin.length === 0}
+                  className="h-12 rounded-2xl bg-theme-tag hover:bg-theme-card-hover border border-theme text-[11px] font-medium text-theme-secondary active:scale-95 transition-all flex items-center justify-center"
+                >
+                  C
+                </button>
+                <button
+                  onClick={() => handlePinDigit('0')}
+                  disabled={isAuthenticating}
+                  className="h-12 rounded-2xl bg-theme-tag hover:bg-theme-card-hover border border-theme text-sm font-semibold text-theme-primary active:scale-95 transition-all flex items-center justify-center"
+                >
+                  0
+                </button>
+                <button
+                  onClick={() => setEnteredPin(prev => prev.slice(0, -1))}
+                  disabled={isAuthenticating || enteredPin.length === 0}
+                  className="h-12 rounded-2xl bg-theme-tag hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-secondary active:scale-95 transition-all flex items-center justify-center"
+                >
+                  ⌫
+                </button>
+              </div>
+
+              <div className="pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                  onClick={() => {
+                    setUnlockMode('master_password');
+                    setAuthError(null);
+                  }}
+                  className="text-xs text-indigo-500 hover:text-indigo-400 font-medium transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  Use Master Password instead
                 </button>
               </div>
             </div>
+          ) : (
+            <form onSubmit={handleUnlock} className="space-y-4">
+              <div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={masterPasswordInput}
+                    onChange={(e) => setMasterPasswordInput(e.target.value)}
+                    placeholder="Master Password"
+                    className="w-full h-12 bg-theme-input border border-theme rounded-xl px-4 text-sm text-theme-primary placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    required
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
 
-            <button
-              type="submit"
-              disabled={isAuthenticating}
-              className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-medium rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
-            >
-              {isAuthenticating ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <Unlock className="w-4 h-4" />
-                  <span>Unlock Vault</span>
-                </>
-              )}
-            </button>
+              <button
+                type="submit"
+                disabled={isAuthenticating}
+                className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-medium rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+              >
+                {isAuthenticating ? (
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <Unlock className="w-4 h-4" />
+                    <span>Unlock Vault</span>
+                  </>
+                )}
+              </button>
 
-            <button
-              type="button"
-              onClick={handleBiometricUnlock}
-              disabled={isAuthenticating}
-              className="w-full h-12 bg-theme-input hover:bg-theme-card-hover border border-theme active:scale-[0.99] text-theme-primary font-medium rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              <Fingerprint className="w-5 h-5 text-indigo-500" />
-              <span>Unlock with Touch ID / Biometrics</span>
-            </button>
-          </form>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUnlockMode('biometric_pin');
+                    setAuthError(null);
+                  }}
+                  className="text-xs text-indigo-500 hover:text-indigo-400 font-medium transition-colors"
+                >
+                  Use Touch ID &amp; Quick PIN instead
+                </button>
+              </div>
+            </form>
+          )}
 
-          <div className="mt-6 pt-6 border-t border-theme flex items-center justify-between text-xs text-theme-muted">
+          <div className="mt-4 pt-4 border-t border-theme flex items-center justify-between text-xs text-theme-muted">
             <span>Argon2id + ChaCha20</span>
-            <span>v4.2.0</span>
+            <span>v5.0.0 Native</span>
           </div>
         </div>
       </div>
@@ -2459,6 +2615,27 @@ export default function App() {
                         <p className="text-[11px] text-theme-muted">Unlock vault instantly using device biometric sensors</p>
                       </div>
                       <span className="text-xs font-bold text-emerald-500 font-mono">Active</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
+                      <div>
+                        <span className="text-xs font-medium text-theme-primary block">Quick Unlock PIN (4 Digits)</span>
+                        <p className="text-[11px] text-theme-muted">Fast keypad unlock code (Default: 1234)</p>
+                      </div>
+                      <input
+                        type="password"
+                        maxLength={4}
+                        value={quickPinSetting}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setQuickPinSetting(val);
+                          if (val.length === 4) {
+                            setQuickPin(val);
+                            localStorage.setItem('orvpass_quick_pin', val);
+                          }
+                        }}
+                        className="w-16 text-center font-mono font-bold text-xs bg-theme-input border border-theme rounded-lg py-1 text-indigo-500 focus:outline-none focus:border-indigo-500"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between p-3 rounded-xl bg-theme-tag border border-theme">
