@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Orvpass Autofill",
-  "version": "2.0.0",
-  "description": "Premium autofill extension for Orvpass",
+  "name": "Orvpass - Zero-Knowledge Password & Passkey Manager",
+  "version": "5.0.0",
+  "description": "High-speed, zero-knowledge password & passkey manager with native biometrics and instant autofill.",
   "permissions": [
-    "activeTab",
     "storage",
-    "scripting"
+    "activeTab",
+    "scripting",
+    "tabs"
   ],
   "background": {
     "service_worker": "background.js"
@@ -14,11 +15,21 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
+  "commands": {
+    "auto_fill": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Autofill credentials for current page"
+    }
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Orvpass"
+    "default_title": "Orvpass Vault"
   }
 }
