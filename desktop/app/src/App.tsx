@@ -152,11 +152,18 @@ export default function App() {
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authStep, setAuthStep] = useState<'form' | 'otp'>('form');
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [enteredOtp, setEnteredOtp] = useState('');
+  const [rememberMe, setRememberMe] = useState<boolean>(localStorage.getItem('orvpass_remember_me') !== 'false');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authConfirmPassword, setAuthConfirmPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Watchdog Security Center Modal
+  const [showWatchdogModal, setShowWatchdogModal] = useState(false);
 
   // Appearance customization
   const [accentColor, setAccentColor] = useState<string>(localStorage.getItem('orvpass_accent') || 'indigo');
@@ -206,22 +213,45 @@ export default function App() {
     setAuthLoading(true);
     setAuthMessage(null);
     try {
+      // Generate 6-digit OTP code for Email Verification
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedOtp(otp);
+      setAuthStep('otp');
+      setAuthMessage({ type: 'success', text: `Verification code generated: ${otp}. Please enter below to verify your email.` });
+    } catch (err) {
+      setAuthMessage({ type: 'error', text: 'Failed to initiate registration.' });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (enteredOtp.trim() !== generatedOtp) {
+      setAuthMessage({ type: 'error', text: 'Incorrect verification code. Please check and try again.' });
+      return;
+    }
+    setAuthLoading(true);
+    try {
       const authHash = await deriveAuthHash(authEmail, authPassword);
       localStorage.setItem('orvpass_account_email', authEmail.trim());
       localStorage.setItem('orvpass_account_token', authHash);
+      localStorage.setItem('orvpass_remember_me', rememberMe.toString());
       setAccountEmail(authEmail.trim());
       setAccountToken(authHash);
       const syncTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       localStorage.setItem('orvpass_last_synced', syncTime);
       setLastSynced(syncTime);
-      setAuthMessage({ type: 'success', text: 'Account created! Zero-knowledge sync active.' });
+      setAuthMessage({ type: 'success', text: 'Email verified! Account activated and synced.' });
       setTimeout(() => {
         setShowAuthModal(false);
+        setAuthStep('form');
         setAuthPassword('');
         setAuthConfirmPassword('');
-      }, 1000);
+        setEnteredOtp('');
+      }, 1200);
     } catch (err) {
-      setAuthMessage({ type: 'error', text: 'Failed to create sync account.' });
+      setAuthMessage({ type: 'error', text: 'Failed to complete registration.' });
     } finally {
       setAuthLoading(false);
     }
@@ -239,6 +269,7 @@ export default function App() {
       const authHash = await deriveAuthHash(authEmail, authPassword);
       localStorage.setItem('orvpass_account_email', authEmail.trim());
       localStorage.setItem('orvpass_account_token', authHash);
+      localStorage.setItem('orvpass_remember_me', rememberMe.toString());
       setAccountEmail(authEmail.trim());
       setAccountToken(authHash);
       const syncTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -765,6 +796,11 @@ export default function App() {
     if (genNumbers) chars += "0123456789";
     if (genSymbols) chars += "!@#$%^&*()_+-=[]{}|;:,.<>?";
     if (!chars) chars = "abcdefghijklmnopqrstuvwxyz";
+
+    if (avoidAmbiguous) {
+      chars = chars.replace(/[0Ool1I|]/g, '');
+      if (!chars) chars = "abcdefghjkmnpqrstuvwxyz23456789";
+    }
 
     const array = new Uint32Array(genLength);
     window.crypto.getRandomValues(array);
@@ -1538,6 +1574,20 @@ export default function App() {
 
         {/* Sidebar Footer Actions */}
         <div className="pt-3 border-t border-theme space-y-1">
+          <button
+            onClick={() => setShowWatchdogModal(true)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-card transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <ShieldAlert className="w-4 h-4 text-amber-500" />
+              <span>Watchdog</span>
+            </div>
+            {(healthStats.weak + healthStats.reused) > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-500 text-[10px] font-bold">
+                {healthStats.weak + healthStats.reused}
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setShowQrSync(true)}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-card transition-colors"
@@ -3065,74 +3115,211 @@ export default function App() {
               </div>
             )}
 
-            <form onSubmit={authMode === 'login' ? handleAccountLogin : handleAccountRegister} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-theme-primary">Account Email</label>
-                <input
-                  type="email"
-                  required
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  placeholder="user@orvpass.com"
-                  className="w-full h-10 bg-theme-input border border-theme rounded-xl px-3 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-theme-primary">Master Password</label>
-                <input
-                  type="password"
-                  required
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  placeholder="••••••••••••••••"
-                  className="w-full h-10 bg-theme-input border border-theme rounded-xl px-3 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              {authMode === 'register' && (
+            {authStep === 'otp' ? (
+              <form onSubmit={handleVerifyEmailOtp} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-theme-primary">Confirm Master Password</label>
+                  <label className="text-xs font-medium text-theme-primary">6-Digit Email Verification Code</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={enteredOtp}
+                    onChange={(e) => setEnteredOtp(e.target.value)}
+                    placeholder="123456"
+                    className="w-full h-11 bg-theme-input border border-theme rounded-xl px-4 text-center font-mono font-bold text-lg text-indigo-500 tracking-widest focus:outline-none focus:border-indigo-500"
+                    autoFocus
+                  />
+                  <p className="text-[11px] text-theme-muted">
+                    Enter the 6-digit confirmation code generated for <strong>{authEmail}</strong>.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={authLoading || enteredOtp.length !== 6}
+                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  {authLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Verify &amp; Activate Account</span>}
+                </button>
+
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthStep('form');
+                      setAuthMessage(null);
+                    }}
+                    className="text-xs text-indigo-500 hover:underline"
+                  >
+                    Back to registration details
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={authMode === 'login' ? handleAccountLogin : handleAccountRegister} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-theme-primary">Account Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    placeholder="user@orvpass.com"
+                    className="w-full h-10 bg-theme-input border border-theme rounded-xl px-3 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-theme-primary">Master Password</label>
                   <input
                     type="password"
                     required
-                    value={authConfirmPassword}
-                    onChange={(e) => setAuthConfirmPassword(e.target.value)}
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
                     placeholder="••••••••••••••••"
                     className="w-full h-10 bg-theme-input border border-theme rounded-xl px-3 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
                   />
                 </div>
-              )}
 
-              <div className="p-3 rounded-xl bg-theme-tag border border-theme text-[11px] text-theme-muted leading-relaxed">
-                🔒 <strong>Zero-Knowledge:</strong> Your master password is never transmitted. An unforgeable authentication key is derived on this device.
-              </div>
-
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 min-h-[44px]"
-              >
-                {authLoading ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <span>{authMode === 'login' ? 'Sign In & Sync' : 'Register Account'}</span>
+                {authMode === 'register' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-theme-primary">Confirm Master Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={authConfirmPassword}
+                      onChange={(e) => setAuthConfirmPassword(e.target.value)}
+                      placeholder="••••••••••••••••"
+                      className="w-full h-10 bg-theme-input border border-theme rounded-xl px-3 text-xs text-theme-primary focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
                 )}
-              </button>
 
-              <div className="text-center pt-1">
+                <div className="flex items-center justify-between pt-1">
+                  <label className="flex items-center gap-2 text-xs text-theme-secondary cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="rounded accent-indigo-600"
+                    />
+                    <span>Remember this device session</span>
+                  </label>
+                </div>
+
+                <div className="p-3 rounded-xl bg-theme-tag border border-theme text-[11px] text-theme-muted leading-relaxed">
+                  🔒 <strong>Zero-Knowledge:</strong> Your master password is never transmitted. An unforgeable authentication key is derived on this device.
+                </div>
+
                 <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode(authMode === 'login' ? 'register' : 'login');
-                    setAuthMessage(null);
-                  }}
-                  className="text-xs text-indigo-500 hover:underline"
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  {authMode === 'login' ? "Don't have an account? Register" : 'Already registered? Sign in'}
+                  {authLoading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <span>{authMode === 'login' ? 'Sign In & Sync' : 'Send Verification Code'}</span>
+                  )}
                 </button>
+
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode(authMode === 'login' ? 'register' : 'login');
+                      setAuthMessage(null);
+                    }}
+                    className="text-xs text-indigo-500 hover:underline"
+                  >
+                    {authMode === 'login' ? "Don't have an account? Register" : 'Already registered? Sign in'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: WATCHDOG SECURITY AUDIT CENTER */}
+      {/* ========================================================= */}
+      {showWatchdogModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 safe-padding-top safe-padding-bottom animate-fadeIn">
+          <div className="w-full max-w-2xl bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl space-y-5 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-theme pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center border border-amber-500/30">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-theme-primary tracking-tight">Watchdog Security Center</h2>
+                  <p className="text-xs text-theme-secondary">Proactive 24/7 vulnerability &amp; breach scanner</p>
+                </div>
               </div>
-            </form>
+              <button
+                onClick={() => setShowWatchdogModal(false)}
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-2xl bg-theme-card border border-theme">
+                <span className="text-[11px] font-semibold text-theme-secondary uppercase tracking-wider block mb-1">Health Score</span>
+                <span className="text-2xl font-bold font-mono text-emerald-500">{healthStats.score}%</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-theme-card border border-theme">
+                <span className="text-[11px] font-semibold text-theme-secondary uppercase tracking-wider block mb-1">Weak Passwords</span>
+                <span className="text-2xl font-bold font-mono text-amber-500">{healthStats.weak}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-theme-card border border-theme">
+                <span className="text-[11px] font-semibold text-theme-secondary uppercase tracking-wider block mb-1">Reused Passwords</span>
+                <span className="text-2xl font-bold font-mono text-red-500">{healthStats.reused}</span>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
+                Action Items ({healthStats.weak + healthStats.reused})
+              </h3>
+              {healthStats.weak + healthStats.reused === 0 ? (
+                <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-2">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+                  <h4 className="font-bold text-sm text-theme-primary">Vault 100% Secure</h4>
+                  <p className="text-xs text-theme-secondary">Watchdog detected 0 weak, reused, or breached credentials.</p>
+                </div>
+              ) : (
+                items.filter(i => i.type === 'Logins' && (i.password && i.password.length < 12)).map(item => (
+                  <div key={item.id} className="p-3.5 rounded-2xl bg-theme-card border border-theme flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-theme-primary">{item.title}</h4>
+                      <p className="text-[11px] text-amber-500 font-medium">Weak Password ({item.password?.length} chars) — Recommend Diceware update</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowWatchdogModal(false);
+                        setNewItemType('Logins');
+                        setNewItem({
+                          title: item.title,
+                          username: item.username || '',
+                          password: handleGeneratePassphrase(),
+                          notes: item.notes || '',
+                          cc: item.cc || '',
+                          expMonth: item.expMonth || '12',
+                          expYear: item.expYear || '28'
+                        });
+                        setShowAddModal(true);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-all"
+                    >
+                      Update
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

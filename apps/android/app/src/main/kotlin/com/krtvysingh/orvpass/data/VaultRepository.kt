@@ -358,4 +358,82 @@ class VaultRepository(private val context: Context) {
             strong = (total - weak - if (reused > 0) 1 else 0).coerceAtLeast(0)
         )
     }
+
+    fun exportCsv(): String {
+        val sb = StringBuilder("title,username,password,notes,type\n")
+        _items.value.forEach { item ->
+            val escapedNotes = item.notes.replace("\"", "'")
+            sb.append("\"${item.title}\",\"${item.username}\",\"${item.password}\",\"$escapedNotes\",\"${item.type}\"\n")
+        }
+        return sb.toString()
+    }
+
+    fun exportJson(): String {
+        return try {
+            json.encodeToString(kotlinx.serialization.builtins.ListSerializer(VaultItem.serializer()), _items.value)
+        } catch (t: Throwable) {
+            "[]"
+        }
+    }
+
+    fun exportHtml(): String {
+        val cards = StringBuilder()
+        _items.value.forEach { item ->
+            cards.append("<div style='background:#131d33;padding:1rem;border-radius:12px;margin-bottom:1rem;'>")
+            cards.append("<h3>${item.title} (${item.type})</h3>")
+            if (item.username.isNotEmpty()) cards.append("<p><b>Username:</b> <code>${item.username}</code></p>")
+            if (item.password.isNotEmpty()) cards.append("<p><b>Password:</b> <code>${item.password}</code></p>")
+            if (item.notes.isNotEmpty()) cards.append("<p><b>Notes:</b> ${item.notes}</p>")
+            cards.append("</div>")
+        }
+        return "<!DOCTYPE html><html><head><title>Orvpass Emergency Backup</title><style>body{font-family:sans-serif;background:#070b14;color:#f8fafc;padding:2rem;}</style></head><body><h1>Orvpass Vault Backup</h1>$cards</body></html>"
+    }
+
+    suspend fun importFromText(text: String): Int = withContext(Dispatchers.IO) {
+        var count = 0
+        val trimmed = text.trim()
+        val importedList = mutableListOf<VaultItem>()
+
+        if (trimmed.startsWith("[")) {
+            try {
+                val parsed = json.decodeFromString(kotlinx.serialization.builtins.ListSerializer(VaultItem.serializer()), trimmed)
+                importedList.addAll(parsed)
+            } catch (t: Throwable) {}
+        } else {
+            val lines = trimmed.split("\n")
+            lines.drop(1).forEach { line ->
+                if (line.isNotBlank()) {
+                    val parts = line.split(",").map { it.trim().removeSurrounding("\"") }
+                    if (parts.size >= 2) {
+                        val newItem = VaultItem(
+                            id = UUID.randomUUID().toString(),
+                            title = parts[0],
+                            username = if (parts.size > 1) parts[1] else "",
+                            password = if (parts.size > 2) parts[2] else "",
+                            notes = if (parts.size > 3) parts[3] else "",
+                            type = if (parts.size > 4) parts[4] else "Logins"
+                        )
+                        importedList.add(newItem)
+                    }
+                }
+            }
+        }
+
+        if (importedList.isNotEmpty()) {
+            val current = _items.value.toMutableList()
+            importedList.forEach { newItem ->
+                if (current.none { it.title == newItem.title && it.username == newItem.username }) {
+                    current.add(0, newItem)
+                    count++
+                }
+            }
+            _items.value = current
+            if (activePassword != null) {
+                try {
+                    LocalCryptoEngine.saveVault(vaultFile, activePassword!!, current)
+                } catch (t: Throwable) {}
+            }
+        }
+        count
+    }
 }

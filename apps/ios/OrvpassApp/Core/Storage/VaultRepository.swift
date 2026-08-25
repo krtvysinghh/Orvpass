@@ -81,6 +81,104 @@ public class VaultRepository: ObservableObject {
         }
     }
 
+    public func setQuickPin(_ pin: String) {
+        UserDefaults.standard.set(pin, forKey: pinKey)
+    }
+
+    public func exportToCsv() -> String {
+        var csv = "title,username,password,notes,type,vaultCategory\n"
+        for item in items {
+            let escapedNotes = item.notes.replacingOccurrences(of: "\"", with: "'")
+            let row = "\"\(item.title)\",\"\(item.username)\",\"\(item.password)\",\"\(escapedNotes)\",\"\(item.type)\",\"\(item.vaultCategory)\"\n"
+            csv += row
+        }
+        return csv
+    }
+
+    public func exportToJson() -> String {
+        guard let data = try? JSONEncoder().encode(items),
+              let jsonStr = String(data: data, encoding: .utf8) else {
+            return "[]"
+        }
+        return jsonStr
+    }
+
+    public func exportToHtml() -> String {
+        var cardsHtml = ""
+        for item in items {
+            cardsHtml += "<div class=\"card\"><h3>\(item.title) (\(item.type))</h3>"
+            if !item.username.isEmpty {
+                cardsHtml += "<div class=\"field\"><span class=\"label\">Username:</span> <span class=\"code\">\(item.username)</span></div>"
+            }
+            if !item.password.isEmpty {
+                cardsHtml += "<div class=\"field\"><span class=\"label\">Password:</span> <span class=\"code\">\(item.password)</span></div>"
+            }
+            if !item.notes.isEmpty {
+                cardsHtml += "<div class=\"field\"><span class=\"label\">Notes:</span> \(item.notes)</div>"
+            }
+            cardsHtml += "</div>\n"
+        }
+
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Orvpass Emergency Vault Backup</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #070b14; color: #f8fafc; padding: 2rem; max-width: 800px; margin: auto; }
+            .card { background: #131d33; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+            h1 { color: #818cf8; }
+            .meta { color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem; }
+            .field { margin-top: 0.5rem; font-size: 0.9rem; }
+            .label { color: #64748b; font-weight: bold; }
+            .code { font-family: monospace; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <h1>Orvpass Emergency Offline Backup</h1>
+          <div class="meta">Exported \(Date()) &bull; \(items.count) Items</div>
+          \(cardsHtml)
+        </body>
+        </html>
+        """
+    }
+
+    public func importFromText(_ content: String) -> Int {
+        var count = 0
+        if content.trimmingCharacters(in: .whitespaces).starts(with: "[") {
+            // JSON Import
+            if let data = content.data(using: .utf8),
+               let imported = try? JSONDecoder().decode([VaultItem].self, from: data) {
+                for item in imported {
+                    if !items.contains(where: { $0.title == item.title && $0.username == item.username }) {
+                        items.insert(item, at: 0)
+                        count += 1
+                    }
+                }
+            }
+        } else {
+            // CSV Import
+            let lines = content.components(separatedBy: .newlines)
+            for (idx, line) in lines.enumerated() where idx > 0 && !line.isEmpty {
+                let parts = line.components(separatedBy: ",")
+                if parts.count >= 2 {
+                    let title = parts[0].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                    let user = parts.count > 1 ? parts[1].trimmingCharacters(in: CharacterSet(charactersIn: "\"")) : ""
+                    let pass = parts.count > 2 ? parts[2].trimmingCharacters(in: CharacterSet(charactersIn: "\"")) : ""
+                    let notes = parts.count > 3 ? parts[3].trimmingCharacters(in: CharacterSet(charactersIn: "\"")) : ""
+                    let newItem = VaultItem(type: "Logins", title: title, username: user, password: pass, notes: notes)
+                    items.insert(newItem, at: 0)
+                    count += 1
+                }
+            }
+        }
+        if count > 0 {
+            persistItems()
+        }
+        return count
+    }
+
     private func loadInitialData() {
         if UserDefaults.standard.data(forKey: storageKey) == nil {
             let samples = [
