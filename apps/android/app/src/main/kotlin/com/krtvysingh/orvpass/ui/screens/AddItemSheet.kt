@@ -37,9 +37,25 @@ fun AddItemSheet(
     var showGenOptions by remember { mutableStateOf(false) }
     var genLength by remember { mutableStateOf(18) }
 
+    var isPassphraseMode by remember { mutableStateOf(false) }
+
+    fun generateDiceware(): String {
+        val words = listOf(
+            "falcon", "shield", "crypto", "cipher", "matrix", "beacon", "galaxy", "orbit",
+            "quantum", "vector", "shadow", "summit", "horizon", "glacier", "phoenix", "aurora",
+            "nebula", "zenith", "vortex", "starlight", "timber", "cascade", "dynamo", "solace",
+            "granite", "pinnacle", "bastion", "sentinel", "citadel", "velocity", "meridian", "solstice"
+        )
+        val selected = (1..4).map { words.random() }.joinToString("-")
+        val num = (10..99).random()
+        return "$selected-$num"
+    }
+
     LaunchedEffect(selectedType) {
         if (selectedType == "Logins" && password.isEmpty()) {
-            password = onGeneratePassword(genLength)
+            password = if (isPassphraseMode) generateDiceware() else onGeneratePassword(genLength)
+        } else if (selectedType == "Passkeys" && notes.isEmpty()) {
+            notes = "FIDO2 / WebAuthn Discoverable Passkey (ES256)"
         }
     }
 
@@ -74,14 +90,14 @@ fun AddItemSheet(
             // Segmented category chips
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                listOf("Logins", "Secure Notes", "Credit Cards").forEach { type ->
+                listOf("Logins", "Passkeys", "Secure Notes", "Credit Cards").forEach { type ->
                     val isSelected = selectedType == type
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedType = type },
-                        label = { Text(if (type == "Logins") "Login" else if (type == "Secure Notes") "Note" else "Card") },
+                        label = { Text(if (type == "Logins") "Login" else if (type == "Passkeys") "Passkey" else if (type == "Secure Notes") "Note" else "Card", fontSize = 12.sp) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -94,7 +110,7 @@ fun AddItemSheet(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Title / Service *") },
-                placeholder = { Text("e.g. GitHub, Proton, Bank") },
+                placeholder = { Text("e.g. GitHub, Google, Proton") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
@@ -122,7 +138,7 @@ fun AddItemSheet(
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         Row {
-                            IconButton(onClick = { password = onGeneratePassword(genLength) }) {
+                            IconButton(onClick = { password = if (isPassphraseMode) generateDiceware() else onGeneratePassword(genLength) }) {
                                 Icon(Icons.Default.Refresh, contentDescription = "Generate", tint = IndigoPrimary)
                             }
                             IconButton(onClick = { showPassword = !showPassword }) {
@@ -142,7 +158,7 @@ fun AddItemSheet(
                     onClick = { showGenOptions = !showGenOptions },
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
-                    Text(if (showGenOptions) "Hide Generator Options" else "Customize Password Options", fontSize = 12.sp)
+                    Text(if (showGenOptions) "Hide Generator Options" else "Customize Password / Diceware Passphrase", fontSize = 12.sp)
                 }
 
                 if (showGenOptions) {
@@ -151,25 +167,58 @@ fun AddItemSheet(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Length: $genLength", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                Text("Diceware Passphrase Mode", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                                Switch(
+                                    checked = isPassphraseMode,
+                                    onCheckedChange = {
+                                        isPassphraseMode = it
+                                        password = if (it) generateDiceware() else onGeneratePassword(genLength)
+                                    }
+                                )
                             }
-                            Slider(
-                                value = genLength.toFloat(),
-                                onValueChange = {
-                                    genLength = it.toInt()
-                                    password = onGeneratePassword(genLength)
-                                },
-                                valueRange = 8f..64f,
-                                steps = 55
-                            )
+
+                            if (!isPassphraseMode) {
+                                Text("Length: $genLength", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                                Slider(
+                                    value = genLength.toFloat(),
+                                    onValueChange = {
+                                        genLength = it.toInt()
+                                        password = onGeneratePassword(genLength)
+                                    },
+                                    valueRange = 8f..64f,
+                                    steps = 55
+                                )
+                            }
                         }
                     }
                 }
+            } else if (selectedType == "Passkeys") {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("User Identifier / Email") },
+                    placeholder = { Text("user@example.com") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("Passkey Credential Details") },
+                    placeholder = { Text("FIDO2 WebAuthn ES256 Key") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                )
             } else if (selectedType == "Secure Notes") {
                 OutlinedTextField(
                     value = notes,

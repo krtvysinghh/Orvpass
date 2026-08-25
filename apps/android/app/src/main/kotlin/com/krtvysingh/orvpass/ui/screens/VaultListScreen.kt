@@ -50,7 +50,10 @@ fun VaultListScreen(
 
     val categories = listOf("All Items", "Favorites", "Logins", "Passkeys", "Secure Notes", "Credit Cards")
 
-    val filteredItems = remember(items, selectedTab, searchQuery) {
+    var activeVault by remember { mutableStateOf("Personal") }
+    val vaults = listOf("Personal", "Work", "Family")
+
+    val filteredItems = remember(items, selectedTab, searchQuery, activeVault) {
         items.filter { item ->
             val matchQuery = searchQuery.isEmpty() ||
                     item.title.contains(searchQuery, ignoreCase = true) ||
@@ -126,11 +129,35 @@ fun VaultListScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Multi-Vault Switcher
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                vaults.forEach { v ->
+                    val isCurrent = activeVault == v
+                    SuggestionChip(
+                        onClick = { activeVault = v },
+                        label = { Text(v, fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal, fontSize = 11.sp) },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = if (isCurrent) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            labelColor = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        border = SuggestionChipDefaults.suggestionChipBorder(
+                            borderColor = if (isCurrent) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                }
+            }
+
             // Category filter chips
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(categories) { cat ->
