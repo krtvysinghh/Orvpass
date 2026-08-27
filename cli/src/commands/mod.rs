@@ -14,3 +14,5 @@ pub mod ssh;
 pub mod sss;
 pub mod status;
 pub mod totp;
+pub mod devtools;
+pub mod security_ext;

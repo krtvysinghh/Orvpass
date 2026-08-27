@@ -29,3 +29,5 @@ fuzzy-matcher.workspace = true
 chrono.workspace = true
 zeroize.workspace = true
 hex.workspace = true
+clap_mangen.workspace = true
+qrcode.workspace = true
