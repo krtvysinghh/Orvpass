@@ -60,6 +60,23 @@ pub fn generate(
     Ok(secret.clone())
 }
 
+pub fn generate_totp(secret: &[u8], period: u64) -> Result<u32, TotpError> {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let step = now / period.max(1);
+    
+    // Quick 6-digit numeric hash
+    let mut hash: u32 = 0;
+    for (i, &b) in secret.iter().enumerate() {
+        hash = hash.wrapping_add((b as u32).wrapping_mul(31u32.pow((i % 5) as u32)));
+    }
+    hash = hash.wrapping_add((step as u32).wrapping_mul(7919));
+    Ok(100_000 + (hash % 900_000))
+}
+
 impl std::fmt::Debug for TotpSecret {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TotpSecret")

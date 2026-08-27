@@ -1,23 +1,31 @@
 [package]
-name="orvpass-cli"
-version="5.0.0"
-edition="2024"
+name = "orvpass-cli"
+version = "5.0.0"
+edition = "2024"
 
 [[bin]]
-name="orvpass"
-path="src/main.rs"
+name = "orvpass"
+path = "src/main.rs"
 
 [dependencies]
-orvpass-core={path="../core"}
-clap.workspace=true
-anyhow.workspace=true
-dialoguer.workspace=true
-rpassword.workspace=true
-aes-gcm = "0.11.1"
+orvpass-core = { path = "../core" }
+clap.workspace = true
+clap_complete.workspace = true
+anyhow.workspace = true
+dialoguer.workspace = true
+rpassword.workspace = true
 argon2.workspace = true
+chacha20poly1305.workspace = true
+aes-gcm.workspace = true
 rand.workspace = true
-base64 = "0.23.1"
+base64.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-dirs = "6.0.0"
-arboard = "3.6.1"
+dirs.workspace = true
+arboard.workspace = true
+ratatui.workspace = true
+crossterm.workspace = true
+fuzzy-matcher.workspace = true
+chrono.workspace = true
+zeroize.workspace = true
+hex.workspace = true

@@ -1,34 +1,35 @@
 [workspace]
 members = [
     "core",
-    "cli",
-    "desktop/app/src-tauri",
-    "bindings/android"
+    "cli"
 ]
 resolver = "2"
 
 [workspace.dependencies]
-serde = { version="1", features=["derive"] }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
 
-zeroize = { version="1", features=["derive"] }
+zeroize = { version = "1", features = ["derive"] }
 argon2 = "0.5"
 chacha20poly1305 = "0.10"
 hkdf = "0.12"
 sha2 = "0.10"
 rand = "0.9"
-uuid = { version="1", features=["v4", "serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
 chrono = "0.4"
 
 anyhow = "1"
-clap = { version="4", features=["derive"] }
+clap = { version = "4", features = ["derive", "cargo", "env"] }
+clap_complete = "4"
 dirs = "6"
 base64 = "0.23"
 rpassword = "7"
-dialoguer = "0.12"
+dialoguer = { version = "0.11", features = ["fuzzy-select"] }
 arboard = "3"
 aes-gcm = "0.11"
-postcard = { version="1", features=["alloc"] }
-
+postcard = { version = "1", features = ["alloc"] }
 hex = "0.4"
+ratatui = "0.29"
+crossterm = "0.28"
+fuzzy-matcher = "0.3"

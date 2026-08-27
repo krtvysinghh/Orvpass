@@ -1,4 +1,5 @@
-name: 'Publish Desktop & Mobile Releases'
+name: 'Publish Pure Rust CLI & TUI Binary Releases'
+
 on:
   push:
     tags:
@@ -9,133 +10,59 @@ permissions:
   contents: write
 
 jobs:
-  build-desktop:
+  release-binaries:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
-            args: '--bundles app,dmg'
-          - platform: 'ubuntu-22.04'
-            args: '--bundles deb'
-          - platform: 'windows-latest'
-            args: '--bundles msi,nsis'
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            asset_name: orvpass-v5.0.0-macos-x86_64.tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            asset_name: orvpass-v5.0.0-macos-arm64.tar.gz
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            asset_name: orvpass-v5.0.0-linux-x86_64.tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            asset_name: orvpass-v5.0.0-windows-x86_64.zip
 
-    runs-on: ${{ matrix.platform }}
-    permissions:
-      contents: write
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libayatana-appindicator3-dev libfuse2 libssl-dev libsoup-3.0-dev javascriptcoregtk-4.1
-
-      - name: install frontend dependencies
-        working-directory: desktop/app
-        run: npm install
-
-      - name: build tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: desktop/app
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Orvpass ${{ github.ref_name }}'
-          releaseBody: 'Official release assets for Orvpass - Zero-Knowledge Password & Passkey Manager.'
-          releaseDraft: false
-          prerelease: false
-          args: ${{ matrix.args }}
-
-  build-android:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: install Rust stable
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+          targets: ${{ matrix.target }}
 
-      - name: setup java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
+      - name: Build Binary
+        run: cargo build --release -p orvpass-cli --target ${{ matrix.target }}
 
-      - name: setup android sdk
-        uses: android-actions/setup-android@v3
-
-      - name: install NDK
-        run: sdkmanager "ndk;25.2.9519653"
-
-      - name: build native JNI libraries
-        env:
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
+      - name: Package Unix Archive
+        if: matrix.os != 'windows-latest'
         run: |
-          cargo build --release -p orvpass-android --target aarch64-linux-android || true
-          cargo build --release -p orvpass-android --target armv7-linux-androideabi || true
-          cargo build --release -p orvpass-android --target x86_64-linux-android || true
-          cargo build --release -p orvpass-android --target i686-linux-android || true
-          mkdir -p apps/android/app/src/main/jniLibs/arm64-v8a
-          mkdir -p apps/android/app/src/main/jniLibs/armeabi-v7a
-          mkdir -p apps/android/app/src/main/jniLibs/x86_64
-          mkdir -p apps/android/app/src/main/jniLibs/x86
-          cp target/aarch64-linux-android/release/liborvpass_android.so apps/android/app/src/main/jniLibs/arm64-v8a/ 2>/dev/null || true
-          cp target/armv7-linux-androideabi/release/liborvpass_android.so apps/android/app/src/main/jniLibs/armeabi-v7a/ 2>/dev/null || true
-          cp target/x86_64-linux-android/release/liborvpass_android.so apps/android/app/src/main/jniLibs/x86_64/ 2>/dev/null || true
-          cp target/i686-linux-android/release/liborvpass_android.so apps/android/app/src/main/jniLibs/x86/ 2>/dev/null || true
+          mkdir -p release_assets
+          cp target/${{ matrix.target }}/release/orvpass orvpass
+          tar -czf release_assets/${{ matrix.asset_name }} orvpass README.md LICENSE
+          cd release_assets && sha256sum ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Build Android APK
-        working-directory: apps/android
+      - name: Package Windows Archive
+        if: matrix.os == 'windows-latest'
+        shell: bash
         run: |
-          gradle assembleDebug --no-daemon || true
+          mkdir -p release_assets
+          cp target/${{ matrix.target }}/release/orvpass.exe orvpass.exe
+          7z a release_assets/${{ matrix.asset_name }} orvpass.exe README.md LICENSE
+          cd release_assets && certutil -hashfile ${{ matrix.asset_name }} SHA256 > ${{ matrix.asset_name }}.sha256
 
-      - name: Package Release APK
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          mkdir -p release_apks
-          APK_PATH=$(find apps/android/ -name "*.apk" 2>/dev/null | head -1)
-          if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
-            if [ -n "$KEYSTORE_BASE64" ]; then
-              echo "$KEYSTORE_BASE64" | base64 --decode > orvpass.p12
-              BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -1)
-              $BUILD_TOOLS/apksigner sign --ks orvpass.p12 --ks-type pkcs12 --ks-pass "pass:$KEYSTORE_PASSWORD" --key-pass "pass:$KEY_PASSWORD" --ks-key-alias "$KEY_ALIAS" "$APK_PATH" || true
-              rm -f orvpass.p12
-            fi
-            cp "$APK_PATH" release_apks/Orvpass-android.apk
-          else
-            echo "Packaging release asset archive..."
-            touch release_apks/Orvpass-android.apk
-          fi
-
-      - name: Release APK
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: release_apks/*
+          files: release_assets/*
           fail_on_unmatched_files: false
-

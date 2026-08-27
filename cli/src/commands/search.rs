@@ -1,18 +1,44 @@
 use crate::vault::database;
+use orvpass_core::models::ItemData;
+use fuzzy_matcher::FuzzyMatcher;
+use fuzzy_matcher::skim::SkimMatcherV2;
 
 pub fn execute(query: &str) {
-    let items = database::list();
+    let items = database::load_items();
+    let matcher = SkimMatcherV2::default();
 
-    let mut found = false;
+    let mut matches: Vec<(&orvpass_core::models::VaultItem, i64)> = items
+        .iter()
+        .filter_map(|item| {
+            let score1 = matcher.fuzzy_match(&item.title, query).unwrap_or(0);
+            let score2 = matcher.fuzzy_match(&item.name, query).unwrap_or(0);
+            let score = score1.max(score2);
+            if score > 0 {
+                Some((item, score))
+            } else {
+                None
+            }
+        })
+        .collect();
 
-    for item in items {
-        if item.name.contains(query) {
-            println!("{}", item.name);
-            found = true;
-        }
+    matches.sort_by(|a, b| b.1.cmp(&a.1));
+
+    if matches.is_empty() {
+        println!("🔍 No matching credentials found for '{}'.", query);
+        return;
     }
 
-    if !found {
-        println!("No matches");
+    println!("🔍 Search results for '{}' ({} matches):", query, matches.len());
+    println!("{:<4} {:<24} {:<28}", "TYPE", "TITLE", "DETAILS");
+    println!("{}", "-".repeat(60));
+
+    for (item, _) in matches {
+        let (icon, detail) = match &item.data {
+            ItemData::Login(l) => ("🔑", l.username.clone().unwrap_or_default()),
+            ItemData::SecureNote(_) => ("📝", "Secure Note".to_string()),
+            ItemData::CreditCard(c) => ("💳", format!("•••• {}", c.card_number.chars().rev().take(4).collect::<String>().chars().rev().collect::<String>())),
+            _ => ("📦", String::new()),
+        };
+        println!("{:<4} {:<24} {:<28}", icon, item.title, detail);
     }
 }

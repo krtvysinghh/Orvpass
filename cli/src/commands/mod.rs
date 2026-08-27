@@ -1,9 +1,16 @@
 pub mod add;
+pub mod audit;
+pub mod completions;
 pub mod export;
 pub mod generate;
 pub mod get;
 pub mod import;
 pub mod list;
+pub mod orvsend;
 pub mod remove;
+pub mod run;
 pub mod search;
+pub mod ssh;
+pub mod sss;
 pub mod status;
+pub mod totp;
