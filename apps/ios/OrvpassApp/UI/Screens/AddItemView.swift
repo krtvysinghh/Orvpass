@@ -20,6 +20,37 @@ public struct AddItemView: View {
     public var body: some View {
         NavigationView {
             Form {
+                Section("Templates & Presets") {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            Button("🔑 SSH Key") {
+                                selectedType = "Secure Notes"
+                                title = "SSH Server Key"
+                                notes = "Host: 192.168.1.1\nPort: 22\nUser: root\nKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5..."
+                            }
+                            .buttonStyle(.bordered)
+                            .font(.caption)
+
+                            Button("📶 Wi-Fi") {
+                                selectedType = "Secure Notes"
+                                title = "Home Wi-Fi Network"
+                                notes = "SSID: HomeNetwork\nSecurity: WPA3-Personal\nPassword: "
+                            }
+                            .buttonStyle(.bordered)
+                            .font(.caption)
+
+                            Button("📜 License") {
+                                selectedType = "Secure Notes"
+                                title = "Software License"
+                                notes = "Product: App Pro\nLicense Key: XXXX-XXXX-XXXX-XXXX\nSeat: 1"
+                            }
+                            .buttonStyle(.bordered)
+                            .font(.caption)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+
                 Section {
                     Picker("Category", selection: $selectedType) {
                         ForEach(categories, id: \.self) { cat in
@@ -40,9 +71,19 @@ public struct AddItemView: View {
                     TextField("Title / Service *", text: $title)
 
                     if selectedType == "Logins" || selectedType == "Passkeys" {
-                        TextField(selectedType == "Passkeys" ? "User Handle / Email" : "Username / Email", text: $username)
-                            .textContentType(.username)
-                            .autocapitalization(.none)
+                        HStack {
+                            TextField(selectedType == "Passkeys" ? "User Handle / Email" : "Username / Email", text: $username)
+                                .textContentType(.username)
+                                .autocapitalization(.none)
+
+                            Button("Alias") {
+                                let randomWord = ["shadow", "swift", "nexus", "prism", "cyber"].randomElement() ?? "alias"
+                                let num = Int.random(in: 100...999)
+                                username = "\(randomWord)\(num)@duck.com"
+                            }
+                            .font(.caption2)
+                            .foregroundColor(.indigo)
+                        }
                     }
 
                     if selectedType == "Logins" {
@@ -82,7 +123,7 @@ public struct AddItemView: View {
                     }
                 }
 
-                Section("Notes & Keys") {
+                Section("Notes & Custom Fields") {
                     TextEditor(text: $notes)
                         .frame(minHeight: 100)
                 }
@@ -98,31 +139,34 @@ public struct AddItemView: View {
                         saveItem()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
-                    .fontWeight(.bold)
                 }
             }
-        }
-        .onAppear {
-            if password.isEmpty && selectedType == "Logins" {
-                generatePassword()
+            .onAppear {
+                if selectedType == "Logins" && password.isEmpty {
+                    generatePassword()
+                }
             }
         }
     }
 
     private func generatePassword() {
         if isPassphraseMode {
-            password = LocalCryptoEngine.generateDicewarePassphrase()
+            let words = ["correct", "horse", "battery", "staple", "silver", "crypto", "shield", "beacon", "galaxy", "orbit", "quantum", "falcon", "liquid", "zenith", "timber", "solace"]
+            let chosen = (0..<4).compactMap { _ in words.randomElement() }
+            let num = Int.random(in: 10...99)
+            password = chosen.joined(separator: "-") + "-\(num)"
         } else {
-            password = LocalCryptoEngine.generatePassword(length: Int(genLength))
+            let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-="
+            let length = Int(genLength)
+            password = String((0..<length).compactMap { _ in chars.randomElement() })
         }
     }
 
     private func saveItem() {
-        guard !title.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         let newItem = VaultItem(
             type: selectedType,
             title: title.trimmingCharacters(in: .whitespaces),
-            username: username,
+            username: username.trimmingCharacters(in: .whitespaces),
             password: password,
             notes: notes,
             vaultCategory: repository.selectedVault

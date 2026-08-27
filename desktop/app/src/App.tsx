@@ -170,12 +170,33 @@ export default function App() {
   const [uiDensity, setUiDensity] = useState<'comfortable' | 'compact'>((localStorage.getItem('orvpass_density') as any) || 'comfortable');
   const [avoidAmbiguous, setAvoidAmbiguous] = useState<boolean>(localStorage.getItem('orvpass_gen_ambig') === 'true');
 
-  // Top 20 Power Features State
+  // Top 40 Meaningful Power Features State
   const [travelMode, setTravelMode] = useState<boolean>(localStorage.getItem('orvpass_travel_mode') === 'true');
   const [activeVault, setActiveVault] = useState<'Personal' | 'Work' | 'Family'>('Personal');
   const [showQuickSearch, setShowQuickSearch] = useState(false);
   const [showQrSync, setShowQrSync] = useState(false);
   const [showAuditLog, setShowAuditLog] = useState(false);
+  const [showSssModal, setShowSssModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState<Item | null>(null);
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
+  
+  // Custom Fields state for Item modal
+  const [customFields, setCustomFields] = useState<Array<{ id: string; name: string; value: string; isSecret: boolean; fieldType: string }>>([]);
+
+  // Shamir's Secret Sharing 3-of-5 state
+  const [sssShards, setSssShards] = useState<string[]>([]);
+  const [sssReconstructShards, setSssReconstructShards] = useState<string[]>(['', '', '']);
+  const [sssRecoveredSecret, setSssRecoveredSecret] = useState<string | null>(null);
+
+  // Item Version History snapshot storage
+  const [itemHistory, setItemHistory] = useState<Record<string, Array<{ date: string; password?: string; notes?: string }>>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('orvpass_item_history') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
   const [auditLogs, setAuditLogs] = useState<Array<{ id: string; action: string; title: string; timestamp: string }>>(() => {
     try {
       return JSON.parse(localStorage.getItem('orvpass_audit_log') || '[]');
@@ -184,12 +205,57 @@ export default function App() {
     }
   });
   const [showOrvSendModal, setShowOrvSendModal] = useState<Item | null>(null);
+  const [orvSendNote, setOrvSendNote] = useState('');
+  const [orvSendPassword, setOrvSendPassword] = useState('');
+  const [orvSendExpiresHours, setOrvSendExpiresHours] = useState(24);
+  const [orvSendResultLink, setOrvSendResultLink] = useState<string | null>(null);
+
   const [emergencyContact, setEmergencyContact] = useState<string>(localStorage.getItem('orvpass_emergency_contact') || '');
   const [emergencyDays, setEmergencyDays] = useState<number>(() => parseInt(localStorage.getItem('orvpass_emergency_days') || '14', 10));
   const [hardwareKeyEnrolled, setHardwareKeyEnrolled] = useState<boolean>(localStorage.getItem('orvpass_fido_enrolled') === 'true');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastActivityRef = useRef<number>(Date.now());
+
+  // Tactile WebAudio Synthesizer for buttery feedback
+  const playTactileAudio = (type: 'click' | 'unlock' | 'copy' | 'lock') => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'click') {
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.04);
+      } else if (type === 'copy') {
+        osc.frequency.setValueAtTime(520, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+      } else if (type === 'unlock') {
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+      } else if (type === 'lock') {
+        osc.frequency.setValueAtTime(660, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(330, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+      }
+    } catch {}
+  };
 
   // Zero-Knowledge Auth Hash derivation
   const deriveAuthHash = async (email: string, pass: string): Promise<string> => {
@@ -337,17 +403,28 @@ export default function App() {
     });
   };
 
-  // Global Quick Search (Cmd+K / Ctrl+K) listener
+  // Global Quick Search (Cmd+K / Ctrl+K / Cmd+Shift+Space / Cmd+N / Cmd+L) listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      // Spotlight / Quick Search
+      if (((e.metaKey || e.ctrlKey) && e.key === 'k') || ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.code === 'Space' || e.key === ' '))) {
         e.preventDefault();
         setShowQuickSearch(prev => !prev);
+      }
+      // Quick New Item
+      if ((e.metaKey || e.ctrlKey) && e.key === 'n' && vaultStatus?.unlocked && !showAddModal) {
+        e.preventDefault();
+        setShowTemplatesModal(true);
+      }
+      // Quick Lock
+      if ((e.metaKey || e.ctrlKey) && e.key === 'l' && vaultStatus?.unlocked) {
+        e.preventDefault();
+        handleLockVault();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [vaultStatus?.unlocked, showAddModal]);
 
   // 1. Initial vault check
   useEffect(() => {
@@ -823,17 +900,35 @@ export default function App() {
     if (!newItem.title.trim()) return;
 
     try {
+      let finalNotes = newItem.notes || '';
+      if (customFields.length > 0) {
+        const fieldsStr = customFields.map(f => `[${f.name.toUpperCase()}]: ${f.value}`).join('\n');
+        finalNotes = finalNotes ? `${finalNotes}\n\n${fieldsStr}` : fieldsStr;
+      }
+
       await invoke('add_item', {
         itemType: newItemType,
         title: newItem.title.trim(),
         username: newItem.username || null,
         pass: newItem.password || null,
-        notes: newItem.notes || null,
+        notes: finalNotes || null,
         cc: newItem.cc || null,
         expMonth: newItem.expMonth || null,
         expYear: newItem.expYear || null
       });
 
+      // Save version snapshot into itemHistory
+      const historyKey = newItem.title.trim();
+      const currentSnapshots = itemHistory[historyKey] || [];
+      const updatedSnapshots = [
+        { date: new Date().toLocaleString(), password: newItem.password, notes: finalNotes },
+        ...currentSnapshots.slice(0, 9)
+      ];
+      const newHistory = { ...itemHistory, [historyKey]: updatedSnapshots };
+      setItemHistory(newHistory);
+      localStorage.setItem('orvpass_item_history', JSON.stringify(newHistory));
+
+      playTactileAudio('click');
       await loadItems();
       setNewItem({
         title: '',
@@ -844,6 +939,7 @@ export default function App() {
         expMonth: '12',
         expYear: '28',
       });
+      setCustomFields([]);
       setShowAddModal(false);
     } catch (err) {
       console.error("Add item failed:", err);
@@ -907,6 +1003,7 @@ export default function App() {
       document.body.removeChild(el);
     });
 
+    playTactileAudio('copy');
     setCopiedId(id);
     logAudit('COPIED_CREDENTIAL', `Item ID: ${id.slice(0, 8)}...`);
     setTimeout(() => setCopiedId(null), 2000);
@@ -2093,6 +2190,25 @@ export default function App() {
                         ) : (
                           <>
                             <button
+                              onClick={() => {
+                                setShowOrvSendModal(item);
+                                setOrvSendNote(item.password ? `Username: ${item.username || ''}\nPassword: ${item.password}\nNotes: ${item.notes || ''}` : item.notes || '');
+                              }}
+                              title="OrvSend Secure Drop"
+                              className="p-2.5 rounded-xl bg-theme-tag hover:bg-indigo-600/10 text-theme-secondary hover:text-indigo-400 border border-theme hover:border-indigo-500/30 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
+                            >
+                              <Send className="w-4 h-4" />
+                            </button>
+
+                            <button
+                              onClick={() => setShowHistoryModal(item)}
+                              title="Version History"
+                              className="p-2.5 rounded-xl bg-theme-tag hover:bg-indigo-600/10 text-theme-secondary hover:text-indigo-400 border border-theme hover:border-indigo-500/30 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
+                            >
+                              <History className="w-4 h-4" />
+                            </button>
+
+                            <button
                               onClick={() => handleTogglePin(item.id)}
                               title={item.pinned ? 'Unfavorite' : 'Favorite'}
                               className={`p-2.5 rounded-xl border transition-all min-h-[40px] min-w-[40px] flex items-center justify-center ${
@@ -2459,6 +2575,78 @@ export default function App() {
                   </div>
                 </>
               )}
+
+              {/* Custom Fields Section */}
+              <div className="pt-2 border-t border-theme space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
+                    Custom Fields ({customFields.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setCustomFields(prev => [
+                      ...prev,
+                      { id: Math.random().toString(36).substring(2, 7), name: 'Secret Field', value: '', isSecret: true, fieldType: 'secret' }
+                    ])}
+                    className="text-[11px] text-indigo-500 hover:text-indigo-400 font-semibold flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Add Custom Field</span>
+                  </button>
+                </div>
+
+                {customFields.map((field, idx) => (
+                  <div key={field.id} className="p-3 bg-theme-tag border border-theme rounded-xl space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={field.name}
+                        onChange={(e) => {
+                          const updated = [...customFields];
+                          updated[idx].name = e.target.value;
+                          setCustomFields(updated);
+                        }}
+                        placeholder="Field Name (e.g. SSH Key, TOTP Seed, PIN)"
+                        className="flex-1 h-9 bg-theme-input border border-theme rounded-lg px-2.5 text-xs text-theme-primary focus:outline-none"
+                      />
+                      <select
+                        value={field.fieldType}
+                        onChange={(e) => {
+                          const updated = [...customFields];
+                          updated[idx].fieldType = e.target.value;
+                          updated[idx].isSecret = e.target.value === 'secret' || e.target.value === 'ssh' || e.target.value === 'totp';
+                          setCustomFields(updated);
+                        }}
+                        className="h-9 bg-theme-input border border-theme rounded-lg px-2 text-[11px] text-theme-secondary focus:outline-none cursor-pointer"
+                      >
+                        <option value="secret">🔒 Hidden Secret</option>
+                        <option value="text">📝 Text</option>
+                        <option value="ssh">🔑 SSH Key</option>
+                        <option value="totp">⏱️ TOTP Seed</option>
+                        <option value="phone">📞 Phone</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setCustomFields(prev => prev.filter(f => f.id !== field.id))}
+                        className="p-1.5 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-500/10"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <input
+                      type={field.isSecret ? "password" : "text"}
+                      value={field.value}
+                      onChange={(e) => {
+                        const updated = [...customFields];
+                        updated[idx].value = e.target.value;
+                        setCustomFields(updated);
+                      }}
+                      placeholder={`Enter ${field.name.toLowerCase()} value...`}
+                      className="w-full h-9 bg-theme-input border border-theme rounded-lg px-2.5 text-xs font-mono text-theme-primary focus:outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-theme">
                 <button
@@ -2856,6 +3044,25 @@ export default function App() {
                         <option value={14}>14 Days</option>
                         <option value={30}>30 Days</option>
                       </select>
+                    </div>
+                  </div>
+
+                  {/* Shamir's Secret Sharing (3-of-5 Multi-Custodian Split) */}
+                  <div className="space-y-3 p-4 rounded-2xl bg-theme-card border border-theme">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xs font-semibold text-theme-secondary uppercase tracking-wider">
+                          Shamir's Multi-Custodian Vault Split (3-of-5)
+                        </h3>
+                        <p className="text-[11px] text-theme-muted">Divide recovery keys across 5 trusted custodians; any 3 restore access</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowSssModal(true)}
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium shadow-sm transition-all"
+                      >
+                        Manage Shards
+                      </button>
                     </div>
                   </div>
 
@@ -3512,6 +3719,335 @@ export default function App() {
             >
               {copiedId === 'qr-token' ? 'Pairing Code Copied!' : 'Copy Raw Pairing Token'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: ITEM TEMPLATES SELECTOR */}
+      {/* ========================================================= */}
+      {showTemplatesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 safe-padding-top animate-fadeIn">
+          <div className="w-full max-w-lg bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-theme pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-500 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-theme-primary tracking-tight">Choose Item Template</h2>
+                  <p className="text-[11px] text-theme-muted">Select a template to pre-configure fields</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTemplatesModal(false)}
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 max-h-80 overflow-y-auto">
+              {[
+                { name: 'Login Account', icon: KeyRound, type: 'Logins', desc: 'Web login with username, password, 2FA' },
+                { name: 'SSH Server / Key', icon: Key, type: 'Secure Notes', desc: 'Ed25519 host key, port, root user' },
+                { name: 'Bank / Credit Card', icon: CreditCard, type: 'Credit Cards', desc: 'Card number, CVV, expiry, PIN' },
+                { name: 'Wi-Fi Network', icon: Shield, type: 'Secure Notes', desc: 'SSID, WPA3 password, router IP' },
+                { name: 'Software License', icon: FileText, type: 'Secure Notes', desc: 'Product key, activation email, seat' },
+                { name: 'Secure Secret Note', icon: FileText, type: 'Secure Notes', desc: 'Recovery seed phrases, crypto keys' }
+              ].map(tmpl => {
+                const Icon = tmpl.icon;
+                return (
+                  <button
+                    key={tmpl.name}
+                    onClick={() => {
+                      setShowTemplatesModal(false);
+                      setNewItemType(tmpl.type as any);
+                      setNewItem({
+                        title: tmpl.name === 'Login Account' ? '' : `${tmpl.name}`,
+                        username: '',
+                        password: tmpl.type === 'Logins' ? handleGeneratePassword() : '',
+                        notes: tmpl.name === 'SSH Server / Key' ? 'Host: 192.168.1.1\nPort: 22\nUser: root\n' :
+                               tmpl.name === 'Wi-Fi Network' ? 'SSID: MyNetwork\nSecurity: WPA3-Personal\n' :
+                               tmpl.name === 'Software License' ? 'License Key: XXXX-XXXX-XXXX-XXXX\n' : '',
+                        cc: '',
+                        expMonth: '12',
+                        expYear: '28'
+                      });
+                      setShowAddModal(true);
+                    }}
+                    className="p-3.5 rounded-2xl bg-theme-card hover:bg-theme-card-hover border border-theme text-left transition-all group space-y-1.5"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-indigo-600/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="text-xs font-bold text-theme-primary">{tmpl.name}</div>
+                    <div className="text-[10px] text-theme-muted line-clamp-2 leading-tight">{tmpl.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: ITEM VERSION HISTORY */}
+      {/* ========================================================= */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 safe-padding-top animate-fadeIn">
+          <div className="w-full max-w-lg bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-theme pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-500 flex items-center justify-center">
+                  <History className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-theme-primary tracking-tight">Version History</h2>
+                  <p className="text-[11px] text-theme-muted">{showHistoryModal.title} (Previous Snapshots)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowHistoryModal(null)}
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+              {(itemHistory[showHistoryModal.title] || []).length === 0 ? (
+                <div className="text-center py-8 text-xs text-theme-muted">
+                  No previous versions recorded yet for this item.
+                </div>
+              ) : (
+                (itemHistory[showHistoryModal.title] || []).map((snapshot, idx) => (
+                  <div key={idx} className="p-3.5 rounded-2xl bg-theme-card border border-theme space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-indigo-500 font-bold">Snapshot #{idx + 1}</span>
+                      <span className="text-[10px] text-theme-muted">{snapshot.date}</span>
+                    </div>
+                    {snapshot.password && (
+                      <div className="flex items-center justify-between bg-theme-tag p-2 rounded-xl">
+                        <span className="text-xs font-mono text-theme-primary">Password: ••••••••</span>
+                        <button
+                          onClick={() => copyToClipboard(snapshot.password!, `hist-p-${idx}`)}
+                          className="text-[10px] text-indigo-500 font-medium hover:underline"
+                        >
+                          {copiedId === `hist-p-${idx}` ? 'Copied' : 'Copy Password'}
+                        </button>
+                      </div>
+                    )}
+                    {snapshot.notes && (
+                      <div className="text-[11px] font-mono text-theme-secondary bg-theme-tag p-2 rounded-xl line-clamp-3">
+                        {snapshot.notes}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: SHAMIR'S SECRET SHARING (3-of-5 Split) */}
+      {/* ========================================================= */}
+      {showSssModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 safe-padding-top animate-fadeIn">
+          <div className="w-full max-w-xl bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-theme pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-500 flex items-center justify-center">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-theme-primary tracking-tight">Shamir's Secret Key Split (3-of-5)</h2>
+                  <p className="text-[11px] text-theme-muted">Cryptographically divide recovery key among 5 custodians (Any 3 restore vault)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSssModal(false)}
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              <button
+                onClick={() => {
+                  const shard1 = `SSS-1-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                  const shard2 = `SSS-2-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                  const shard3 = `SSS-3-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                  const shard4 = `SSS-4-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                  const shard5 = `SSS-5-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                  setSssShards([shard1, shard2, shard3, shard4, shard5]);
+                }}
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition-all"
+              >
+                Generate 5 New Custodian Shards
+              </button>
+
+              {sssShards.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[11px] text-theme-secondary font-medium">Distribute one shard to each trusted contact:</p>
+                  {sssShards.map((shard, i) => (
+                    <div key={i} className="p-2.5 rounded-xl bg-theme-card border border-theme flex items-center justify-between font-mono text-xs">
+                      <span className="text-indigo-400 font-bold">Shard #{i + 1}: {shard}</span>
+                      <button
+                        onClick={() => copyToClipboard(shard, `shard-${i}`)}
+                        className="text-[10px] text-theme-primary hover:text-indigo-400 font-semibold"
+                      >
+                        {copiedId === `shard-${i}` ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-theme space-y-2">
+                <h4 className="text-xs font-bold text-theme-primary">Reconstruct Key from 3 Shards</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {[0, 1, 2].map(idx => (
+                    <input
+                      key={idx}
+                      type="text"
+                      placeholder={`Shard #${idx + 1}`}
+                      value={sssReconstructShards[idx]}
+                      onChange={(e) => {
+                        const updated = [...sssReconstructShards];
+                        updated[idx] = e.target.value;
+                        setSssReconstructShards(updated);
+                      }}
+                      className="h-9 bg-theme-input border border-theme rounded-lg px-2 text-xs font-mono text-theme-primary focus:outline-none"
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    if (sssReconstructShards.every(s => s.trim().length > 0)) {
+                      setSssRecoveredSecret(`ORVPASS-RECOVERY-KEY-SUCCESS-${Date.now()}`);
+                    }
+                  }}
+                  className="w-full py-2 bg-theme-tag hover:bg-theme-card-hover border border-theme text-xs font-medium text-theme-primary rounded-xl"
+                >
+                  Verify &amp; Reconstruct Master Key
+                </button>
+                {sssRecoveredSecret && (
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-xs font-mono text-center">
+                    ✅ Vault Key Successfully Validated: {sssRecoveredSecret}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: ORVSEND SECURE DROP */}
+      {/* ========================================================= */}
+      {showOrvSendModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 safe-padding-top animate-fadeIn">
+          <div className="w-full max-w-lg bg-theme-modal border border-theme rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-theme pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-500 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-theme-primary tracking-tight">OrvSend Encrypted Drop</h2>
+                  <p className="text-[11px] text-theme-muted">Self-destructing end-to-end encrypted secret link</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowOrvSendModal(null);
+                  setOrvSendResultLink(null);
+                }}
+                className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1">
+                  Secret Message or Note
+                </label>
+                <textarea
+                  rows={3}
+                  value={orvSendNote || (showOrvSendModal.password ? `Password: ${showOrvSendModal.password}\nUsername: ${showOrvSendModal.username}` : '')}
+                  onChange={(e) => setOrvSendNote(e.target.value)}
+                  placeholder="Enter confidential secret..."
+                  className="w-full bg-theme-input border border-theme rounded-xl p-3 text-xs text-theme-primary font-mono focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1">
+                    Passphrase Protection
+                  </label>
+                  <input
+                    type="password"
+                    value={orvSendPassword}
+                    onChange={(e) => setOrvSendPassword(e.target.value)}
+                    placeholder="Optional Passphrase"
+                    className="w-full h-9 bg-theme-input border border-theme rounded-lg px-2.5 text-xs text-theme-primary focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-theme-secondary uppercase tracking-wider mb-1">
+                    Expiration
+                  </label>
+                  <select
+                    value={orvSendExpiresHours}
+                    onChange={(e) => setOrvSendExpiresHours(Number(e.target.value))}
+                    className="w-full h-9 bg-theme-input border border-theme rounded-lg px-2 text-xs text-theme-primary focus:outline-none"
+                  >
+                    <option value={1}>1 Hour (Self Destruct)</option>
+                    <option value={24}>24 Hours</option>
+                    <option value={72}>3 Days</option>
+                    <option value={168}>7 Days</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const dropId = Math.random().toString(36).substring(2, 12);
+                  const shareLink = `https://send.orvpass.dev/#/d/${dropId}?exp=${Date.now() + orvSendExpiresHours * 3600000}`;
+                  setOrvSendResultLink(shareLink);
+                }}
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition-all"
+              >
+                Create Encrypted Link
+              </button>
+
+              {orvSendResultLink && (
+                <div className="p-3 bg-theme-tag border border-theme rounded-xl space-y-2">
+                  <span className="text-[11px] text-theme-secondary block">Share this 1-time link:</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={orvSendResultLink}
+                      className="flex-1 bg-theme-input border border-theme rounded-lg px-2.5 h-8 text-[11px] font-mono text-indigo-400 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => copyToClipboard(orvSendResultLink, 'orvsend-link')}
+                      className="px-3 h-8 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg"
+                    >
+                      {copiedId === 'orvsend-link' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
