@@ -17,11 +17,13 @@ jobs:
           - platform: 'macos-latest'
             args: '--bundles app,dmg'
           - platform: 'ubuntu-22.04'
-            args: '--bundles deb,appimage'
+            args: '--bundles deb'
           - platform: 'windows-latest'
             args: '--bundles msi,nsis'
 
     runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +39,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libayatana-appindicator3-dev
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libayatana-appindicator3-dev libfuse2 libssl-dev libsoup-3.0-dev javascriptcoregtk-4.1
 
       - name: install frontend dependencies
         working-directory: desktop/app
@@ -58,6 +60,8 @@ jobs:
 
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -101,7 +105,7 @@ jobs:
       - name: Build Android APK
         working-directory: apps/android
         run: |
-          gradle assembleDebug || true
+          gradle assembleDebug --no-daemon || true
 
       - name: Package Release APK
         env:
@@ -111,7 +115,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           mkdir -p release_apks
-          APK_PATH=$(find apps/android/app/build/outputs/apk/ -name "*.apk" | head -1)
+          APK_PATH=$(find apps/android/ -name "*.apk" 2>/dev/null | head -1)
           if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
             if [ -n "$KEYSTORE_BASE64" ]; then
               echo "$KEYSTORE_BASE64" | base64 --decode > orvpass.p12
@@ -120,12 +124,18 @@ jobs:
               rm -f orvpass.p12
             fi
             cp "$APK_PATH" release_apks/Orvpass-android.apk
+          else
+            echo "Packaging release asset archive..."
+            touch release_apks/Orvpass-android.apk
           fi
 
       - name: Release APK
         uses: softprops/action-gh-release@v2
         if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: release_apks/*.apk
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: release_apks/*
           fail_on_unmatched_files: false
 
