@@ -2,6 +2,10 @@ use crate::vault::database;
 use orvpass_core::models::ItemData;
 
 pub fn execute(json_output: bool, category_filter: Option<String>) {
+    execute_filtered(json_output, category_filter, None)
+}
+
+pub fn execute_filtered(json_output: bool, category_filter: Option<String>, _tag: Option<String>) {
     let items = database::load_items();
 
     let filtered: Vec<_> = items
