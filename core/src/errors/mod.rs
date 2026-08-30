@@ -16,3 +16,11 @@ impl fmt::Display for OrvpassError {
 }
 
 impl std::error::Error for OrvpassError {}
+
+#[derive(Debug, thiserror::Error)]
+pub enum CoreError {
+    #[error("cryptographic operation failure: {0}")]
+    Crypto(String),
+    #[error("vault storage I/O error: {0}")]
+    Storage(String),
+}
