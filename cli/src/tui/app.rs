@@ -32,7 +32,16 @@ impl Category {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Theme {
+    TokyoNight,
+    Catppuccin,
+    Nord,
+    Gruvbox,
+}
+
 pub struct TuiApp {
+    pub theme: Theme,
     pub items: Vec<VaultItem>,
     pub selected_index: usize,
     pub category: Category,
@@ -54,6 +63,7 @@ impl TuiApp {
             show_password: false,
             status_message: None,
             should_quit: false,
+            theme: Theme::TokyoNight,
         }
     }
 
