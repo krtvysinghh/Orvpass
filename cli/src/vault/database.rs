@@ -113,5 +113,10 @@ pub fn save_items(items: &[VaultItem]) -> anyhow::Result<()> {
     final_buf.extend_from_slice(&enc_data.ciphertext);
 
     fs::write(&path, final_buf)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(&path, fs::Permissions::from_mode(0o600));
+    }
     Ok(())
 }
