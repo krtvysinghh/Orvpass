@@ -1,6 +1,10 @@
 use rand::Rng;
 
 pub fn execute(length: usize, diceware: bool) -> String {
+    execute_advanced(length, diceware, false, true)
+}
+
+pub fn execute_advanced(length: usize, diceware: bool, avoid_ambiguous: bool, include_symbols: bool) -> String {
     if diceware {
         let words = [
             "correct", "horse", "battery", "staple", "crypto", "shield", "beacon", "galaxy",
@@ -12,11 +16,18 @@ pub fn execute(length: usize, diceware: bool) -> String {
         let num: u32 = rng.random_range(10..99);
         format!("{}-{}", chosen.join("-"), num)
     } else {
-        const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=";
+        let mut charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".to_string();
+        if include_symbols {
+            charset.push_str("!@#$%^&*()_+-=");
+        }
+        if avoid_ambiguous {
+            charset = charset.chars().filter(|c| !matches!(c, 'l' | '1' | 'I' | 'O' | '0')).collect();
+        }
+        let bytes = charset.as_bytes();
         let mut rng = rand::rng();
         let len = length.max(8);
         (0..len)
-            .map(|_| CHARSET[rng.random_range(0..CHARSET.len())] as char)
+            .map(|_| bytes[rng.random_range(0..bytes.len())] as char)
             .collect()
     }
 }
