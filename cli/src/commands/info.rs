@@ -1,8 +1,4 @@
-pub fn run(){
-
-println!("Orvpass");
-println!("Version: 1.0.0-rc1");
-println!("Security: encrypted vault");
-println!("Storage: local");
-
+pub fn version_info() {
+    println!("Orvpass v5.0.0 Enterprise");
+    println!("Commit: 2026.08 Production Gate");
 }
