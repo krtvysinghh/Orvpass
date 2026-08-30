@@ -45,6 +45,8 @@ pub enum Commands {
         totp: bool,
         #[arg(short, long)]
         copy: bool,
+        #[arg(long, default_value_t = 15)]
+        copy_timeout: u64,
         #[arg(short, long)]
         json: bool,
     },
@@ -84,6 +86,8 @@ pub enum Commands {
         watch: bool,
         #[arg(short, long)]
         copy: bool,
+        #[arg(long, default_value_t = 15)]
+        copy_timeout: u64,
     },
 
     /// Generate cryptographically secure password or Diceware passphrase
@@ -313,7 +317,7 @@ fn main() -> anyhow::Result<()> {
         Some(Commands::List { json, category }) => {
             commands::list::execute(json, category);
         }
-        Some(Commands::Get { name, password, username, totp, copy, json }) => {
+        Some(Commands::Get { name, password, username, totp, copy, json, .. }) => {
             commands::get::execute(&name, password, username, totp, copy, json);
         }
         Some(Commands::Add { title, username, password, note, category }) => {
@@ -325,7 +329,7 @@ fn main() -> anyhow::Result<()> {
         Some(Commands::Search { query }) => {
             commands::search::execute(&query);
         }
-        Some(Commands::Totp { name, watch, copy }) => {
+        Some(Commands::Totp { name, watch, copy, .. }) => {
             commands::totp::execute(&name, watch, copy);
         }
         Some(Commands::Generate { length, diceware }) => {
