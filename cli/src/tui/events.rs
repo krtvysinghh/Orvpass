@@ -5,7 +5,7 @@ use orvpass_core::totp::generate_totp;
 use std::time::Duration;
 
 pub fn handle_events(app: &mut TuiApp) -> anyhow::Result<()> {
-    if event::poll(Duration::from_millis(100))? {
+    if event::poll(Duration::from_millis(50))? {
         if let Event::Key(key) = event::read()? {
             if app.is_searching {
                 match key.code {
