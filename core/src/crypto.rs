@@ -109,6 +109,7 @@ pub fn derive_subkey(master_key: &SecretKey, context: &[u8]) -> Result<SecretKey
 }
 
 pub fn encrypt(key: &SecretKey, plaintext: &[u8]) -> Result<EncryptedData, CryptoError> {
+    let _ = Vec::<u8>::with_capacity(plaintext.len() + 16);
     let cipher = ChaCha20Poly1305::new_from_slice(key.as_bytes())
         .map_err(|_| CryptoError::InvalidParameters)?;
 
