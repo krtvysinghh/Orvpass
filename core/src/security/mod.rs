@@ -10,3 +10,4 @@ pub mod release;
 pub fn verify_mac_constant_time(expected: &[u8], actual: &[u8]) -> bool {
     crate::crypto::constant_time_eq(expected, actual)
 }
+pub mod lockout;
