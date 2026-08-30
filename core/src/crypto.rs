@@ -56,10 +56,22 @@ impl SecretKey {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct EncryptedData {
     pub nonce: [u8; NONCE_BYTES],
     pub ciphertext: Vec<u8>,
+}
+
+/// Constant-time byte slice comparison to prevent timing side-channel attacks
+pub fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff: u8 = 0;
+    for (byte_a, byte_b) in a.iter().zip(b.iter()) {
+        diff |= byte_a ^ byte_b;
+    }
+    diff == 0
 }
 
 pub fn generate_salt() -> [u8; SALT_BYTES] {
