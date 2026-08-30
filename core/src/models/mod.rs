@@ -99,3 +99,13 @@ impl VaultItem {
         });
     }
 }
+
+impl VaultItem {
+    pub fn compute_item_hash(&self) -> String {
+        use sha2::{Digest, Sha256};
+        let mut hasher = Sha256::new();
+        hasher.update(self.id.as_bytes());
+        hasher.update(self.title.as_bytes());
+        format!("{:x}", hasher.finalize())
+    }
+}
