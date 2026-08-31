@@ -1,5 +1,7 @@
-use orvpass_core::crypto::{SecretKey, derive_master_key, generate_salt, encrypt, decrypt};
-use orvpass_core::models::{ItemData, ItemType, LoginData, SecureNoteData, CreditCardData, VaultItem};
+use orvpass_core::crypto::{SecretKey, decrypt, derive_master_key, encrypt, generate_salt};
+use orvpass_core::models::{
+    CreditCardData, ItemData, ItemType, LoginData, SecureNoteData, VaultItem,
+};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -50,7 +52,8 @@ pub fn load_items() -> Vec<VaultItem> {
                 ItemType::SecureNote,
                 "Server SSH Key",
                 ItemData::SecureNote(SecureNoteData {
-                    content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrvpass... (Production Node)".to_string(),
+                    content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrvpass... (Production Node)"
+                        .to_string(),
                 }),
             ),
             VaultItem::new(
@@ -82,7 +85,8 @@ pub fn load_items() -> Vec<VaultItem> {
                     ciphertext: ciphertext.to_vec(),
                 };
                 if let Ok(decrypted) = decrypt(&key, &enc_data) {
-                    if let Ok(payload) = serde_json::from_slice::<EncryptedVaultPayload>(&decrypted) {
+                    if let Ok(payload) = serde_json::from_slice::<EncryptedVaultPayload>(&decrypted)
+                    {
                         return payload.items;
                     }
                 }

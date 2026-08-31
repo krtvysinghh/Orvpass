@@ -26,7 +26,8 @@ pub fn execute(items: &[VaultItem], command_args: &[String]) -> anyhow::Result<(
             }
         }
         for cf in &item.custom_fields {
-            let cf_key = format!("{}_{}", item.title.to_uppercase(), cf.name.to_uppercase()).replace([' ', '-', '.'], "_");
+            let cf_key = format!("{}_{}", item.title.to_uppercase(), cf.name.to_uppercase())
+                .replace([' ', '-', '.'], "_");
             cmd.env(cf_key, &cf.value);
         }
     }

@@ -51,7 +51,9 @@ pub fn handle_events(app: &mut TuiApp) -> anyhow::Result<()> {
                                 if let Some(pass) = &login.password {
                                     if let Ok(mut board) = arboard::Clipboard::new() {
                                         let _ = board.set_text(pass);
-                                        app.set_status("Password copied to clipboard (Auto-wipe 15s)!");
+                                        app.set_status(
+                                            "Password copied to clipboard (Auto-wipe 15s)!",
+                                        );
                                     }
                                 }
                             }

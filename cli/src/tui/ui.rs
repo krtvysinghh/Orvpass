@@ -2,13 +2,11 @@ use crate::tui::app::{Category, TuiApp};
 use orvpass_core::models::ItemData;
 use orvpass_core::totp::generate_totp;
 use ratatui::{
+    Frame,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{
-        Block, BorderType, Borders, Clear, List, ListItem, Paragraph, Tabs, Wrap,
-    },
-    Frame,
+    widgets::{Block, BorderType, Borders, Clear, List, ListItem, Paragraph, Tabs, Wrap},
 };
 
 pub fn render(frame: &mut Frame, app: &TuiApp) {
@@ -41,8 +39,16 @@ fn render_header(frame: &mut Frame, app: &TuiApp, area: Rect) {
         .border_style(Style::default().fg(Color::Rgb(99, 102, 241)));
 
     let title_text = Paragraph::new(Line::from(vec![
-        Span::styled(" 🛡️  ORVPASS ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
-        Span::styled("v5.0.0 Enterprise ", Style::default().fg(Color::Rgb(129, 140, 248))),
+        Span::styled(
+            " 🛡️  ORVPASS ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            "v5.0.0 Enterprise ",
+            Style::default().fg(Color::Rgb(129, 140, 248)),
+        ),
         Span::styled("[Argon2id+ChaCha20]", Style::default().fg(Color::DarkGray)),
     ]))
     .block(title_block);
@@ -50,7 +56,9 @@ fn render_header(frame: &mut Frame, app: &TuiApp, area: Rect) {
     frame.render_widget(title_text, header_chunks[0]);
 
     let search_style = if app.is_searching {
-        Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+        Style::default()
+            .fg(Color::Yellow)
+            .add_modifier(Modifier::BOLD)
     } else {
         Style::default().fg(Color::Rgb(148, 163, 184))
     };
@@ -61,9 +69,17 @@ fn render_header(frame: &mut Frame, app: &TuiApp, area: Rect) {
         .border_style(search_style);
 
     let query_display = if app.search_query.is_empty() && !app.is_searching {
-        Span::styled("Press '/' to fuzzy search vault credentials...", Style::default().fg(Color::DarkGray))
+        Span::styled(
+            "Press '/' to fuzzy search vault credentials...",
+            Style::default().fg(Color::DarkGray),
+        )
     } else {
-        Span::styled(&app.search_query, Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
+        Span::styled(
+            &app.search_query,
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        )
     };
 
     let search_text = Paragraph::new(Line::from(vec![
@@ -91,7 +107,10 @@ fn render_categories(frame: &mut Frame, app: &TuiApp, area: Rect) {
         })
         .collect();
 
-    let current_idx = categories.iter().position(|c| *c == app.category).unwrap_or(0);
+    let current_idx = categories
+        .iter()
+        .position(|c| *c == app.category)
+        .unwrap_or(0);
 
     let tabs = Tabs::new(titles)
         .block(
@@ -134,7 +153,9 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
             let title_span = Span::styled(
                 format!("{}  {}", icon, item.title),
                 if is_selected {
-                    Style::default().fg(Color::White).add_modifier(Modifier::BOLD)
+                    Style::default()
+                        .fg(Color::White)
+                        .add_modifier(Modifier::BOLD)
                 } else {
                     Style::default().fg(Color::Rgb(226, 232, 240))
                 },
@@ -142,7 +163,17 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
 
             let sub_info = match &item.data {
                 ItemData::Login(l) => l.username.clone().unwrap_or_default(),
-                ItemData::CreditCard(c) => format!("•••• {}", c.card_number.chars().rev().take(4).collect::<String>().chars().rev().collect::<String>()),
+                ItemData::CreditCard(c) => format!(
+                    "•••• {}",
+                    c.card_number
+                        .chars()
+                        .rev()
+                        .take(4)
+                        .collect::<String>()
+                        .chars()
+                        .rev()
+                        .collect::<String>()
+                ),
                 _ => String::new(),
             };
 
@@ -166,7 +197,12 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
 
     let list_title = format!(" Vault Items ({}) ", filtered_items.len());
     let list_block = Block::default()
-        .title(Span::styled(list_title, Style::default().fg(Color::Rgb(129, 140, 248)).add_modifier(Modifier::BOLD)))
+        .title(Span::styled(
+            list_title,
+            Style::default()
+                .fg(Color::Rgb(129, 140, 248))
+                .add_modifier(Modifier::BOLD),
+        ))
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(Color::Rgb(79, 70, 229)));
@@ -179,7 +215,12 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
 
     // Detail Pane
     let detail_block = Block::default()
-        .title(Span::styled(" Credential Inspector ", Style::default().fg(Color::Rgb(129, 140, 248)).add_modifier(Modifier::BOLD)))
+        .title(Span::styled(
+            " Credential Inspector ",
+            Style::default()
+                .fg(Color::Rgb(129, 140, 248))
+                .add_modifier(Modifier::BOLD),
+        ))
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(Color::Rgb(79, 70, 229)));
@@ -189,9 +230,17 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
 
         detail_lines.push(Line::from(vec![
             Span::styled("Title:     ", Style::default().fg(Color::DarkGray)),
-            Span::styled(&item.title, Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                &item.title,
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            ),
         ]));
-        detail_lines.push(Line::from(Span::styled("Entropy Score:  ★★★★★ (138 bits)", Style::default().fg(Color::Green))));
+        detail_lines.push(Line::from(Span::styled(
+            "Entropy Score:  ★★★★★ (138 bits)",
+            Style::default().fg(Color::Green),
+        )));
         detail_lines.push(Line::from(""));
 
         match &item.data {
@@ -199,7 +248,12 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
                 if let Some(user) = &login.username {
                     detail_lines.push(Line::from(vec![
                         Span::styled("Username:  ", Style::default().fg(Color::DarkGray)),
-                        Span::styled(user, Style::default().fg(Color::Rgb(56, 189, 248)).add_modifier(Modifier::BOLD)),
+                        Span::styled(
+                            user,
+                            Style::default()
+                                .fg(Color::Rgb(56, 189, 248))
+                                .add_modifier(Modifier::BOLD),
+                        ),
                         Span::styled("  [u to copy]", Style::default().fg(Color::DarkGray)),
                     ]));
                 }
@@ -212,8 +266,16 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
                     };
                     detail_lines.push(Line::from(vec![
                         Span::styled("Password:  ", Style::default().fg(Color::DarkGray)),
-                        Span::styled(pass_display, Style::default().fg(Color::Rgb(251, 146, 60)).add_modifier(Modifier::BOLD)),
-                        Span::styled("  [c to copy, p to reveal]", Style::default().fg(Color::DarkGray)),
+                        Span::styled(
+                            pass_display,
+                            Style::default()
+                                .fg(Color::Rgb(251, 146, 60))
+                                .add_modifier(Modifier::BOLD),
+                        ),
+                        Span::styled(
+                            "  [c to copy, p to reveal]",
+                            Style::default().fg(Color::DarkGray),
+                        ),
                     ]));
                 }
 
@@ -222,17 +284,29 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
                 let seconds_left = TuiApp::totp_seconds_left();
                 detail_lines.push(Line::from(vec![
                     Span::styled("2FA TOTP:  ", Style::default().fg(Color::DarkGray)),
-                    Span::styled(format!("{:06}", totp_code), Style::default().fg(Color::Rgb(52, 211, 153)).add_modifier(Modifier::BOLD)),
-                    Span::styled(format!(" ({}s left)", seconds_left), Style::default().fg(Color::Rgb(16, 185, 129))),
+                    Span::styled(
+                        format!("{:06}", totp_code),
+                        Style::default()
+                            .fg(Color::Rgb(52, 211, 153))
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(
+                        format!(" ({}s left)", seconds_left),
+                        Style::default().fg(Color::Rgb(16, 185, 129)),
+                    ),
                     Span::styled("  [t to copy]", Style::default().fg(Color::DarkGray)),
                 ]));
             }
             ItemData::SecureNote(note) => {
-                detail_lines.push(Line::from(vec![
-                    Span::styled("Note Content:", Style::default().fg(Color::DarkGray)),
-                ]));
+                detail_lines.push(Line::from(vec![Span::styled(
+                    "Note Content:",
+                    Style::default().fg(Color::DarkGray),
+                )]));
                 for line in note.content.lines() {
-                    detail_lines.push(Line::from(Span::styled(format!("  {}", line), Style::default().fg(Color::Rgb(226, 232, 240)))));
+                    detail_lines.push(Line::from(Span::styled(
+                        format!("  {}", line),
+                        Style::default().fg(Color::Rgb(226, 232, 240)),
+                    )));
                 }
             }
             ItemData::CreditCard(card) => {
@@ -242,15 +316,28 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
                 ]));
                 detail_lines.push(Line::from(vec![
                     Span::styled("Card Number:", Style::default().fg(Color::DarkGray)),
-                    Span::styled(&card.card_number, Style::default().fg(Color::Rgb(56, 189, 248))),
+                    Span::styled(
+                        &card.card_number,
+                        Style::default().fg(Color::Rgb(56, 189, 248)),
+                    ),
                 ]));
                 detail_lines.push(Line::from(vec![
                     Span::styled("Expires:    ", Style::default().fg(Color::DarkGray)),
-                    Span::styled(format!("{}/{}", card.expiration_month, card.expiration_year), Style::default().fg(Color::White)),
+                    Span::styled(
+                        format!("{}/{}", card.expiration_month, card.expiration_year),
+                        Style::default().fg(Color::White),
+                    ),
                 ]));
                 detail_lines.push(Line::from(vec![
                     Span::styled("CVV:        ", Style::default().fg(Color::DarkGray)),
-                    Span::styled(if app.show_password { &card.cvv } else { "•••" }, Style::default().fg(Color::Rgb(251, 146, 60))),
+                    Span::styled(
+                        if app.show_password {
+                            &card.cvv
+                        } else {
+                            "•••"
+                        },
+                        Style::default().fg(Color::Rgb(251, 146, 60)),
+                    ),
                 ]));
             }
             _ => {}
@@ -258,11 +345,21 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
 
         if !item.custom_fields.is_empty() {
             detail_lines.push(Line::from(""));
-            detail_lines.push(Line::from(Span::styled("Custom Fields:", Style::default().fg(Color::DarkGray))));
+            detail_lines.push(Line::from(Span::styled(
+                "Custom Fields:",
+                Style::default().fg(Color::DarkGray),
+            )));
             for cf in &item.custom_fields {
-                let val = if cf.secret && !app.show_password { "••••••••" } else { &cf.value };
+                let val = if cf.secret && !app.show_password {
+                    "••••••••"
+                } else {
+                    &cf.value
+                };
                 detail_lines.push(Line::from(vec![
-                    Span::styled(format!("  {}: ", cf.name), Style::default().fg(Color::Rgb(148, 163, 184))),
+                    Span::styled(
+                        format!("  {}: ", cf.name),
+                        Style::default().fg(Color::Rgb(148, 163, 184)),
+                    ),
                     Span::styled(val, Style::default().fg(Color::White)),
                 ]));
             }
@@ -288,7 +385,12 @@ fn render_footer(frame: &mut Frame, app: &TuiApp, area: Rect) {
         .border_style(Style::default().fg(Color::Rgb(51, 65, 85)));
 
     let status_span = if let Some((msg, _)) = &app.status_message {
-        Span::styled(format!(" 🔔 {} ", msg), Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+        Span::styled(
+            format!(" 🔔 {} ", msg),
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
+        )
     } else {
         Span::styled(" Ready ", Style::default().fg(Color::DarkGray))
     };

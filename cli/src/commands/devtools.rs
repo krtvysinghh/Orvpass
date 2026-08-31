@@ -18,20 +18,31 @@ pub fn dotenv_sync(items: &[VaultItem], env_file: &str, export: bool) -> anyhow:
                 }
             }
             for cf in &item.custom_fields {
-                let key = format!("{}_{}", item.title.to_uppercase(), cf.name.to_uppercase()).replace([' ', '-', '.'], "_");
+                let key = format!("{}_{}", item.title.to_uppercase(), cf.name.to_uppercase())
+                    .replace([' ', '-', '.'], "_");
                 lines.push(format!("{}=\"{}\"", key, cf.value));
             }
         }
         fs::write(path, lines.join("\n"))?;
-        println!("✨ Exported vault secrets to '{}' ({} lines)", env_file, lines.len());
+        println!(
+            "✨ Exported vault secrets to '{}' ({} lines)",
+            env_file,
+            lines.len()
+        );
     } else {
         if !path.exists() {
             println!("❌ Error: File '{}' does not exist.", env_file);
             return Ok(());
         }
         let content = fs::read_to_string(path)?;
-        let count = content.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).count();
-        println!("📥 Synchronized {} environment variables from '{}' into encrypted vault.", count, env_file);
+        let count = content
+            .lines()
+            .filter(|l| !l.trim().is_empty() && !l.starts_with('#'))
+            .count();
+        println!(
+            "📥 Synchronized {} environment variables from '{}' into encrypted vault.",
+            count, env_file
+        );
     }
     Ok(())
 }
@@ -39,11 +50,18 @@ pub fn dotenv_sync(items: &[VaultItem], env_file: &str, export: bool) -> anyhow:
 pub fn docker_secret(items: &[VaultItem], service: &str) {
     println!("🐳 DOCKER COMPOSE SECRETS INJECTION");
     println!("===================================");
-    println!("Generated in-memory compose environment for service '{}':", service);
+    println!(
+        "Generated in-memory compose environment for service '{}':",
+        service
+    );
     for item in items {
         if item.title.to_lowercase().contains(&service.to_lowercase()) {
             if let ItemData::Login(l) = &item.data {
-                println!("  - {}_PASSWORD={}", item.title.to_uppercase(), l.password.as_deref().unwrap_or(""));
+                println!(
+                    "  - {}_PASSWORD={}",
+                    item.title.to_uppercase(),
+                    l.password.as_deref().unwrap_or("")
+                );
             }
         }
     }
@@ -51,7 +69,10 @@ pub fn docker_secret(items: &[VaultItem], service: &str) {
 }
 
 pub fn k8s_sync(items: &[VaultItem], namespace: &str) {
-    println!("apiVersion: v1\nkind: Secret\nmetadata:\n  name: orvpass-vault-secrets\n  namespace: {}\ntype: Opaque\nstringData:", namespace);
+    println!(
+        "apiVersion: v1\nkind: Secret\nmetadata:\n  name: orvpass-vault-secrets\n  namespace: {}\ntype: Opaque\nstringData:",
+        namespace
+    );
     for item in items {
         if let ItemData::Login(l) = &item.data {
             let k = item.title.to_lowercase().replace([' ', '_'], "-");
@@ -77,10 +98,16 @@ pub fn tf_provider() {
 }
 
 pub fn aws_vault(profile: &str, items: &[VaultItem]) {
-    let key_id = "AKIA".to_string() + &rand::rng().random_range(100000000000u64..999999999999u64).to_string();
-    let secret = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, "ORVPASS_AWS_TEMPORARY_STS_KEY_SECRET");
-    let token = "IQoJb3J2cGFzcy9zdHMvcHJvZmlsZS8yMDI2..." ;
-    
+    let key_id = "AKIA".to_string()
+        + &rand::rng()
+            .random_range(100000000000u64..999999999999u64)
+            .to_string();
+    let secret = base64::Engine::encode(
+        &base64::engine::general_purpose::STANDARD,
+        "ORVPASS_AWS_TEMPORARY_STS_KEY_SECRET",
+    );
+    let token = "IQoJb3J2cGFzcy9zdHMvcHJvZmlsZS8yMDI2...";
+
     let sts = serde_json::json!({
         "Version": 1,
         "AccessKeyId": key_id,
@@ -96,7 +123,9 @@ pub fn git_credential(action: &str, items: &[VaultItem]) {
     match action {
         "get" => {
             for item in items {
-                if item.title.to_lowercase().contains("git") || item.title.to_lowercase().contains("github") {
+                if item.title.to_lowercase().contains("git")
+                    || item.title.to_lowercase().contains("github")
+                {
                     if let ItemData::Login(l) = &item.data {
                         println!("username={}", l.username.as_deref().unwrap_or(""));
                         println!("password={}", l.password.as_deref().unwrap_or(""));
@@ -117,8 +146,12 @@ pub fn pipe(items: &[VaultItem], name: &str, field: &str) {
             match &item.data {
                 ItemData::Login(l) => {
                     match field {
-                        "password" | "pass" | "p" => print!("{}", l.password.as_deref().unwrap_or("")),
-                        "username" | "user" | "u" => print!("{}", l.username.as_deref().unwrap_or("")),
+                        "password" | "pass" | "p" => {
+                            print!("{}", l.password.as_deref().unwrap_or(""))
+                        }
+                        "username" | "user" | "u" => {
+                            print!("{}", l.username.as_deref().unwrap_or(""))
+                        }
                         _ => print!("{}", l.password.as_deref().unwrap_or("")),
                     }
                     return;

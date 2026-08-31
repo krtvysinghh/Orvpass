@@ -14,7 +14,10 @@ pub fn execute(items: &[VaultItem], json_output: bool) {
                 if pass.len() < 12 {
                     weak += 1;
                 }
-                pass_map.entry(pass.clone()).or_default().push(item.title.clone());
+                pass_map
+                    .entry(pass.clone())
+                    .or_default()
+                    .push(item.title.clone());
             }
         }
     }
@@ -28,7 +31,8 @@ pub fn execute(items: &[VaultItem], json_output: bool) {
     let score = if total == 0 {
         100
     } else {
-        let penalty = ((weak as f32 / total as f32) * 40.0) + ((reused_count as f32 / total as f32) * 40.0);
+        let penalty =
+            ((weak as f32 / total as f32) * 40.0) + ((reused_count as f32 / total as f32) * 40.0);
         (100.0 - penalty).clamp(10.0, 100.0) as u32
     };
 
@@ -44,13 +48,23 @@ pub fn execute(items: &[VaultItem], json_output: bool) {
     } else {
         println!("🛡️  ORVPASS WATCHDOG SECURITY AUDIT");
         println!("=====================================");
-        println!("  Health Score:      {}% ({})", score, if score >= 90 { "✅ SECURE" } else { "⚠️ ATTENTION NEEDED" });
+        println!(
+            "  Health Score:      {}% ({})",
+            score,
+            if score >= 90 {
+                "✅ SECURE"
+            } else {
+                "⚠️ ATTENTION NEEDED"
+            }
+        );
         println!("  Total Logins:      {}", total);
         println!("  Weak (<12 chars):  {}", weak);
         println!("  Reused Passwords:  {}", reused_count);
         println!("=====================================");
         if weak > 0 || reused_count > 0 {
-            println!("💡 Recommendation: Run 'orvpass generate -d' to upgrade weak passwords to Diceware passphrases.");
+            println!(
+                "💡 Recommendation: Run 'orvpass generate -d' to upgrade weak passwords to Diceware passphrases."
+            );
         } else {
             println!("✨ Vault is 100% compliant with zero detected vulnerabilities.");
         }

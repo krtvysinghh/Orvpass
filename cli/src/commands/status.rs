@@ -8,7 +8,14 @@ pub fn execute() {
     println!("🛡️  ORVPASS VAULT STATUS");
     println!("========================");
     println!("  Vault Location: {}", path.display());
-    println!("  Vault Encrypted: {}", if exists { "Yes (Argon2id + ChaCha20-Poly1305)" } else { "Not Initialized (Default In-Memory)" });
+    println!(
+        "  Vault Encrypted: {}",
+        if exists {
+            "Yes (Argon2id + ChaCha20-Poly1305)"
+        } else {
+            "Not Initialized (Default In-Memory)"
+        }
+    );
     println!("  Total Items:    {}", items.len());
     println!("  Security State: 🔒 Zero-Knowledge RAM Encrypted");
     println!("========================");

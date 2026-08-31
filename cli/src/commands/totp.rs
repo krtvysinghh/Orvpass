@@ -16,7 +16,10 @@ pub fn execute(name: &str, watch: bool, copy: bool) {
             let seconds_left = 30 - (now % 30);
             let code = generate_totp(seed.as_bytes(), 30).unwrap_or(123456);
 
-            print!("\r  Code: \x1b[1;32m{:06}\x1b[0m  (Refreshes in {:02}s)   ", code, seconds_left);
+            print!(
+                "\r  Code: \x1b[1;32m{:06}\x1b[0m  (Refreshes in {:02}s)   ",
+                code, seconds_left
+            );
             use std::io::Write;
             let _ = std::io::stdout().flush();
             thread::sleep(Duration::from_millis(500));
@@ -33,12 +36,18 @@ pub fn execute(name: &str, watch: bool, copy: bool) {
         if copy {
             if let Ok(mut board) = arboard::Clipboard::new() {
                 let _ = board.set_text(&formatted);
-                println!("📋 Copied TOTP 2FA code {} for '{}' (Valid for {}s)", formatted, name, seconds_left);
+                println!(
+                    "📋 Copied TOTP 2FA code {} for '{}' (Valid for {}s)",
+                    formatted, name, seconds_left
+                );
             } else {
                 println!("{}", formatted);
             }
         } else {
-            println!("2FA Code for {}: {} (Expires in {}s)", name, formatted, seconds_left);
+            println!(
+                "2FA Code for {}: {} (Expires in {}s)",
+                name, formatted, seconds_left
+            );
         }
     }
 }

@@ -25,19 +25,39 @@ pub fn execute_filtered(json_output: bool, category_filter: Option<String>, _tag
         .collect();
 
     if json_output {
-        println!("{}", serde_json::to_string_pretty(&filtered).unwrap_or_default());
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&filtered).unwrap_or_default()
+        );
         return;
     }
 
     println!("📦 ORVPASS VAULT (Total: {} Items)", filtered.len());
-    println!("{:<4} {:<24} {:<16} {:<28}", "TYPE", "TITLE", "CATEGORY", "DETAILS");
+    println!(
+        "{:<4} {:<24} {:<16} {:<28}",
+        "TYPE", "TITLE", "CATEGORY", "DETAILS"
+    );
     println!("{}", "-".repeat(74));
 
     for item in filtered {
         let (icon, cat, detail) = match &item.data {
             ItemData::Login(l) => ("🔑", "Login", l.username.clone().unwrap_or_default()),
             ItemData::SecureNote(_) => ("📝", "Secure Note", "Confidential text".to_string()),
-            ItemData::CreditCard(c) => ("💳", "Credit Card", format!("•••• {}", c.card_number.chars().rev().take(4).collect::<String>().chars().rev().collect::<String>())),
+            ItemData::CreditCard(c) => (
+                "💳",
+                "Credit Card",
+                format!(
+                    "•••• {}",
+                    c.card_number
+                        .chars()
+                        .rev()
+                        .take(4)
+                        .collect::<String>()
+                        .chars()
+                        .rev()
+                        .collect::<String>()
+                ),
+            ),
             _ => ("📦", "Custom", String::new()),
         };
 

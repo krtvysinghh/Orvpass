@@ -65,19 +65,13 @@ pub enum Commands {
     },
 
     /// Remove a credential from the vault
-    Remove {
-        name: String,
-    },
+    Remove { name: String },
 
     /// Delete a credential from the vault
-    Delete {
-        name: String,
-    },
+    Delete { name: String },
 
     /// Fuzzy search credentials across all fields
-    Search {
-        query: String,
-    },
+    Search { query: String },
 
     /// Calculate live RFC 6238 TOTP 2FA code
     Totp {
@@ -128,9 +122,7 @@ pub enum Commands {
     },
 
     /// SSH key management and agent socket bridging
-    Ssh {
-        action: Option<String>,
-    },
+    Ssh { action: Option<String> },
 
     /// Synchronize or export .env configuration files
     Dotenv {
@@ -141,9 +133,7 @@ pub enum Commands {
     },
 
     /// Inject secrets dynamically into Docker compose
-    Docker {
-        service: String,
-    },
+    Docker { service: String },
 
     /// Generate Kubernetes Secret manifest from vault items
     K8s {
@@ -161,9 +151,7 @@ pub enum Commands {
     },
 
     /// Git credential helper bridge
-    Git {
-        action: String,
-    },
+    Git { action: String },
 
     /// UNIX pipeline raw output without trailing newlines
     Pipe {
@@ -197,9 +185,7 @@ pub enum Commands {
     Bench,
 
     /// Render terminal ANSI QR Code for mobile 2FA scanning
-    Qr {
-        name: String,
-    },
+    Qr { name: String },
 
     /// Offline Have I Been Pwned k-anonymity breach scan
     PwnedCheck,
@@ -211,9 +197,7 @@ pub enum Commands {
     Policy,
 
     /// 1-click credential auto-rotation
-    Rotate {
-        name: String,
-    },
+    Rotate { name: String },
 
     /// Export compliance audit report (SOC2 / ISO-27001)
     AuditExport {
@@ -234,14 +218,10 @@ pub enum Commands {
     },
 
     /// Peer-to-peer LAN / Tailscale vault sync
-    P2pSync {
-        peer: String,
-    },
+    P2pSync { peer: String },
 
     /// Dispatch HMAC-signed mutation webhook
-    Webhook {
-        url: String,
-    },
+    Webhook { url: String },
 
     /// Privacy email forwarding alias generator
     AliasDns {
@@ -277,27 +257,19 @@ pub enum Commands {
     Man,
 
     /// Password entropy and crack-time analyzer
-    Strength {
-        password: String,
-    },
+    Strength { password: String },
 
     /// System, RNG, and compiler diagnostics
     Doctor,
 
     /// Import vault items from CSV, JSON, Bitwarden, or KeePass
-    Import {
-        file: String,
-    },
+    Import { file: String },
 
     /// Export vault items to CSV, JSON, or standalone offline HTML decryptor
-    Export {
-        file: String,
-    },
+    Export { file: String },
 
     /// Generate shell auto-completions for zsh, bash, fish, powershell
-    Completions {
-        shell: Shell,
-    },
+    Completions { shell: Shell },
 
     /// Display current vault cryptographic status
     Status,
@@ -317,10 +289,24 @@ fn main() -> anyhow::Result<()> {
         Some(Commands::List { json, category }) => {
             commands::list::execute(json, category);
         }
-        Some(Commands::Get { name, password, username, totp, copy, json, .. }) => {
+        Some(Commands::Get {
+            name,
+            password,
+            username,
+            totp,
+            copy,
+            json,
+            ..
+        }) => {
             commands::get::execute(&name, password, username, totp, copy, json);
         }
-        Some(Commands::Add { title, username, password, note, category }) => {
+        Some(Commands::Add {
+            title,
+            username,
+            password,
+            note,
+            category,
+        }) => {
             commands::add::execute(title, username, password, note, category)?;
         }
         Some(Commands::Remove { name }) | Some(Commands::Delete { name }) => {
@@ -329,7 +315,9 @@ fn main() -> anyhow::Result<()> {
         Some(Commands::Search { query }) => {
             commands::search::execute(&query);
         }
-        Some(Commands::Totp { name, watch, copy, .. }) => {
+        Some(Commands::Totp {
+            name, watch, copy, ..
+        }) => {
             commands::totp::execute(&name, watch, copy);
         }
         Some(Commands::Generate { length, diceware }) => {
@@ -353,7 +341,11 @@ fn main() -> anyhow::Result<()> {
                 commands::sss::split(None);
             }
         }
-        Some(Commands::Orvsend { text, expires, passphrase }) => {
+        Some(Commands::Orvsend {
+            text,
+            expires,
+            passphrase,
+        }) => {
             commands::orvsend::create(&text, expires, passphrase);
         }
         Some(Commands::Ssh { action }) => {

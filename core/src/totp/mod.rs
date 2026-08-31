@@ -67,7 +67,7 @@ pub fn generate_totp(secret: &[u8], period: u64) -> Result<u32, TotpError> {
         .unwrap_or_default()
         .as_secs();
     let step = now / period.max(1);
-    
+
     // Quick 6-digit numeric hash
     let mut hash: u32 = 0;
     for (i, &b) in secret.iter().enumerate() {

@@ -1,6 +1,8 @@
 use crate::vault::database;
-use orvpass_core::models::{ItemData, ItemType, LoginData, SecureNoteData, CreditCardData, VaultItem};
 use dialoguer::Input;
+use orvpass_core::models::{
+    CreditCardData, ItemData, ItemType, LoginData, SecureNoteData, VaultItem,
+};
 
 pub fn execute(
     title: Option<String>,
@@ -27,21 +29,42 @@ pub fn execute(
                     .with_prompt("Secure Note Content")
                     .interact_text()?,
             };
-            VaultItem::new(ItemType::SecureNote, &item_title, ItemData::SecureNote(SecureNoteData { content }))
+            VaultItem::new(
+                ItemType::SecureNote,
+                &item_title,
+                ItemData::SecureNote(SecureNoteData { content }),
+            )
         }
         "card" | "cards" => {
-            let cardholder = Input::<String>::new().with_prompt("Cardholder Name").interact_text()?;
-            let number = Input::<String>::new().with_prompt("Card Number").interact_text()?;
-            let exp_m = Input::<String>::new().with_prompt("Expiry Month (MM)").default("12".into()).interact_text()?;
-            let exp_y = Input::<String>::new().with_prompt("Expiry Year (YYYY)").default("2028".into()).interact_text()?;
-            let cvv = Input::<String>::new().with_prompt("CVV").default("123".into()).interact_text()?;
-            VaultItem::new(ItemType::CreditCard, &item_title, ItemData::CreditCard(CreditCardData {
-                cardholder_name: cardholder,
-                card_number: number,
-                expiration_month: exp_m,
-                expiration_year: exp_y,
-                cvv,
-            }))
+            let cardholder = Input::<String>::new()
+                .with_prompt("Cardholder Name")
+                .interact_text()?;
+            let number = Input::<String>::new()
+                .with_prompt("Card Number")
+                .interact_text()?;
+            let exp_m = Input::<String>::new()
+                .with_prompt("Expiry Month (MM)")
+                .default("12".into())
+                .interact_text()?;
+            let exp_y = Input::<String>::new()
+                .with_prompt("Expiry Year (YYYY)")
+                .default("2028".into())
+                .interact_text()?;
+            let cvv = Input::<String>::new()
+                .with_prompt("CVV")
+                .default("123".into())
+                .interact_text()?;
+            VaultItem::new(
+                ItemType::CreditCard,
+                &item_title,
+                ItemData::CreditCard(CreditCardData {
+                    cardholder_name: cardholder,
+                    card_number: number,
+                    expiration_month: exp_m,
+                    expiration_year: exp_y,
+                    cvv,
+                }),
+            )
         }
         _ => {
             let user = match username {
@@ -61,11 +84,15 @@ pub fn execute(
                 pass
             };
 
-            VaultItem::new(ItemType::Login, &item_title, ItemData::Login(LoginData {
-                username: Some(user),
-                password: Some(final_pass),
-                urls: Vec::new(),
-            }))
+            VaultItem::new(
+                ItemType::Login,
+                &item_title,
+                ItemData::Login(LoginData {
+                    username: Some(user),
+                    password: Some(final_pass),
+                    urls: Vec::new(),
+                }),
+            )
         }
     };
 

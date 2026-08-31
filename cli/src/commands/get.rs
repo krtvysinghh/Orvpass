@@ -2,9 +2,18 @@ use crate::vault::database;
 use orvpass_core::models::ItemData;
 use orvpass_core::totp::generate_totp;
 
-pub fn execute(name: &str, password_only: bool, username_only: bool, totp_only: bool, copy: bool, json_output: bool) {
+pub fn execute(
+    name: &str,
+    password_only: bool,
+    username_only: bool,
+    totp_only: bool,
+    copy: bool,
+    json_output: bool,
+) {
     let items = database::load_items();
-    let found = items.iter().find(|i| i.title.eq_ignore_ascii_case(name) || i.name.eq_ignore_ascii_case(name));
+    let found = items
+        .iter()
+        .find(|i| i.title.eq_ignore_ascii_case(name) || i.name.eq_ignore_ascii_case(name));
 
     if let Some(item) = found {
         if json_output {
@@ -34,7 +43,10 @@ pub fn execute(name: &str, password_only: bool, username_only: bool, totp_only: 
                     if copy {
                         if let Ok(mut board) = arboard::Clipboard::new() {
                             let _ = board.set_text(pass);
-                            println!("📋 Copied password for '{}' (Auto-wiping in 15s)", item.title);
+                            println!(
+                                "📋 Copied password for '{}' (Auto-wiping in 15s)",
+                                item.title
+                            );
                             return;
                         }
                     }
@@ -82,7 +94,10 @@ pub fn execute(name: &str, password_only: bool, username_only: bool, totp_only: 
                 println!("=====================================");
                 println!("  Cardholder:  {}", card.cardholder_name);
                 println!("  Card Number: {}", card.card_number);
-                println!("  Expiration:  {}/{}", card.expiration_month, card.expiration_year);
+                println!(
+                    "  Expiration:  {}/{}",
+                    card.expiration_month, card.expiration_year
+                );
                 println!("  CVV:         {}", card.cvv);
                 println!("=====================================");
             }

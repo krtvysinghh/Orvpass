@@ -1,4 +1,4 @@
-use orvpass_core::models::{VaultItem, ItemData};
+use orvpass_core::models::{ItemData, VaultItem};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -76,7 +76,9 @@ impl TuiApp {
                     Category::Logins => matches!(item.data, ItemData::Login(_)),
                     Category::Notes => matches!(item.data, ItemData::SecureNote(_)),
                     Category::Cards => matches!(item.data, ItemData::CreditCard(_)),
-                    Category::Favorites => item.tags.iter().any(|t| t == "favorite" || t == "pinned"),
+                    Category::Favorites => {
+                        item.tags.iter().any(|t| t == "favorite" || t == "pinned")
+                    }
                 };
 
                 let query = self.search_query.to_lowercase();
@@ -119,7 +121,10 @@ impl TuiApp {
 
     pub fn next_category(&mut self) {
         let categories = Category::all();
-        let current_idx = categories.iter().position(|c| *c == self.category).unwrap_or(0);
+        let current_idx = categories
+            .iter()
+            .position(|c| *c == self.category)
+            .unwrap_or(0);
         self.category = categories[(current_idx + 1) % categories.len()].clone();
         self.selected_index = 0;
     }

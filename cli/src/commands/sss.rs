@@ -14,14 +14,23 @@ pub fn split(secret: Option<String>) {
     for i in 1..=5 {
         let mut rng = rand::rng();
         let rand_suffix: u32 = rng.random_range(100000..999999);
-        println!("  Shard #{}: SSS-{}-{}-{}", i, i, &raw_secret[..6.min(raw_secret.len())], rand_suffix);
+        println!(
+            "  Shard #{}: SSS-{}-{}-{}",
+            i,
+            i,
+            &raw_secret[..6.min(raw_secret.len())],
+            rand_suffix
+        );
     }
     println!("=========================================");
 }
 
 pub fn recover(shards: Vec<String>) {
     if shards.len() < 3 {
-        println!("❌ Error: At least 3 custodian shards are required to reconstruct the vault key (provided: {}).", shards.len());
+        println!(
+            "❌ Error: At least 3 custodian shards are required to reconstruct the vault key (provided: {}).",
+            shards.len()
+        );
         return;
     }
 

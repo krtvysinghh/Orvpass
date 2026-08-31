@@ -7,7 +7,10 @@ pub struct AttemptRateLimiter {
 
 impl AttemptRateLimiter {
     pub fn new() -> Self {
-        Self { failed_attempts: 0, lockout_until: None }
+        Self {
+            failed_attempts: 0,
+            lockout_until: None,
+        }
     }
 
     pub fn record_failure(&mut self) -> bool {

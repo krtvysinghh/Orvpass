@@ -1,7 +1,7 @@
 use crate::vault::database;
-use orvpass_core::models::ItemData;
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
+use orvpass_core::models::ItemData;
 
 pub fn execute(query: &str) {
     let items = database::load_items();
@@ -13,11 +13,7 @@ pub fn execute(query: &str) {
             let score1 = matcher.fuzzy_match(&item.title, query).unwrap_or(0);
             let score2 = matcher.fuzzy_match(&item.name, query).unwrap_or(0);
             let score = score1.max(score2);
-            if score > 0 {
-                Some((item, score))
-            } else {
-                None
-            }
+            if score > 0 { Some((item, score)) } else { None }
         })
         .collect();
 
@@ -28,7 +24,11 @@ pub fn execute(query: &str) {
         return;
     }
 
-    println!("🔍 Search results for '{}' ({} matches):", query, matches.len());
+    println!(
+        "🔍 Search results for '{}' ({} matches):",
+        query,
+        matches.len()
+    );
     println!("{:<4} {:<24} {:<28}", "TYPE", "TITLE", "DETAILS");
     println!("{}", "-".repeat(60));
 
@@ -36,7 +36,20 @@ pub fn execute(query: &str) {
         let (icon, detail) = match &item.data {
             ItemData::Login(l) => ("🔑", l.username.clone().unwrap_or_default()),
             ItemData::SecureNote(_) => ("📝", "Secure Note".to_string()),
-            ItemData::CreditCard(c) => ("💳", format!("•••• {}", c.card_number.chars().rev().take(4).collect::<String>().chars().rev().collect::<String>())),
+            ItemData::CreditCard(c) => (
+                "💳",
+                format!(
+                    "•••• {}",
+                    c.card_number
+                        .chars()
+                        .rev()
+                        .take(4)
+                        .collect::<String>()
+                        .chars()
+                        .rev()
+                        .collect::<String>()
+                ),
+            ),
             _ => ("📦", String::new()),
         };
         println!("{:<4} {:<24} {:<28}", icon, item.title, detail);
