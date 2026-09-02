@@ -84,3 +84,9 @@ impl std::fmt::Debug for TotpSecret {
             .finish()
     }
 }
+
+pub fn normalize_totp_secret(raw: &str) -> String {
+    let clean: String = raw.chars().filter(|c| c.is_ascii_alphanumeric()).collect();
+    let pad_len = (8 - (clean.len() % 8)) % 8;
+    clean.to_uppercase() + &"=".repeat(pad_len)
+}
