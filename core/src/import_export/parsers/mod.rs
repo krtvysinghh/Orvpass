@@ -22,3 +22,4 @@ pub mod chrome;
 pub mod apple;
 pub mod proton;
 pub mod dashlane;
+pub mod roboform;
