@@ -41,6 +41,7 @@ pub enum Theme {
 }
 
 pub struct TuiApp {
+    pub last_import_count: usize,
     pub theme: Theme,
     pub items: Vec<VaultItem>,
     pub selected_index: usize,
@@ -64,6 +65,7 @@ impl TuiApp {
             status_message: None,
             should_quit: false,
             theme: Theme::TokyoNight,
+            last_import_count: 0,
         }
     }
 
