@@ -3,6 +3,10 @@ use orvpass_core::import_export::exporters::html::export_standalone_html;
 use std::fs;
 
 pub fn execute(file: &str) {
+    execute_category(file, None)
+}
+
+pub fn execute_category(file: &str, _category: Option<&str>) {
     let items = database::load_items();
     if file.ends_with(".html") {
         let html = export_standalone_html(&items);
