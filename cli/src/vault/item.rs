@@ -1,53 +1,17 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use orvpass_core::models::VaultItem;
 
-#[derive(Clone)]
-pub struct VaultItem {
-    pub id: String,
-    pub name: String,
-    pub username: String,
-    pub password: String,
-    pub url: String,
-    pub created: u128,
-}
-
-impl VaultItem {
-    pub fn new(name: String, username: String, password: String, url: String) -> Self {
-        let created = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis();
-
-        Self {
-            id: created.to_string(),
-            name,
-            username,
-            password,
-            url,
-            created,
+pub fn merge_items(existing: &mut Vec<VaultItem>, new_items: Vec<VaultItem>, overwrite: bool) -> usize {
+    let mut added = 0;
+    for item in new_items {
+        if let Some(pos) = existing.iter().position(|i| i.title.eq_ignore_ascii_case(&item.title)) {
+            if overwrite {
+                existing[pos] = item;
+                added += 1;
+            }
+        } else {
+            existing.push(item);
+            added += 1;
         }
     }
-
-    pub fn serialize(&self) -> String {
-        format!(
-            "{}|{}|{}|{}|{}|{}",
-            self.id, self.name, self.username, self.password, self.url, self.created
-        )
-    }
-
-    pub fn deserialize(line: &str) -> Option<Self> {
-        let p: Vec<&str> = line.split('|').collect();
-
-        if p.len() != 6 {
-            return None;
-        }
-
-        Some(Self {
-            id: p[0].into(),
-            name: p[1].into(),
-            username: p[2].into(),
-            password: p[3].into(),
-            url: p[4].into(),
-            created: p[5].parse().unwrap_or(0),
-        })
-    }
+    added
 }
