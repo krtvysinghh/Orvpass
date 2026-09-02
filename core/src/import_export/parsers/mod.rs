@@ -1,10 +1,10 @@
 pub mod apple;
 pub mod bitwarden;
 pub mod chrome;
+pub mod csv_utils;
 pub mod dashlane;
 pub mod keepass;
 pub mod lastpass;
 pub mod onepassword;
 pub mod proton;
 pub mod roboform;
-pub mod csv_utils;
