@@ -20,3 +20,4 @@ pub mod onepassword;
 pub mod lastpass;
 pub mod chrome;
 pub mod apple;
+pub mod proton;
