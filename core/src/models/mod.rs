@@ -109,3 +109,9 @@ impl VaultItem {
         format!("{:x}", hasher.finalize())
     }
 }
+
+impl VaultItem {
+    pub fn sanitize_inputs(&mut self) {
+        self.title = self.title.trim().chars().take(256).collect();
+    }
+}
