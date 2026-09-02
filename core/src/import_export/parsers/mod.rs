@@ -16,3 +16,4 @@ pub struct ImportedItem {
 pub trait Importer {
     fn import(data: &str) -> Result<Vec<ImportedItem>, String>;
 }
+pub mod onepassword;
