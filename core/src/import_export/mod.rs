@@ -3,7 +3,10 @@ pub mod formats;
 pub mod parsers;
 
 pub fn detect_vault_format(content: &str) -> &'static str {
-    if content.contains("encryptedFor") || content.contains("ciphers") || content.contains("\"items\":") {
+    if content.contains("encryptedFor")
+        || content.contains("ciphers")
+        || content.contains("\"items\":")
+    {
         "Bitwarden"
     } else if content.contains("KeePassFile") || content.contains("Group") {
         "KeePass"

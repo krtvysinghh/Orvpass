@@ -1,4 +1,4 @@
-use crate::models::{ItemData, ItemType, LoginData, SecureNoteData, VaultItem, CustomField};
+use crate::models::{CustomField, ItemData, ItemType, LoginData, SecureNoteData, VaultItem};
 use serde_json::Value;
 
 pub fn parse_bitwarden_json(json_str: &str) -> Result<Vec<VaultItem>, String> {
@@ -14,14 +14,20 @@ pub fn parse_bitwarden_json(json_str: &str) -> Result<Vec<VaultItem>, String> {
     };
 
     for entry in entries {
-        let name = entry.get("name").and_then(|v| v.as_str()).unwrap_or("Imported Item");
+        let name = entry
+            .get("name")
+            .and_then(|v| v.as_str())
+            .unwrap_or("Imported Item");
         let item_type = entry.get("type").and_then(|v| v.as_u64()).unwrap_or(1);
         let notes = entry.get("notes").and_then(|v| v.as_str()).unwrap_or("");
 
         let mut custom_fields = Vec::new();
         if let Some(fields) = entry.get("fields").and_then(|v| v.as_array()) {
             for f in fields {
-                if let (Some(fname), Some(fval)) = (f.get("name").and_then(|v| v.as_str()), f.get("value").and_then(|v| v.as_str())) {
+                if let (Some(fname), Some(fval)) = (
+                    f.get("name").and_then(|v| v.as_str()),
+                    f.get("value").and_then(|v| v.as_str()),
+                ) {
                     custom_fields.push(CustomField {
                         name: fname.to_string(),
                         value: fval.to_string(),
@@ -34,8 +40,14 @@ pub fn parse_bitwarden_json(json_str: &str) -> Result<Vec<VaultItem>, String> {
         let item = match item_type {
             1 => {
                 let login = entry.get("login");
-                let username = login.and_then(|l| l.get("username")).and_then(|v| v.as_str()).map(|s| s.to_string());
-                let password = login.and_then(|l| l.get("password")).and_then(|v| v.as_str()).map(|s| s.to_string());
+                let username = login
+                    .and_then(|l| l.get("username"))
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+                let password = login
+                    .and_then(|l| l.get("password"))
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
                 let mut urls = Vec::new();
                 if let Some(uris) = login.and_then(|l| l.get("uris")).and_then(|v| v.as_array()) {
                     for u in uris {
@@ -44,12 +56,26 @@ pub fn parse_bitwarden_json(json_str: &str) -> Result<Vec<VaultItem>, String> {
                         }
                     }
                 }
-                let mut v = VaultItem::new(ItemType::Login, name, ItemData::Login(LoginData { username, password, urls }));
+                let mut v = VaultItem::new(
+                    ItemType::Login,
+                    name,
+                    ItemData::Login(LoginData {
+                        username,
+                        password,
+                        urls,
+                    }),
+                );
                 v.custom_fields = custom_fields;
                 v
             }
             2 => {
-                let mut v = VaultItem::new(ItemType::SecureNote, name, ItemData::SecureNote(SecureNoteData { content: notes.to_string() }));
+                let mut v = VaultItem::new(
+                    ItemType::SecureNote,
+                    name,
+                    ItemData::SecureNote(SecureNoteData {
+                        content: notes.to_string(),
+                    }),
+                );
                 v.custom_fields = custom_fields;
                 v
             }

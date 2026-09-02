@@ -12,7 +12,8 @@ pub fn export_standalone_html(items: &[VaultItem]) -> String {
         }
     }
 
-    format!(r#"<!DOCTYPE html>
+    format!(
+        r#"<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -34,5 +35,7 @@ th {{ color: #818cf8; }}
 </tbody>
 </table>
 </body>
-</html>"#, rows)
+</html>"#,
+        rows
+    )
 }

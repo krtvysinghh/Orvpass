@@ -11,11 +11,19 @@ pub fn execute_category(file: &str, _category: Option<&str>) {
     if file.ends_with(".html") {
         let html = export_standalone_html(&items);
         let _ = fs::write(file, html);
-        println!("🌐 Exported standalone offline HTML vault to '{}' ({} items)", file, items.len());
+        println!(
+            "🌐 Exported standalone offline HTML vault to '{}' ({} items)",
+            file,
+            items.len()
+        );
     } else if file.ends_with(".json") {
         let json = serde_json::to_string_pretty(&items).unwrap_or_default();
         let _ = fs::write(file, json);
-        println!("📄 Exported JSON vault to '{}' ({} items)", file, items.len());
+        println!(
+            "📄 Exported JSON vault to '{}' ({} items)",
+            file,
+            items.len()
+        );
     } else {
         let json = serde_json::to_string_pretty(&items).unwrap_or_default();
         let _ = fs::write(file, json);

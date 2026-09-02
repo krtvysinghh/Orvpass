@@ -9,15 +9,23 @@ pub fn parse_lastpass_csv(csv_str: &str) -> Vec<VaultItem> {
             let url = parts[0];
             let username = parts[1];
             let password = parts[2];
-            let title = if parts.len() > 5 && !parts[5].is_empty() { parts[5] } else { url };
-            
+            let title = if parts.len() > 5 && !parts[5].is_empty() {
+                parts[5]
+            } else {
+                url
+            };
+
             let item = VaultItem::new(
                 ItemType::Login,
                 title,
                 ItemData::Login(LoginData {
                     username: Some(username.to_string()),
                     password: Some(password.to_string()),
-                    urls: if url.is_empty() { vec![] } else { vec![url.to_string()] },
+                    urls: if url.is_empty() {
+                        vec![]
+                    } else {
+                        vec![url.to_string()]
+                    },
                 }),
             );
             items.push(item);

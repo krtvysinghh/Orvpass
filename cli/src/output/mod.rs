@@ -3,5 +3,8 @@ pub fn info(msg: &str) {
 }
 
 pub fn print_import_summary(total: usize, logins: usize, notes: usize) {
-    println!("📊 Import Summary: {} total ({} logins, {} secure notes)", total, logins, notes);
+    println!(
+        "📊 Import Summary: {} total ({} logins, {} secure notes)",
+        total, logins, notes
+    );
 }
