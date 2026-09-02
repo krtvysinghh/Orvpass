@@ -54,7 +54,7 @@ pub fn parse_bitwarden_json(json_str: &str) -> Result<Vec<VaultItem>, String> {
                 v
             }
             _ => {
-                let mut v = VaultItem::new(ItemType::Custom("Other".into()), name, ItemData::Custom(std::collections::HashMap::new()));
+                let mut v = VaultItem::new(ItemType::Custom, name, ItemData::Custom);
                 v.custom_fields = custom_fields;
                 v
             }
