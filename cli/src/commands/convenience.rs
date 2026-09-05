@@ -77,3 +77,19 @@ pub fn show_favorites() {
         println!("  ⭐ 🔑 {}", item.title);
     }
 }
+
+pub fn toggle_favorite(name: &str) {
+    let mut items = database::load_items();
+    if let Some(item) = items.iter_mut().find(|i| i.title.eq_ignore_ascii_case(name)) {
+        if item.tags.iter().any(|t| t == "favorite") {
+            item.tags.retain(|t| t != "favorite");
+            println!("☆ Unstarred '{}'", item.title);
+        } else {
+            item.tags.push("favorite".to_string());
+            println!("⭐ Starred '{}'", item.title);
+        }
+        let _ = database::save_items(&items);
+    } else {
+        println!("❌ Item '{}' not found.", name);
+    }
+}
