@@ -42,3 +42,19 @@ pub fn copy_totp_quick(name: &str) {
     }
     println!("❌ Item '{}' not found or TOTP not configured.", name);
 }
+
+pub fn quick_add_item(title: &str, username: Option<String>, password: Option<String>) {
+    let mut items = database::load_items();
+    let new_item = orvpass_core::models::VaultItem::new(
+        orvpass_core::models::ItemType::Login,
+        title,
+        ItemData::Login(orvpass_core::models::LoginData {
+            username,
+            password: password.or_else(|| Some(crate::commands::generate::execute(20, false))),
+            urls: vec![],
+        }),
+    );
+    items.push(new_item);
+    let _ = database::save_items(&items);
+    println!("⚡ Quick-added credential '{}' to vault.", title);
+}
