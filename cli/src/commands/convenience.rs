@@ -15,3 +15,17 @@ pub fn copy_password_quick(name: &str) {
     }
     println!("❌ Item '{}' not found or has no password.", name);
 }
+
+pub fn copy_username_quick(name: &str) {
+    let items = database::load_items();
+    if let Some(item) = items.iter().find(|i| i.title.eq_ignore_ascii_case(name)) {
+        if let ItemData::Login(l) = &item.data {
+            if let Some(u) = &l.username {
+                crate::clipboard::copy_with_notification(u, 15);
+                println!("👤 Copied username for '{}' to clipboard ({}).", item.title, u);
+                return;
+            }
+        }
+    }
+    println!("❌ Item '{}' not found or has no username.", name);
+}
