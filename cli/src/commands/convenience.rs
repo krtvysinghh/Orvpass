@@ -139,3 +139,9 @@ pub fn rename_credential(old_name: &str, new_name: &str) {
 pub fn show_qr_preview_help() {
     println!("📱 Tip: You can scan the terminal QR code directly with iOS Camera or Google Lens.");
 }
+
+pub fn detect_current_shell() {
+    let shell = std::env::var("SHELL").unwrap_or_else(|_| "zsh".into());
+    println!("🐚 Active shell detected: {}", shell);
+    println!("👉 Add shortcuts via: eval \"$(orvpass init-shell)\"");
+}
