@@ -4,3 +4,4 @@ pub mod html;
 pub mod keepass_xml;
 pub mod bitwarden;
 pub mod onepassword;
+pub mod lastpass;
