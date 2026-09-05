@@ -12,3 +12,4 @@ pub mod enpass;
 pub mod safeincloud;
 pub mod buttercup;
 pub mod firefox;
+pub mod edge;
