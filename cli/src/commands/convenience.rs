@@ -58,3 +58,12 @@ pub fn quick_add_item(title: &str, username: Option<String>, password: Option<St
     let _ = database::save_items(&items);
     println!("⚡ Quick-added credential '{}' to vault.", title);
 }
+
+pub fn show_recent_items() {
+    let items = database::load_items();
+    println!("🕒 RECENTLY ACCESSED CREDENTIALS");
+    println!("================================");
+    for item in items.iter().take(5) {
+        println!("  ▶ 🔑 {}", item.title);
+    }
+}
