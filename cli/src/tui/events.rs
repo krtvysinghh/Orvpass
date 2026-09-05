@@ -47,6 +47,12 @@ pub fn handle_events(app: &mut TuiApp) -> anyhow::Result<()> {
                             crate::commands::open::open_browser(&item.title);
                         }
                     }
+                    KeyCode::Char('s') => {
+                        if let Some(item) = app.selected_item() {
+                            let title = item.title.clone();
+                            crate::commands::convenience::toggle_favorite(&title);
+                        }
+                    }
                     KeyCode::Char('p') => {
                         app.show_password = !app.show_password;
                     }
