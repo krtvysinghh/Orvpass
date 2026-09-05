@@ -44,3 +44,9 @@ pub fn execute_advanced(
 }
 
 // Entropy calculation: L * log2(N)
+
+pub fn generate_and_copy(length: usize, diceware: bool) -> String {
+    let pass = execute(length, diceware);
+    crate::clipboard::copy_with_notification(&pass, 15);
+    pass
+}
