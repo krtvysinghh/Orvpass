@@ -9,3 +9,4 @@ pub mod onepassword;
 pub mod proton;
 pub mod roboform;
 pub mod enpass;
+pub mod safeincloud;
