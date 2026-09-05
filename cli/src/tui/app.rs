@@ -151,3 +151,9 @@ impl TuiApp {
         self.search_query.clear();
     }
 }
+
+impl TuiApp {
+    pub fn category_badge_counts(&self) -> (usize, usize, usize, usize, usize) {
+        (self.items.len(), 0, 0, 0, 0)
+    }
+}
