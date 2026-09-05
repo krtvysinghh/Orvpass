@@ -143,3 +143,9 @@ impl TuiApp {
         30 - (now % 30)
     }
 }
+
+impl TuiApp {
+    pub fn clear_search(&mut self) {
+        self.search_query.clear();
+    }
+}
