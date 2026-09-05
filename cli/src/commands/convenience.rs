@@ -135,3 +135,7 @@ pub fn rename_credential(old_name: &str, new_name: &str) {
         println!("❌ Item '{}' not found.", old_name);
     }
 }
+
+pub fn show_qr_preview_help() {
+    println!("📱 Tip: You can scan the terminal QR code directly with iOS Camera or Google Lens.");
+}
