@@ -15,3 +15,4 @@ pub mod firefox;
 pub mod edge;
 pub mod brave;
 pub mod opera;
+pub mod vivaldi;
