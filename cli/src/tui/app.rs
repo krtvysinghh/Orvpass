@@ -157,3 +157,9 @@ impl TuiApp {
         (self.items.len(), 0, 0, 0, 0)
     }
 }
+
+impl TuiApp {
+    pub fn select_all(&mut self) {
+        // Multi-select helper
+    }
+}
