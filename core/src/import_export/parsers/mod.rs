@@ -18,3 +18,4 @@ pub mod opera;
 pub mod vivaldi;
 pub mod passbolt;
 pub mod infisical;
+pub mod doppler;
