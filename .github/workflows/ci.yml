@@ -19,3 +19,5 @@ jobs:
         run: cargo check --workspace
       - name: Cargo Test
         run: cargo test --workspace
+      - name: Clippy Linter
+        run: cargo clippy -- -D warnings
