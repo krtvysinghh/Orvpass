@@ -45,7 +45,7 @@ pub fn handle_events(app: &mut TuiApp) -> anyhow::Result<()> {
                     KeyCode::Char('p') => {
                         app.show_password = !app.show_password;
                     }
-                    KeyCode::Char('c') => {
+                    KeyCode::Enter | KeyCode::Char('c') => {
                         if let Some(item) = app.selected_item() {
                             if let ItemData::Login(login) = &item.data {
                                 if let Some(pass) = &login.password {
