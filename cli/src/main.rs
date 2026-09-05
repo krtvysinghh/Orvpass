@@ -477,7 +477,7 @@ fn main() -> anyhow::Result<()> {
             commands::status::execute();
         }
         Some(Commands::Version) => {
-            println!("Orvpass v5.0.0 Enterprise (Pure Rust CLI & TUI)");
+            println!("⚡ ORVPASS ENTERPRISE v5.3.0 (Zero-Knowledge Memory-Safe Engine)");
             println!("Engine: Argon2id + ChaCha20-Poly1305 AEAD");
         }
     }
