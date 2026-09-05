@@ -115,3 +115,9 @@ impl VaultItem {
         self.title = self.title.trim().chars().take(256).collect();
     }
 }
+
+impl VaultItem {
+    pub fn validate_schema(&self) -> bool {
+        self.title.len() <= 1024 && self.tags.len() <= 100
+    }
+}
