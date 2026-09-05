@@ -6,3 +6,4 @@ pub mod bitwarden;
 pub mod onepassword;
 pub mod lastpass;
 pub mod dotenv;
+pub mod k8s;
