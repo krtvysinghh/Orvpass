@@ -23,3 +23,4 @@ pub mod aws_sm;
 pub mod gcp_sm;
 pub mod vault_hcl;
 pub mod k8s_secret;
+pub mod dotenv;
