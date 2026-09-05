@@ -124,3 +124,14 @@ pub fn duplicate_credential(name: &str) {
         println!("❌ Item '{}' not found.", name);
     }
 }
+
+pub fn rename_credential(old_name: &str, new_name: &str) {
+    let mut items = database::load_items();
+    if let Some(item) = items.iter_mut().find(|i| i.title.eq_ignore_ascii_case(old_name)) {
+        item.title = new_name.to_string();
+        let _ = database::save_items(&items);
+        println!("✏️  Renamed credential '{}' -> '{}'.", old_name, new_name);
+    } else {
+        println!("❌ Item '{}' not found.", old_name);
+    }
+}
