@@ -16,3 +16,4 @@ pub mod ssh;
 pub mod sss;
 pub mod status;
 pub mod totp;
+pub mod convenience;
