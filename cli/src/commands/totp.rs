@@ -51,3 +51,5 @@ pub fn execute(name: &str, watch: bool, copy: bool) {
         }
     }
 }
+
+// QR Code integration enabled via `orvpass qr <name>`
