@@ -124,3 +124,11 @@ pub fn save_items(items: &[VaultItem]) -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+pub fn shred_file(path: &std::path::Path) -> std::io::Result<()> {
+    if path.exists() {
+        std::fs::write(path, [0u8; 1024])?;
+        std::fs::remove_file(path)?;
+    }
+    Ok(())
+}
