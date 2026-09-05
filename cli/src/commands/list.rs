@@ -64,3 +64,9 @@ pub fn execute_filtered(json_output: bool, category_filter: Option<String>, _tag
         println!("{:<4} {:<24} {:<16} {:<28}", icon, item.title, cat, detail);
     }
 }
+
+pub fn render_compact_list(items: &[orvpass_core::models::VaultItem]) {
+    for item in items {
+        println!("🔑 {:<25} [ready]", item.title);
+    }
+}
