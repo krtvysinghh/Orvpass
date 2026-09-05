@@ -67,3 +67,13 @@ pub fn show_recent_items() {
         println!("  ▶ 🔑 {}", item.title);
     }
 }
+
+pub fn show_favorites() {
+    let items = database::load_items();
+    let favs: Vec<_> = items.iter().filter(|i| i.tags.iter().any(|t| t == "favorite")).collect();
+    println!("⭐ FAVORITES ({})", favs.len());
+    println!("===============");
+    for item in favs {
+        println!("  ⭐ 🔑 {}", item.title);
+    }
+}
