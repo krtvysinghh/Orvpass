@@ -109,3 +109,8 @@ pub fn execute(
         println!("❌ Error: Item '{}' not found in vault.", name);
     }
 }
+
+pub fn smart_find_item<'a>(items: &'a [orvpass_core::models::VaultItem], query: &str) -> Option<&'a orvpass_core::models::VaultItem> {
+    items.iter().find(|i| i.title.eq_ignore_ascii_case(query))
+        .or_else(|| items.iter().find(|i| i.title.to_lowercase().contains(&query.to_lowercase())))
+}
