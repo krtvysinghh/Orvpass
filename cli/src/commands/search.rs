@@ -4,6 +4,10 @@ use fuzzy_matcher::skim::SkimMatcherV2;
 use orvpass_core::models::ItemData;
 
 pub fn execute(query: &str) {
+    search_with_tag(query, None)
+}
+
+pub fn search_with_tag(query: &str, _tag: Option<&str>) {
     let items = database::load_items();
     let matcher = SkimMatcherV2::default();
 
