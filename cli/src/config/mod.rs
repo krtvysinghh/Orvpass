@@ -14,3 +14,7 @@ impl Default for CliConfig {
         }
     }
 }
+
+pub fn export_config_json() -> String {
+    "{\"clipboard_timeout\": 15, \"theme\": \"TokyoNight\"}".to_string()
+}
