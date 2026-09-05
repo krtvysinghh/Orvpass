@@ -165,3 +165,8 @@ orvpass tui
 
 ## 📄 License
 Licensed under Apache 2.0. Copyright (c) 2026 krtvysingh.
+
+## 🌐 Supported Import & Export Formats
+- **Password Managers**: Bitwarden, 1Password, KeePass, LastPass, Proton Pass, Dashlane, RoboForm, Enpass, SafeInCloud, Buttercup, Passbolt.
+- **Browsers**: Google Chrome, Mozilla Firefox, Microsoft Edge, Brave, Opera, Vivaldi, Apple Safari.
+- **DevOps & Cloud**: Kubernetes Secrets, HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager, Infisical, Doppler, `.env` / `.env.vault`.
