@@ -20,3 +20,4 @@ pub mod passbolt;
 pub mod infisical;
 pub mod doppler;
 pub mod aws_sm;
+pub mod gcp_sm;
