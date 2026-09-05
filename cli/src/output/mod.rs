@@ -8,3 +8,7 @@ pub fn print_import_summary(total: usize, logins: usize, notes: usize) {
         total, logins, notes
     );
 }
+
+pub fn print_highlighted_json(json_str: &str) {
+    println!("{}", json_str);
+}
