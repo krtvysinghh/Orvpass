@@ -93,3 +93,12 @@ pub fn toggle_favorite(name: &str) {
         println!("❌ Item '{}' not found.", name);
     }
 }
+
+pub fn list_secure_notes() {
+    let items = database::load_items();
+    println!("📝 SECURE NOTES");
+    println!("===============");
+    for item in items.iter().filter(|i| matches!(i.item_type, orvpass_core::models::ItemType::SecureNote)) {
+        println!("  📝 {}", item.title);
+    }
+}
