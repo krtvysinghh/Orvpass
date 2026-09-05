@@ -141,3 +141,7 @@ pub fn decrypt(key: &SecretKey, encrypted: &EncryptedData) -> Result<Vec<u8>, Cr
         )
         .map_err(|_| CryptoError::Decryption)
 }
+
+pub fn constant_time_str_eq(a: &str, b: &str) -> bool {
+    constant_time_eq(a.as_bytes(), b.as_bytes())
+}
