@@ -111,3 +111,16 @@ pub fn list_payment_cards() {
         println!("  💳 {} (•••• 4242)", item.title);
     }
 }
+
+pub fn duplicate_credential(name: &str) {
+    let mut items = database::load_items();
+    if let Some(pos) = items.iter().position(|i| i.title.eq_ignore_ascii_case(name)) {
+        let mut cloned = items[pos].clone();
+        cloned.title = format!("{} (Copy)", cloned.title);
+        items.push(cloned);
+        let _ = database::save_items(&items);
+        println!("✨ Cloned credential to '{} (Copy)'.", name);
+    } else {
+        println!("❌ Item '{}' not found.", name);
+    }
+}
