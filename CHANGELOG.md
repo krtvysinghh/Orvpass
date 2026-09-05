@@ -1,16 +1,12 @@
 # Changelog
 
+## [v5.3.0] - 2026-09-05
+### Added
+- Complete Import & Export support for 20+ formats (Enpass, SafeInCloud, Buttercup, Firefox, Edge, Brave, Opera, Vivaldi, Passbolt, Infisical, Doppler, AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault, Kubernetes Secret, .env, OTPAuth URIs).
+- Real-time password entropy scoring, strict schema bounds, timing-safe equality checks.
+- TUI tag badges, help popup dialog, search clearing shortcuts.
+- Secure file shredder, auto-repair engine, and auto-delimiter CSV analyzer.
+
 ## [v5.2.0] - 2026-09-02
 ### Added
-- Universal Vault Import from 10+ formats (Bitwarden, KeePass, 1Password, Chrome, Apple, LastPass, Proton Pass, Dashlane, RoboForm, CSV).
-- Universal Vault Export (Standalone offline HTML decryptor, KeePass XML 2.0, Encrypted JSON, CSV).
-- Memory-scrubbed intermediate import/export buffers with `zeroize`.
-- Duplicate detection, merge strategies, and RFC 4180 CSV parser.
-
-## [v5.1.0] - 2026-08-30
-### Added
-- 40+ Developer & Cryptographic CLI power tools.
-- Interactive TokyoNight Ratatui Terminal UI Dashboard.
-- ZeroizeOnDrop and constant-time verification.
-- Automated timestamped backups, Merkle tree audits, and rate-limiting lockout.
-- Native Homebrew tap (`brew install orvpass-cli`) and 1-line curl installer.
+- Universal Vault Import & Export engine for Bitwarden, KeePass, 1Password, Chrome, Apple, LastPass.
