@@ -241,6 +241,7 @@ fn render_main_content(frame: &mut Frame, app: &TuiApp, area: Rect) {
             "Entropy Score:  ★★★★★ (138 bits)",
             Style::default().fg(Color::Green),
         )));
+        detail_lines.push(Line::from(Span::styled("Tags:          [production, infra, cloud]", Style::default().fg(Color::Cyan))));
         detail_lines.push(Line::from(""));
 
         match &item.data {
