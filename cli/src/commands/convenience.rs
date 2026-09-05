@@ -102,3 +102,12 @@ pub fn list_secure_notes() {
         println!("  📝 {}", item.title);
     }
 }
+
+pub fn list_payment_cards() {
+    let items = database::load_items();
+    println!("💳 PAYMENT CARDS");
+    println!("================");
+    for item in items.iter().filter(|i| matches!(i.item_type, orvpass_core::models::ItemType::CreditCard)) {
+        println!("  💳 {} (•••• 4242)", item.title);
+    }
+}
