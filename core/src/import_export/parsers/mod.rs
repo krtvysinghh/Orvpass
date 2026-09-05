@@ -14,3 +14,4 @@ pub mod buttercup;
 pub mod firefox;
 pub mod edge;
 pub mod brave;
+pub mod opera;
