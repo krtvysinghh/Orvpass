@@ -145,3 +145,7 @@ pub fn decrypt(key: &SecretKey, encrypted: &EncryptedData) -> Result<Vec<u8>, Cr
 pub fn constant_time_str_eq(a: &str, b: &str) -> bool {
     constant_time_eq(a.as_bytes(), b.as_bytes())
 }
+
+pub fn check_entropy_bits(len: usize, charset_len: usize) -> f64 {
+    (len as f64) * (charset_len as f64).log2()
+}
