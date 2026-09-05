@@ -11,3 +11,4 @@ pub mod roboform;
 pub mod enpass;
 pub mod safeincloud;
 pub mod buttercup;
+pub mod firefox;
