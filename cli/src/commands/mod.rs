@@ -18,3 +18,4 @@ pub mod status;
 pub mod totp;
 pub mod convenience;
 pub mod open;
+pub mod init_shell;
