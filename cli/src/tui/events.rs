@@ -42,6 +42,11 @@ pub fn handle_events(app: &mut TuiApp) -> anyhow::Result<()> {
                     KeyCode::Char('/') => {
                         app.is_searching = true;
                     }
+                    KeyCode::Char('o') => {
+                        if let Some(item) = app.selected_item() {
+                            crate::commands::open::open_browser(&item.title);
+                        }
+                    }
                     KeyCode::Char('p') => {
                         app.show_password = !app.show_password;
                     }
