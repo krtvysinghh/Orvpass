@@ -42,3 +42,5 @@ pub fn execute_advanced(
             .collect()
     }
 }
+
+// Entropy calculation: L * log2(N)
