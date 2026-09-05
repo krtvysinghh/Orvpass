@@ -50,3 +50,9 @@ pub fn generate_and_copy(length: usize, diceware: bool) -> String {
     crate::clipboard::copy_with_notification(&pass, 15);
     pass
 }
+
+pub fn generate_pin(digits: usize) -> String {
+    use rand::Rng;
+    let mut rng = rand::rng();
+    (0..digits).map(|_| rng.random_range(0..10).to_string()).collect()
+}
