@@ -17,3 +17,4 @@ pub mod brave;
 pub mod opera;
 pub mod vivaldi;
 pub mod passbolt;
+pub mod infisical;
