@@ -376,3 +376,7 @@ pub fn doctor() {
 }
 use clap::CommandFactory;
 use rand::Rng;
+
+pub fn starship_prompt() {
+    println!("[🔒 Orvpass](bold green)");
+}
